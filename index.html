@@ -269,7 +269,7 @@
 
     // ---- 国旗映射(国籍 → 国旗 emoji) ----
     var FLAGS = {
-      '中国': '🇨🇳', '中国香港': '🇭🇰', '中国台北': '',
+      '中国': '🇨🇳', '中国香港': '🇭🇰', '中国台北': '🇨🇳',
       '日本': '🇯🇵', '韩国': '🇰🇷', '朝鲜': '🇰🇵',
       '法国': '🇫🇷', '德国': '🇩🇪', '英国': '🇬🇧', '瑞典': '🇸🇪',
       '俄罗斯': '🇷🇺', '葡萄牙': '🇵🇹', '丹麦': '🇩🇰',
@@ -327,8 +327,14 @@
       document.title = data.title + ' · 每日更新';
       document.getElementById('updatedAt').textContent = data.updatedAt;
 
+      // 只显示今天及以后的日期,昨天及更早的数据自动隐藏
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
       var html = '';
-      data.days.forEach(function (day) {
+      (data.days || []).filter(function (day) {
+        var d = new Date(day.date + 'T00:00:00');
+        return d >= today;
+      }).forEach(function (day) {
         var rel = relativeLabel(day.date);
         html += '<section class="day">';
         html += '<div class="day-header">' +
