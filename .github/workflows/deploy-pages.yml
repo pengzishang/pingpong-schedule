@@ -10,9 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+# 官方要求:Pages 部署不可互相取消,否则会出现 "Deployment cancelled."
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   deploy:
