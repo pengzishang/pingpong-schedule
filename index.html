@@ -101,9 +101,25 @@
       padding: 0.3rem 0.9rem; border-radius: 2rem;
       white-space: nowrap;
     }
-    .match-players { margin-top: 0.6rem; font-size: 1.25rem; font-weight: 700; line-height: 1.5; }
+    .match-tournament {
+      margin-top: 0.5rem;
+      display: inline-block;
+      font-size: 1.0rem; font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid #9dbdd4;
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+    }
+    .match-players {
+      margin-top: 0.7rem;
+      font-size: 1.4rem; font-weight: 800;
+      line-height: 1.5;
+      text-align: center;               /* 对阵居中突出 */
+    }
+    .match-players .vs { color: var(--text-sub); font-weight: 700; margin: 0 0.3rem; }
     .match-players .info { font-size: 1rem; color: var(--text-sub); font-weight: 400; margin-left: 0.4rem; }
-    .match-stage { margin-top: 0.3rem; font-size: 1.05rem; color: var(--text-sub); }
+    .match-stage { margin-top: 0.5rem; font-size: 1.1rem; color: var(--text-sub); text-align: center; }
     .match-risk {
       margin-top: 0.7rem; font-size: 1.05rem; line-height: 1.6;
       background: var(--warn-bg); color: var(--warn);
@@ -275,9 +291,10 @@
                       '<span class="match-time">' + esc(m.time) + '</span>' +
                       '<span class="match-channel">' + esc(m.channel) + '</span>' +
                     '</div>';
+            if (m.tournament) html += '<div class="match-tournament">🏆 ' + esc(m.tournament) + '</div>';
             html += '<div class="match-players">' +
                     '<span class="flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) + '<span class="info">' + esc(m.playerHomeInfo) + '</span>' +
-                    ' <span>vs</span> ' +
+                    ' <span class="vs">VS</span> ' +
                     '<span class="flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) + '<span class="info">' + esc(m.playerAwayInfo) + '</span></div>';
             html += '<div class="match-stage">' + esc(m.stage) + '</div>';
             if (m.risk) html += '<div class="match-risk">' + esc(m.risk) + '</div>';
@@ -292,7 +309,7 @@
               html += '<div class="sched-item">' +
                         '<span class="sched-time">' + esc(s.time) + '</span>' +
                         '<span class="sched-info"><span class="sched-channel">' + esc(s.channel) + '</span>' +
-                        '<div class="sched-content">' + esc(s.content) + '</div></span>' +
+                        '<div class="sched-content">' + (s.tournament ? '🏆 ' + esc(s.tournament) + ' · ' : '') + esc(s.content) + '</div></span>' +
                       '</div>';
             });
           } else {
