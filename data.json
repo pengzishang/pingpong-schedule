@@ -1,8 +1,8 @@
 {
   "title": "国乒赛事日历",
   "subtitle": "央视直播 · 国乒赛程 · 每日更新",
-  "updatedAt": "2026-08-06 09:30",
-  "note": "数据经多源交叉认证(≥4个独立来源),同稿转载不计独立源。未公布场次显示『待节目单公布』,不硬凑。",
+  "updatedAt": "2026-08-06 10:10",
+  "note": "数据经多源交叉认证(≥4个独立来源,本期采集9源),同稿转载不计独立源。未公布场次显示『待节目单公布』,不硬凑。插播风险以电视猫独立EPG核实。",
   "days": [
     {
       "date": "2026-08-06",
@@ -14,9 +14,9 @@
           "playerHome": "向鹏",
           "playerHomeInfo": "中国 · 世界第18",
           "playerAway": "希德仁科",
-          "playerAwayInfo": "俄罗斯 · 世界第16",
+          "playerAwayInfo": "俄罗斯 · 世界第16(又译西多伦科)",
           "stage": "男单1/16决赛",
-          "risk": "对手刚拿WTT美国大满贯亚军,硬仗",
+          "risk": "对手为WTT美国大满贯亚军,硬仗;CCTV-5+节目单未能抓取,前场打满5局会顺延",
           "sources": 5,
           "nationHome": "中国",
           "nationAway": "俄罗斯",
@@ -28,9 +28,9 @@
           "playerHome": "陈垣宇",
           "playerHomeInfo": "中国 · 世界第29",
           "playerAway": "西蒙·高茨",
-          "playerAwayInfo": "法国",
+          "playerAwayInfo": "法国 · 32岁老将",
           "stage": "男单1/16决赛",
-          "risk": "此前交手0-3,复仇战",
+          "risk": "此前交手0-3,复仇战;存在前场顺延风险",
           "sources": 5,
           "nationHome": "中国",
           "nationAway": "法国",
@@ -40,11 +40,11 @@
           "time": "17:30",
           "channel": "CCTV-5",
           "playerHome": "陈幸同",
-          "playerHomeInfo": "中国 · 卫冕冠军",
+          "playerHomeInfo": "中国 · 世界第5 · 卫冕冠军",
           "playerAway": "帕瓦德",
-          "playerAwayInfo": "法国",
+          "playerAwayInfo": "法国 · 欧洲新星",
           "stage": "女单1/8决赛",
-          "risk": "",
+          "risk": "⚠️ CCTV-5转播段16:30-18:00,18:00硬切《体育新闻》。若前场延时,本场尾段会被切,建议央视频观看",
           "sources": 5,
           "nationHome": "中国",
           "nationAway": "法国",
@@ -54,18 +54,18 @@
           "time": "18:05",
           "channel": "CCTV-5",
           "playerHome": "陈熠",
-          "playerHomeInfo": "中国 · 世界第12",
+          "playerHomeInfo": "中国 · 世界第12 · 带伤出战",
           "playerAway": "张本美和",
-          "playerAwayInfo": "日本 · 世界第3 头号种子",
+          "playerAwayInfo": "日本 · 世界第3 · 头号种子",
           "stage": "女单1/8决赛",
-          "risk": "⚠️ 18:00-18:30《体育新闻》可能插播,建议央视频全程观看",
+          "risk": "🔴 高风险:CCTV-5在18:00-18:30播《体育新闻》,18:30才切回,开局约25分钟电视端看不到,强烈建议央视频/CCTV5APP全程观看",
           "sources": 5,
           "nationHome": "中国",
           "nationAway": "日本",
           "tournament": "WTT横滨冠军赛"
         }
       ],
-      "broadcast": "CCTV-5+ 10:00 起直播第1轮;CCTV-5 16:30/18:30 转播1/8决赛;央视频全天网络直播"
+      "broadcast": "CCTV-5+ 10:00 起直播第1轮3;CCTV-5 16:30-18:00 及 18:30-20:00 转播1/8决赛1(18:00-18:30《体育新闻》中断);央视频全天网络直播"
     },
     {
       "date": "2026-08-07",
@@ -73,6 +73,12 @@
       "matches": [],
       "pending": true,
       "schedule": [
+        {
+          "time": "01:00",
+          "channel": "CCTV-16",
+          "content": "实况录像-WTT美国大满贯2026 比赛4(录像,非直播)",
+          "tournament": "WTT美国大满贯"
+        },
         {
           "time": "10:00",
           "channel": "CCTV-5+",
@@ -82,13 +88,13 @@
         {
           "time": "16:30",
           "channel": "CCTV-5",
-          "content": "横滨冠军赛 1/8决赛2",
+          "content": "横滨冠军赛 1/8决赛2(18:00-18:30《体育新闻》中断)",
           "tournament": "WTT横滨冠军赛"
         },
         {
           "time": "18:30",
           "channel": "CCTV-5",
-          "content": "横滨冠军赛 1/8决赛2",
+          "content": "横滨冠军赛 1/8决赛2(续)",
           "tournament": "WTT横滨冠军赛"
         }
       ]
@@ -99,6 +105,12 @@
       "matches": [],
       "pending": true,
       "schedule": [
+        {
+          "time": "00:35",
+          "channel": "CCTV-16",
+          "content": "实况录像-WTT美国大满贯2026 比赛5(录像,非直播)",
+          "tournament": "WTT美国大满贯"
+        },
         {
           "time": "10:00",
           "channel": "CCTV-5+",
@@ -114,7 +126,7 @@
         {
           "time": "18:30",
           "channel": "CCTV-5",
-          "content": "横滨冠军赛 1/4决赛1",
+          "content": "横滨冠军赛 1/4决赛1(续)",
           "tournament": "WTT横滨冠军赛"
         }
       ]
