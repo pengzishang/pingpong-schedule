@@ -38,7 +38,6 @@
     /* ---------- 页头 ---------- */
     header { text-align: center; padding: 1.8rem 1rem 1.4rem; border-bottom: 3px solid var(--text); }
     .title { font-size: 2.1rem; font-weight: 800; letter-spacing: 0.02em; }
-    .subtitle { font-size: 1.15rem; color: var(--text-sub); margin-top: 0.4rem; }
     .updated { font-size: 1.05rem; color: var(--text-sub); margin-top: 0.6rem; }
     .updated strong { color: var(--accent); font-weight: 700; }
 
@@ -57,17 +56,6 @@
     /* 国旗 */
     .flag { font-size: 1.1em; margin: 0 0.2em; vertical-align: -0.05em; }
 
-    /* ---------- 说明条 ---------- */
-    .note {
-      margin: 1.2rem 0;
-      padding: 0.9rem 1rem;
-      background: var(--accent-bg);
-      border-left: 6px solid var(--accent);
-      font-size: 1.05rem;
-      color: var(--text);
-      border-radius: 0.4rem;
-    }
-
     /* ---------- 日期区块 ---------- */
     .day {
       border: 2px solid var(--border);
@@ -77,15 +65,28 @@
     }
     .day-header {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       padding: 1rem 1.1rem 0.8rem;
       background: var(--chip-bg);
       border-bottom: 2px solid var(--border);
+      text-align: center;
     }
     .day-date { font-size: 1.5rem; font-weight: 800; }
     .day-weekday { font-size: 1.15rem; color: var(--text-sub); margin-left: 0.6rem; }
     .day-badge { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+    .day-relative {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      background: var(--warn);
+      padding: 0.15rem 0.7rem;
+      border-radius: 2rem;
+      margin-left: 0.4rem;
+      white-space: nowrap;
+    }
 
     /* ---------- 比赛卡片 ---------- */
     .match {
@@ -120,6 +121,12 @@
     .match-players .vs { color: var(--text-sub); font-weight: 700; margin: 0 0.3rem; }
     .match-players .info { font-size: 1rem; color: var(--text-sub); font-weight: 400; margin-left: 0.4rem; }
     .match-stage { margin-top: 0.5rem; font-size: 1.1rem; color: var(--text-sub); text-align: center; }
+    .match-result {
+      margin-top: 0.7rem; font-size: 1.15rem; font-weight: 700;
+      text-align: center; color: var(--text);
+      background: var(--ok-bg); border: 1px solid #7ec49a;
+      border-radius: 0.4rem; padding: 0.5rem 0.8rem;
+    }
     .match-risk {
       margin-top: 0.7rem; font-size: 1.05rem; line-height: 1.6;
       background: var(--warn-bg); color: var(--warn);
@@ -202,14 +209,12 @@
 <body>
   <header>
     <div class="title">🏓 国乒赛事日历</div>
-    <div class="subtitle">央视直播 · 国乒赛程 · 每日更新</div>
     <div class="clock" id="clock">--:--:--</div>
     <div class="clock-date" id="clockDate">…</div>
     <div class="updated">数据更新于 <strong id="updatedAt">…</strong></div>
   </header>
 
   <div class="container">
-    <div class="note" id="note"></div>
     <div id="days"></div>
     <footer>
       <div>数据经 ≥4 个独立来源交叉认证,冲突取多数源时间,同稿转载不计独立源。</div>
@@ -270,17 +275,42 @@
       });
     }
 
+    function relativeLabel(dateStr) {
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var d = new Date(dateStr + 'T00:00:00');
+      d.setHours(0, 0, 0, 0);
+      var diff = Math.round((d - today) / (1000 * 60 * 60 * 24));
+      if (diff === 0) return '今天';
+      if (diff === 1) return '明天';
+      if (diff === 2) return '后天';
+      return '';
+    }
+
+    function ordinal(n) {
+      var s = ['th', 'st', 'nd', 'rd'];
+      var v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+
+    function ordinalizeInfo(info) {
+      if (!info) return '';
+      return esc(info).replace(/世界第(\d+)/g, function (_, n) { return ordinal(parseInt(n, 10)) + ''; });
+    }
+
     function render(data) {
       document.title = data.title + ' · 每日更新';
       document.getElementById('updatedAt').textContent = data.updatedAt;
-      document.getElementById('note').textContent = data.note;
 
       var html = '';
       data.days.forEach(function (day) {
+        var rel = relativeLabel(day.date);
         html += '<section class="day">';
         html += '<div class="day-header">' +
                   '<div><span class="day-date">' + esc(day.date) + '</span>' +
-                  '<span class="day-weekday">' + esc(day.weekday) + '</span></div>' +
+                  '<span class="day-weekday">' + esc(day.weekday) + '</span>' +
+                  (rel ? '<span class="day-relative">' + esc(rel) + '</span>' : '') +
+                  '</div>' +
                   '<span class="day-badge">' + (day.matches.length ? day.matches.length + ' 场' : '待公布') + '</span>' +
                 '</div>';
 
@@ -292,12 +322,18 @@
                       '<span class="match-channel">' + esc(m.channel) + '</span>' +
                     '</div>';
             if (m.tournament) html += '<div class="match-tournament">🏆 ' + esc(m.tournament) + '</div>';
+            var homeInfo = ordinalizeInfo(m.playerHomeInfo);
+            var awayInfo = ordinalizeInfo(m.playerAwayInfo);
             html += '<div class="match-players">' +
-                    '<span class="flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) + '<span class="info">' + esc(m.playerHomeInfo) + '</span>' +
+                    '<span class="flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) + '<span class="info">' + homeInfo + '</span>' +
                     ' <span class="vs">VS</span> ' +
-                    '<span class="flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) + '<span class="info">' + esc(m.playerAwayInfo) + '</span></div>';
+                    '<span class="flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) + '<span class="info">' + awayInfo + '</span></div>';
             html += '<div class="match-stage">' + esc(m.stage) + '</div>';
-            if (m.risk) html += '<div class="match-risk">' + esc(m.risk) + '</div>';
+            if (m.result) {
+              html += '<div class="match-result">' + esc(m.result) + '</div>';
+            } else if (m.risk) {
+              html += '<div class="match-risk">' + esc(m.risk) + '</div>';
+            }
             html += '<div class="match-sources"><span class="tag">✅ ' + esc(m.sources) + ' 源认证</span>时间经多源交叉验证</div>';
             html += '</div>';
           });
