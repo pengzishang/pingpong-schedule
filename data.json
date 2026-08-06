@@ -17,7 +17,9 @@
           "playerAwayInfo": "俄罗斯 · 世界第16",
           "stage": "男单1/16决赛",
           "risk": "对手刚拿WTT美国大满贯亚军,硬仗",
-          "sources": 5
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "俄罗斯"
         },
         {
           "time": "12:20",
@@ -28,7 +30,9 @@
           "playerAwayInfo": "法国",
           "stage": "男单1/16决赛",
           "risk": "此前交手0-3,复仇战",
-          "sources": 5
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "法国"
         },
         {
           "time": "17:30",
@@ -39,7 +43,9 @@
           "playerAwayInfo": "法国",
           "stage": "女单1/8决赛",
           "risk": "",
-          "sources": 5
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "法国"
         },
         {
           "time": "18:05",
@@ -50,7 +56,9 @@
           "playerAwayInfo": "日本 · 世界第3 头号种子",
           "stage": "女单1/8决赛",
           "risk": "⚠️ 18:00-18:30《体育新闻》可能插播,建议央视频全程观看",
-          "sources": 5
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "日本"
         }
       ],
       "broadcast": "CCTV-5+ 10:00 起直播第1轮;CCTV-5 16:30/18:30 转播1/8决赛;央视频全天网络直播"
@@ -61,9 +69,21 @@
       "matches": [],
       "pending": true,
       "schedule": [
-        { "time": "10:00", "channel": "CCTV-5+", "content": "横滨冠军赛 1/8决赛" },
-        { "time": "16:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/8决赛2" },
-        { "time": "18:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/8决赛2" }
+        {
+          "time": "10:00",
+          "channel": "CCTV-5+",
+          "content": "横滨冠军赛 1/8决赛"
+        },
+        {
+          "time": "16:30",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 1/8决赛2"
+        },
+        {
+          "time": "18:30",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 1/8决赛2"
+        }
       ]
     },
     {
@@ -72,9 +92,21 @@
       "matches": [],
       "pending": true,
       "schedule": [
-        { "time": "10:00", "channel": "CCTV-5+", "content": "横滨冠军赛 1/4决赛" },
-        { "time": "16:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/4决赛1" },
-        { "time": "18:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/4决赛1" }
+        {
+          "time": "10:00",
+          "channel": "CCTV-5+",
+          "content": "横滨冠军赛 1/4决赛"
+        },
+        {
+          "time": "16:30",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 1/4决赛1"
+        },
+        {
+          "time": "18:30",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 1/4决赛1"
+        }
       ]
     }
   ]
