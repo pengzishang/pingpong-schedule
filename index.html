@@ -9,237 +9,229 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <style>
-    /* ========== 适老化设计:大字号 · 高对比 · 大触控 · 无动效 ========== */
+    /* ============ 国乒赛事日历 · 移动端重设计 ============ */
+    /* 设计语言:体育转播编辑风 —— 深海蓝主色 + 中国红强调,高对比、大字号、零动效(适老化) */
+
     :root {
-      --bg: #ffffff;
-      --text: #1a1a1a;
-      --text-sub: #4a4a4a;
-      --accent: #1a5276;
-      --accent-bg: #eaf2f8;
-      --border: #c8c8c8;
-      --warn: #b30000;
-      --warn-bg: #fff3f3;
-      --ok: #0e6b34;
-      --ok-bg: #eefaf2;
-      --chip-bg: #f0f0f0;
+      --page:      #eef1f5;   /* 页面底色:冷调浅灰蓝 */
+      --card:      #ffffff;   /* 卡片底色 */
+      --ink:       #14202c;   /* 主文字:近黑,高对比 */
+      --ink-2:     #586474;   /* 次级文字 */
+      --navy:      #0e2a47;   /* 主色:深海蓝 */
+      --navy-2:    #1b3e63;   /* 主色 hover/分层 */
+      --red:       #d62828;   /* 强调:中国红(今日/高风险) */
+      --red-soft:  #fdecec;
+      --green:     #0a7a3a;   /* 已结束比分 */
+      --green-soft:#e7f6ed;
+      --amber:     #9a5a00;   /* 风险提示文字 */
+      --amber-soft:#fdf3e2;
+      --line:      #d9e0e8;   /* 分隔线/边框 */
+      --radius:    18px;
+      --shadow:    0 1px 2px rgba(14,32,43,.05), 0 10px 28px rgba(14,32,43,.07);
+
+      --fs-title: clamp(1.5rem, 4.2vw, 1.95rem);
+      --fs-clock: clamp(2.3rem, 9vw, 3.1rem);
+      --fs-date:  clamp(1.3rem, 5vw, 1.6rem);
+      --fs-time:  clamp(1.9rem, 7.5vw, 2.4rem);
+      --fs-name:  clamp(1.35rem, 5.2vw, 1.7rem);
+      --fs-info:  clamp(.85rem, 3vw, .98rem);
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html { font-size: 18px; }
+    html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+    @media (min-width: 600px) { html { font-size: 19px; } }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.7;
-      -webkit-text-size-adjust: 100%;
-      padding: 0 0 calc(env(safe-area-inset-bottom) + 2rem) 0;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.6;
+      padding: 0 0 calc(env(safe-area-inset-bottom) + 2rem);
     }
 
-    /* 页面容器:手机竖屏友好,桌面也不至于太宽 */
-    .container { max-width: 720px; margin: 0 auto; padding: 1.2rem 1rem; }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 0 1rem; }
 
-    /* ---------- 页头 ---------- */
-    header { text-align: center; padding: 1.8rem 1rem 1.4rem; border-bottom: 3px solid var(--text); }
-    .title { font-size: 2.1rem; font-weight: 800; letter-spacing: 0.02em; }
-    .updated { font-size: 1.05rem; color: var(--text-sub); margin-top: 0.6rem; }
-    .updated strong { color: var(--accent); font-weight: 700; }
-
-    /* 实时时钟:大字号、等宽数字防跳动 */
-    .clock {
-      margin-top: 0.9rem;
-      font-size: 2.6rem;
+    /* ---------- 顶部品牌带(深海蓝) ---------- */
+    .top {
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+      padding: 1.6rem 1rem 1.3rem;
+      border-bottom: 4px solid var(--red);
+    }
+    .top__brand {
+      font-size: var(--fs-title);
       font-weight: 800;
-      color: var(--text);
+      letter-spacing: .02em;
+    }
+    .top__brand::after {
+      content: "";
+      display: block;
+      width: 46px; height: 3px;
+      background: var(--red);
+      margin: .5rem auto 0;
+      border-radius: 2px;
+    }
+    .top__clock {
+      margin-top: .8rem;
+      font-size: var(--fs-clock);
+      font-weight: 800;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.04em;
-      line-height: 1.2;
+      letter-spacing: .04em;
+      line-height: 1.1;
     }
-    .clock-date { font-size: 1.1rem; color: var(--text-sub); margin-top: 0.2rem; }
+    .top__dated { margin-top: .25rem; font-size: 1rem; color: rgba(255,255,255,.78); }
+    .top__updated { margin-top: .5rem; font-size: .82rem; color: rgba(255,255,255,.62); }
+    .top__updated strong { color: #fff; font-weight: 700; }
 
-    /* 国旗 */
-    .flag { font-size: 1.1em; margin: 0 0.2em; vertical-align: -0.05em; }
-
-    /* ---------- 日期区块 ---------- */
+    /* ---------- 日期卡片 ---------- */
     .day {
-      border: 2px solid var(--border);
-      border-radius: 0.8rem;
-      margin: 1.6rem 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin: 1.4rem 0;
       overflow: hidden;
+      box-shadow: var(--shadow);
     }
-    .day-header {
+    .day--today { border-top: 4px solid var(--red); }
+
+    .day__head {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      padding: 1rem 1.1rem 0.8rem;
-      background: var(--chip-bg);
-      border-bottom: 2px solid var(--border);
-      text-align: center;
+      justify-content: space-between;
+      gap: .6rem;
+      padding: .95rem 1.1rem;
+      background: #f4f7fa;
+      border-bottom: 1px solid var(--line);
     }
-    .day-date { font-size: 1.5rem; font-weight: 800; }
-    .day-weekday { font-size: 1.15rem; color: var(--text-sub); margin-left: 0.6rem; }
-    .day-badge { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
-    .day-relative {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #fff;
-      background: var(--warn);
-      padding: 0.15rem 0.7rem;
-      border-radius: 2rem;
-      margin-left: 0.4rem;
-      white-space: nowrap;
+    .day__when { display: flex; align-items: baseline; gap: .55rem; min-width: 0; }
+    .day__date { font-size: var(--fs-date); font-weight: 800; color: var(--navy); }
+    .day__week { font-size: 1.05rem; color: var(--ink-2); font-weight: 600; }
+
+    .day__tags { display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
+    .tag {
+      font-size: .92rem; font-weight: 800;
+      padding: .25rem .7rem; border-radius: 2rem; white-space: nowrap;
     }
+    .tag--today { background: var(--red); color: #fff; }
+    .tag--soon  { background: var(--navy); color: #fff; }
+    .tag--muted { background: #e4e9ef; color: var(--ink-2); }
 
     /* ---------- 比赛卡片 ---------- */
-    .match {
-      padding: 1rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .match { padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line); }
     .match:last-child { border-bottom: none; }
-    .match-top {
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      min-height: 3rem;
-      gap: 0.8rem;
-    }
-    .match-time {
-      grid-column: 2;
-      font-size: 1.7rem;
-      font-weight: 800;
-      color: var(--accent);
-      white-space: nowrap;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-    .match-channel {
-      grid-column: 3;
-      justify-self: end;
-      font-size: 1.05rem; font-weight: 700;
-      background: var(--text); color: var(--bg);
-      padding: 0.3rem 0.9rem; border-radius: 2rem;
-      white-space: nowrap;
-    }
-    /* 赛事名 + 轮次合并为一条居中标签 */
-    .match-event {
-      margin: 0.5rem auto 0;
-      display: block;
-      width: fit-content;
+
+    .match__event {
+      display: block; width: fit-content; margin: 0 auto .8rem;
       max-width: 100%;
-      font-size: 1.05rem; font-weight: 700;
-      color: var(--accent);
-      background: var(--accent-bg);
-      border: 1px solid #9dbdd4;
-      padding: 0.3rem 0.9rem;
-      border-radius: 2rem;
+      font-size: 1rem; font-weight: 700; color: var(--navy);
+      background: #eaf1f8; border: 1px solid #cdddee;
+      padding: .3rem .9rem; border-radius: 2rem; text-align: center;
+    }
+
+    .match__bar {
+      display: flex; align-items: center; justify-content: center; gap: .7rem;
+      margin-bottom: .7rem;
+    }
+    .match__time {
+      font-size: var(--fs-time); font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .match__chan {
+      font-size: .95rem; font-weight: 700; color: #fff; background: var(--navy);
+      padding: .28rem .8rem; border-radius: 2rem; white-space: nowrap;
+    }
+
+    .match__players {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: .5rem;
+    }
+    .player { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+    .player__flag { font-size: 1.4rem; line-height: 1; }
+    .player__name { font-size: var(--fs-name); font-weight: 800; color: var(--ink); margin-top: .15rem; }
+    .player__meta { font-size: var(--fs-info); color: var(--ink-2); font-weight: 500; margin-top: .1rem; word-break: break-word; }
+    .player__vs { font-size: 1.05rem; font-weight: 800; color: var(--red); }
+
+    .match__result {
+      margin-top: .85rem; padding: .6rem .9rem;
+      font-size: 1.1rem; font-weight: 700; color: var(--green);
+      background: var(--green-soft); border: 1px solid #a9dcc0; border-radius: .6rem;
       text-align: center;
     }
-    .match-players {
-      margin-top: 0.7rem;
-      font-size: 1.4rem; font-weight: 800;
-      line-height: 1.5;
-      text-align: center;               /* 对阵居中突出 */
-    }
-    .match-players .vs { color: var(--text-sub); font-weight: 700; margin: 0 0.3rem; }
-    .match-players .info { font-size: 1rem; color: var(--text-sub); font-weight: 400; margin-left: 0.4rem; }
-    .match-result {
-      margin-top: 0.7rem; font-size: 1.15rem; font-weight: 700;
-      text-align: center; color: var(--text);
-      background: var(--ok-bg); border: 1px solid #7ec49a;
-      border-radius: 0.4rem; padding: 0.5rem 0.8rem;
-    }
-    .match-risk {
-      margin-top: 0.7rem; font-size: 1.05rem; line-height: 1.6;
-      background: var(--warn-bg); color: var(--warn);
-      border: 1px solid #e0a0a0; border-radius: 0.4rem;
-      padding: 0.55rem 0.8rem;
+    .match__risk {
+      margin-top: .85rem; padding: .6rem .9rem;
+      font-size: 1rem; line-height: 1.6; color: var(--amber);
+      background: var(--amber-soft); border: 1px solid #f0d9ad;
+      border-left: 4px solid var(--red); border-radius: .6rem;
     }
 
     /* ---------- 待公布 / 转播安排 ---------- */
-    .pending {
-      padding: 1.2rem 1.1rem 0.8rem;
-      font-size: 1.1rem;
-      color: var(--text-sub);
+    .day__pending {
+      padding: 1.1rem 1.1rem .4rem;
+      font-size: 1.05rem; color: var(--ink-2);
     }
-    .pending strong { color: var(--text); }
+    .day__pending strong { color: var(--ink); }
 
-    .sched-title {
-      padding: 0.6rem 1.1rem 0.4rem;
-      font-size: 1.1rem; font-weight: 800; color: var(--accent);
+    .sched { padding: .2rem 0 .4rem; }
+    .sched__row {
+      display: flex; align-items: center; gap: .8rem;
+      padding: .8rem 1.1rem; border-top: 1px solid var(--line);
     }
-    .sched-item {
-      padding: 0.85rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.8rem;
+    .sched__time { font-size: 1.35rem; font-weight: 800; color: var(--navy); white-space: nowrap; }
+    .sched__main { min-width: 0; }
+    .sched__chan {
+      display: inline-block; font-size: .85rem; font-weight: 700; color: #fff;
+      background: var(--navy); padding: .2rem .65rem; border-radius: 2rem; margin-bottom: .25rem;
     }
-    .sched-item:last-child { border-bottom: none; }
-    .sched-time { font-size: 1.5rem; font-weight: 800; color: var(--accent); white-space: nowrap; }
-    .sched-info { text-align: right; }
-    .sched-channel {
-      display: inline-block; font-size: 1.0rem; font-weight: 700;
-      background: var(--text); color: var(--bg);
-      padding: 0.25rem 0.8rem; border-radius: 2rem;
-    }
-    .sched-content { font-size: 1.05rem; color: var(--text); margin-top: 0.3rem; }
+    .sched__text { font-size: 1rem; color: var(--ink); line-height: 1.5; }
 
-    /* ---------- 广播信息 ---------- */
-    .broadcast {
-      padding: 0.9rem 1.1rem 1rem;
-      font-size: 1.0rem;
-      color: var(--text-sub);
-      border-top: 1px dashed var(--border);
-      background: #fafafa;
+    /* ---------- 转播安排(日底) ---------- */
+    .day__broadcast {
+      padding: .85rem 1.1rem 1rem;
+      font-size: .95rem; color: var(--ink-2); line-height: 1.6;
+      background: #f7f9fb; border-top: 1px dashed var(--line);
     }
-    .broadcast::before { content: "📺 转播安排:"; font-weight: 700; color: var(--text); }
+    .day__broadcast b { color: var(--navy); }
 
-    /* ---------- 空窗期:下一场比赛 ---------- */
-    .next-event-day { border-color: var(--accent); }
-    .next-event-body {
-      padding: 1.3rem 1.1rem;
-      font-size: 1.25rem; font-weight: 700;
-      text-align: center; color: var(--text);
+    /* ---------- 空窗期:下一场 ---------- */
+    .day--next { border-top: 4px solid var(--navy); }
+    .day__next {
+      padding: 1.2rem 1.1rem; text-align: center;
+      font-size: 1.15rem; font-weight: 700; color: var(--ink);
     }
+    .day__next strong { color: var(--navy); }
 
     /* ---------- 页脚 ---------- */
-    footer { margin-top: 2.2rem; text-align: center; font-size: 1rem; color: var(--text-sub); }
-    footer .links { margin-top: 0.8rem; }
-    footer a {
-      display: inline-block; margin: 0.3rem;
-      padding: 0.6rem 1.4rem;
-      font-size: 1.05rem; font-weight: 700;
-      color: var(--bg); background: var(--accent);
-      text-decoration: none; border-radius: 2rem;
-      min-height: 48px; line-height: 48px; /* 大触控区 */
+    footer { margin-top: 2rem; text-align: center; }
+    .links { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
+    .links a {
+      padding: .7rem 1.4rem; font-size: 1rem; font-weight: 700;
+      color: #fff; background: var(--navy); text-decoration: none;
+      border-radius: 2rem; min-height: 48px; line-height: 1;
+      display: inline-flex; align-items: center;
     }
-    footer a:active { opacity: 0.85; }
-    footer a.secondary { background: var(--text-sub); }
+    .links a:active { opacity: .88; }
+    .links a.secondary { background: var(--ink-2); }
 
-    /* 加载失败提示 */
+    /* 加载失败 */
     .error {
-      margin: 1.2rem 0; padding: 1.2rem 1rem;
-      background: var(--warn-bg); color: var(--warn);
-      border: 2px solid #e0a0a0; border-radius: 0.8rem;
-      font-size: 1.1rem; text-align: center;
-    }
-
-    /* ---------- 大屏适配:字号再放大一档 ---------- */
-    @media (min-width: 600px) {
-      html { font-size: 20px; }
+      margin: 1.4rem 0; padding: 1.2rem 1rem;
+      background: var(--red-soft); color: var(--red);
+      border: 2px solid #e6b3b3; border-radius: var(--radius);
+      font-size: 1.05rem; text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title">🏓 国乒赛事日历</div>
-    <div class="clock" id="clock">--:--:--</div>
-    <div class="clock-date" id="clockDate">…</div>
-    <div class="updated">数据更新于 <strong id="updatedAt">…</strong></div>
+  <header class="top">
+    <div class="top__brand">🏓 国乒赛事日历</div>
+    <div class="top__clock" id="clock">--:--:--</div>
+    <div class="top__dated" id="clockDate">…</div>
+    <div class="top__updated">数据更新于 <strong id="updatedAt">…</strong></div>
   </header>
 
-  <div class="container">
+  <div class="wrap">
     <div id="days"></div>
     <footer>
       <div class="links">
@@ -252,7 +244,7 @@
   <script>
     // 适老化:纯文本渲染,无动画、无复杂交互,保证任何设备可读
 
-    // ---- 实时时钟(北京时间,每秒跳动) ----
+    // ---- 实时时钟(本地时间,每秒跳动) ----
     function tick() {
       var now = new Date();
       var hh = String(now.getHours()).padStart(2, '0');
@@ -336,66 +328,85 @@
         return d >= today;
       }).forEach(function (day) {
         var rel = relativeLabel(day.date);
-        html += '<section class="day">';
-        html += '<div class="day-header">' +
-                  '<span class="day-date">' + esc(day.date) + '</span>' +
-                  '<span class="day-weekday">' + esc(day.weekday) + '</span>' +
-                  (rel ? '<span class="day-relative">' + esc(rel) + '</span>' : '') +
-                  '<span class="day-badge">' + (day.matches.length ? day.matches.length + ' 场' : '待公布') + '</span>' +
+        var relClass = rel === '今天' ? 'tag--today' : 'tag--soon';
+        html += '<section class="day' + (rel === '今天' ? ' day--today' : '') + '">';
+        html += '<div class="day__head">' +
+                  '<div class="day__when">' +
+                    '<span class="day__date">' + esc(day.date) + '</span>' +
+                    '<span class="day__week">' + esc(day.weekday) + '</span>' +
+                  '</div>' +
+                  '<div class="day__tags">' +
+                    (rel ? '<span class="tag ' + relClass + '">' + esc(rel) + '</span>' : '') +
+                    '<span class="tag tag--muted">' + (day.matches.length ? day.matches.length + ' 场' : '待公布') + '</span>' +
+                  '</div>' +
                 '</div>';
 
         if (day.matches.length) {
           day.matches.forEach(function (m) {
-            html += '<div class="match">';
-            html += '<div class="match-top">' +
-                      '<span class="match-time">' + esc(m.time) + '</span>' +
-                      '<span class="match-channel">' + esc(m.channel) + '</span>' +
-                    '</div>';
-            var homeInfo = ordinalizeInfo(m.playerHomeInfo);
-            var awayInfo = ordinalizeInfo(m.playerAwayInfo);
+            html += '<article class="match">';
             var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
                              (m.tournament && m.stage ? ' · ' : '') +
                              (m.stage ? esc(m.stage) : '');
-            if (eventLabel) html += '<div class="match-event">' + eventLabel + '</div>';
-            html += '<div class="match-players">' +
-                    '<span class="flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) + '<span class="info">' + homeInfo + '</span>' +
-                    ' <span class="vs">VS</span> ' +
-                    '<span class="flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) + '<span class="info">' + awayInfo + '</span></div>';
+            if (eventLabel) html += '<div class="match__event">' + eventLabel + '</div>';
+            html += '<div class="match__bar">' +
+                      '<span class="match__time">' + esc(m.time) + '</span>' +
+                      '<span class="match__chan">' + esc(m.channel) + '</span>' +
+                    '</div>';
+            var homeInfo = ordinalizeInfo(m.playerHomeInfo);
+            var awayInfo = ordinalizeInfo(m.playerAwayInfo);
+            html += '<div class="match__players">' +
+                      '<div class="player player--home">' +
+                        '<span class="player__flag">' + flagFor(m.nationHome) + '</span>' +
+                        '<span class="player__name">' + esc(m.playerHome) + '</span>' +
+                        '<span class="player__meta">' + homeInfo + '</span>' +
+                      '</div>' +
+                      '<span class="player__vs">VS</span>' +
+                      '<div class="player player--away">' +
+                        '<span class="player__flag">' + flagFor(m.nationAway) + '</span>' +
+                        '<span class="player__name">' + esc(m.playerAway) + '</span>' +
+                        '<span class="player__meta">' + awayInfo + '</span>' +
+                      '</div>' +
+                    '</div>';
             if (m.result) {
-              html += '<div class="match-result">' + esc(m.result) + '</div>';
+              html += '<div class="match__result">' + esc(m.result) + '</div>';
             } else if (m.risk) {
-              html += '<div class="match-risk">' + esc(m.risk) + '</div>';
+              html += '<div class="match__risk">' + esc(m.risk) + '</div>';
             }
-            html += '</div>';
+            html += '</article>';
           });
         } else {
-          html += '<div class="pending"><strong>国乒对阵待节目单公布</strong> —— 以下为央视今日已排定的转播安排:</div>';
+          html += '<div class="day__pending"><strong>国乒对阵待节目单公布</strong> · 以下为央视已排定的转播安排</div>';
           if (day.schedule && day.schedule.length) {
-            html += '<div class="sched-title">📺 央视转播安排</div>';
+            html += '<div class="sched">';
             day.schedule.forEach(function (s) {
-              html += '<div class="sched-item">' +
-                        '<span class="sched-time">' + esc(s.time) + '</span>' +
-                        '<span class="sched-info"><span class="sched-channel">' + esc(s.channel) + '</span>' +
-                        '<div class="sched-content">' + (s.tournament ? '🏆 ' + esc(s.tournament) + ' · ' : '') + esc(s.content) + '</div></span>' +
+              html += '<div class="sched__row">' +
+                        '<span class="sched__time">' + esc(s.time) + '</span>' +
+                        '<div class="sched__main">' +
+                          '<span class="sched__chan">' + esc(s.channel) + '</span>' +
+                          '<div class="sched__text">' + (s.tournament ? '🏆 ' + esc(s.tournament) + ' · ' : '') + esc(s.content) + '</div>' +
+                        '</div>' +
                       '</div>';
             });
+            html += '</div>';
           } else {
-            html += '<div class="pending">暂无转播安排,请明天再来查看。</div>';
+            html += '<div class="day__pending">暂无转播安排,请明天再来查看。</div>';
           }
         }
 
-        if (day.broadcast) html += '<div class="broadcast">' + esc(day.broadcast) + '</div>';
+        if (day.broadcast) html += '<div class="day__broadcast"><b>📺 转播安排:</b> ' + esc(day.broadcast) + '</div>';
         html += '</section>';
       });
 
       if (data.nextEvent) {
-        html += '<section class="day next-event-day">' +
-                  '<div class="day-header">' +
-                    '<span class="day-date">' + esc(data.nextEvent.date) + '</span>' +
-                    '<span class="day-weekday">' + esc(data.nextEvent.weekday) + '</span>' +
-                    '<span class="day-relative">距今天 ' + esc(data.nextEvent.daysAway) + ' 天</span>' +
+        html += '<section class="day day--next">' +
+                  '<div class="day__head">' +
+                    '<div class="day__when">' +
+                      '<span class="day__date">' + esc(data.nextEvent.date) + '</span>' +
+                      '<span class="day__week">' + esc(data.nextEvent.weekday) + '</span>' +
+                    '</div>' +
+                    '<span class="tag tag--soon">距今天 ' + esc(data.nextEvent.daysAway) + ' 天</span>' +
                   '</div>' +
-                  '<div class="next-event-body"><strong>下一场国乒比赛</strong> —— ' + esc(data.nextEvent.note || '具体赛程待官方公布') + '</div>' +
+                  '<div class="day__next">下一场国乒比赛 · <strong>' + esc(data.nextEvent.note || '具体赛程待官方公布') + '</strong></div>' +
                 '</section>';
       }
 
