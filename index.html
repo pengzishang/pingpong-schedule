@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>国乒赛事日历 · 每日更新</title>
   <meta name="description" content="央视直播的国乒乒乓球比赛时间表,每日自动更新,大字大按钮,老年朋友也能看清。">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
     /* ========== 适老化设计:大字号 · 高对比 · 大触控 · 无动效 ========== */
     :root {
@@ -264,7 +267,8 @@
       return '';
     }
 
-    fetch('data.json')
+    // 加时间戳 + no-store,绕开 GitHub Pages 的 max-age=600 缓存,保证每次打开都拿最新数据
+    fetch('data.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
       .then(render)
       .catch(function (err) {
