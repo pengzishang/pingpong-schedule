@@ -1,0 +1,73 @@
+{
+  "title": "国乒赛事日历",
+  "subtitle": "央视直播 · 国乒赛程 · 每日更新",
+  "updatedAt": "2026-08-06 09:30",
+  "note": "数据经多源交叉认证(≥4个独立来源),同稿转载不计独立源。未公布场次显示『待节目单公布』,不硬凑。",
+  "days": [
+    {
+      "date": "2026-08-06",
+      "weekday": "周四",
+      "matches": [
+        {
+          "time": "11:10",
+          "channel": "CCTV-5+",
+          "playerHome": "向鹏",
+          "playerHomeInfo": "中国 · 世界第18",
+          "playerAway": "希德仁科",
+          "playerAwayInfo": "俄罗斯 · 世界第16",
+          "stage": "男单1/16决赛",
+          "risk": "对手刚拿WTT美国大满贯亚军,硬仗",
+          "sources": 5
+        },
+        {
+          "time": "12:20",
+          "channel": "CCTV-5+",
+          "playerHome": "陈垣宇",
+          "playerHomeInfo": "中国 · 世界第29",
+          "playerAway": "西蒙·高茨",
+          "playerAwayInfo": "法国",
+          "stage": "男单1/16决赛",
+          "risk": "此前交手0-3,复仇战",
+          "sources": 5
+        },
+        {
+          "time": "17:30",
+          "channel": "CCTV-5",
+          "playerHome": "陈幸同",
+          "playerHomeInfo": "中国 · 卫冕冠军",
+          "playerAway": "帕瓦德",
+          "playerAwayInfo": "法国",
+          "stage": "女单1/8决赛",
+          "risk": "",
+          "sources": 5
+        },
+        {
+          "time": "18:05",
+          "channel": "CCTV-5",
+          "playerHome": "陈熠",
+          "playerHomeInfo": "中国 · 世界第12",
+          "playerAway": "张本美和",
+          "playerAwayInfo": "日本 · 世界第3 头号种子",
+          "stage": "女单1/8决赛",
+          "risk": "⚠️ 18:00-18:30《体育新闻》可能插播,建议央视频全程观看",
+          "sources": 5
+        }
+      ],
+      "broadcast": "CCTV-5+ 10:00 起直播第1轮;CCTV-5 16:30/18:30 转播1/8决赛;央视频全天网络直播"
+    },
+    {
+      "date": "2026-08-07",
+      "weekday": "周五",
+      "matches": [],
+      "broadcast": "CCTV-5+ 10:00 1/8决赛;CCTV-5 16:30/18:30 1/8决赛2 —— 国乒具体对阵待8/6赛果产生后公布",
+      "pending": true
+    },
+    {
+      "date": "2026-08-08",
+      "weekday": "周六",
+      "matches": [],
+      "broadcast": "CCTV-5+ 10:00 1/4决赛;CCTV-5 16:30/18:30 1/4决赛1 —— 国乒具体对阵待8/7赛果产生后公布",
+      "pending": true
+    }
+  ]
+}
