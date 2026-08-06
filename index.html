@@ -159,11 +159,52 @@
       background: var(--green-soft); border: 1px solid #a9dcc0; border-radius: .6rem;
       text-align: center;
     }
+    /* 风险提示:分层卡片(严重级别徽章 + 正文 + 证据 + 数据),告别一坨字 */
     .match__risk {
-      margin-top: .85rem; padding: .6rem .9rem;
-      font-size: 1rem; line-height: 1.6; color: var(--amber);
-      background: var(--amber-soft); border: 1px solid #f0d9ad;
-      border-left: 4px solid var(--red); border-radius: .6rem;
+      margin-top: .85rem;
+      border-radius: .7rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .risk--high { border-color: #e6b3b3; background: var(--red-soft); }
+    .risk--mid  { border-color: #f0d9ad; background: var(--amber-soft); }
+    .risk--low  { border-color: #a9dcc0; background: var(--green-soft); }
+
+    .risk__head {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .55rem .8rem;
+      border-bottom: 1px solid rgba(14,32,43,.08);
+    }
+    .risk--high .risk__head { background: rgba(214,40,40,.08); }
+    .risk--mid  .risk__head { background: rgba(154,90,0,.07); }
+    .risk--low  .risk__head { background: rgba(10,122,58,.07); }
+
+    .risk__badge {
+      font-size: .92rem; font-weight: 800; color: #fff;
+      padding: .22rem .65rem; border-radius: 2rem; white-space: nowrap;
+      line-height: 1.2;
+    }
+    .risk--high .risk__badge { background: var(--red); }
+    .risk--mid  .risk__badge { background: var(--amber); }
+    .risk--low  .risk__badge { background: var(--green); }
+
+    .risk__type { font-size: .9rem; font-weight: 700; color: var(--ink-2); }
+
+    .risk__body {
+      padding: .7rem .85rem .75rem;
+      font-size: 1rem; line-height: 1.62; color: var(--ink);
+    }
+    .risk__ev, .risk__stat {
+      display: flex; gap: .35rem; align-items: flex-start;
+      padding: .5rem .85rem;
+      font-size: .92rem; line-height: 1.55;
+      border-top: 1px dashed rgba(14,32,43,.12);
+    }
+    .risk__ev { color: var(--ink-2); }
+    .risk__stat {
+      color: var(--navy); font-weight: 600;
+      background: rgba(14,42,71,.045);
     }
 
     /* ---------- 待公布 / 转播安排 ---------- */
@@ -315,6 +356,37 @@
       return esc(info).replace(/世界第(\d+)/g, function (_, n) { return ordinal(parseInt(n, 10)) + ''; });
     }
 
+    // 把风险说明字符串拆成「级别徽章 + 正文 + 证据 + 数据」分层卡片
+    // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
+    // 正文中 ⚠️ 引导证据可靠性提示,📊 引导交手数据(后者恒在末尾)
+    function renderRisk(risk) {
+      if (!risk) return '';
+      var s = String(risk).trim();
+      var sev = { emoji: '', label: '风险提示', type: '', cls: 'risk--mid' };
+      var m = s.match(/^(🔴|✅|⚠️)\s*(高风险|低风险|中风险)(?:\(([^)]+)\))?[:：]/);
+      if (m) {
+        sev.emoji = m[1]; sev.label = m[2]; sev.type = m[3] || '';
+        sev.cls = m[1] === '🔴' ? 'risk--high' : (m[1] === '✅' ? 'risk--low' : 'risk--mid');
+        s = s.slice(m[0].length).trim();
+      }
+      var stat = '', evidence = '', body = s;
+      var statIdx = s.lastIndexOf('📊');
+      if (statIdx !== -1) { stat = s.slice(statIdx).trim(); body = s.slice(0, statIdx).trim(); }
+      var evIdx = body.indexOf('⚠️');
+      if (evIdx !== -1) { evidence = body.slice(evIdx).trim(); body = body.slice(0, evIdx).trim(); }
+
+      var out = '<div class="match__risk ' + sev.cls + '">';
+      out += '<div class="risk__head">';
+      out += '<span class="risk__badge">' + esc((sev.emoji ? sev.emoji + ' ' : '') + sev.label) + '</span>';
+      if (sev.type) out += '<span class="risk__type">' + esc(sev.type) + '</span>';
+      out += '</div>';
+      if (body) out += '<div class="risk__body">' + esc(body) + '</div>';
+      if (evidence) out += '<div class="risk__ev">' + esc(evidence) + '</div>';
+      if (stat) out += '<div class="risk__stat">' + esc(stat) + '</div>';
+      out += '</div>';
+      return out;
+    }
+
     function render(data) {
       document.title = data.title + ' · 每日更新';
       document.getElementById('updatedAt').textContent = data.updatedAt;
@@ -370,7 +442,7 @@
             if (m.result) {
               html += '<div class="match__result">' + esc(m.result) + '</div>';
             } else if (m.risk) {
-              html += '<div class="match__risk">' + esc(m.risk) + '</div>';
+              html += renderRisk(m.risk);
             }
             html += '</article>';
           });
