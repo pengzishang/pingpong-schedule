@@ -59,15 +59,23 @@
       "date": "2026-08-07",
       "weekday": "周五",
       "matches": [],
-      "broadcast": "CCTV-5+ 10:00 1/8决赛;CCTV-5 16:30/18:30 1/8决赛2 —— 国乒具体对阵待8/6赛果产生后公布",
-      "pending": true
+      "pending": true,
+      "schedule": [
+        { "time": "10:00", "channel": "CCTV-5+", "content": "横滨冠军赛 1/8决赛" },
+        { "time": "16:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/8决赛2" },
+        { "time": "18:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/8决赛2" }
+      ]
     },
     {
       "date": "2026-08-08",
       "weekday": "周六",
       "matches": [],
-      "broadcast": "CCTV-5+ 10:00 1/4决赛;CCTV-5 16:30/18:30 1/4决赛1 —— 国乒具体对阵待8/7赛果产生后公布",
-      "pending": true
+      "pending": true,
+      "schedule": [
+        { "time": "10:00", "channel": "CCTV-5+", "content": "横滨冠军赛 1/4决赛" },
+        { "time": "16:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/4决赛1" },
+        { "time": "18:30", "channel": "CCTV-5", "content": "横滨冠军赛 1/4决赛1" }
+      ]
     }
   ]
 }

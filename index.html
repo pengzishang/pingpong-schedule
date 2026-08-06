@@ -102,13 +102,33 @@
       padding: 0.15rem 0.7rem; font-weight: 700; margin-right: 0.4rem;
     }
 
-    /* ---------- 待公布 ---------- */
+    /* ---------- 待公布 / 转播安排 ---------- */
     .pending {
-      padding: 1.2rem 1.1rem;
+      padding: 1.2rem 1.1rem 0.8rem;
       font-size: 1.1rem;
       color: var(--text-sub);
     }
     .pending strong { color: var(--text); }
+
+    .sched-title {
+      padding: 0.6rem 1.1rem 0.4rem;
+      font-size: 1.1rem; font-weight: 800; color: var(--accent);
+    }
+    .sched-item {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.8rem;
+    }
+    .sched-item:last-child { border-bottom: none; }
+    .sched-time { font-size: 1.5rem; font-weight: 800; color: var(--accent); white-space: nowrap; }
+    .sched-info { text-align: right; }
+    .sched-channel {
+      display: inline-block; font-size: 1.0rem; font-weight: 700;
+      background: var(--text); color: var(--bg);
+      padding: 0.25rem 0.8rem; border-radius: 2rem;
+    }
+    .sched-content { font-size: 1.05rem; color: var(--text); margin-top: 0.3rem; }
 
     /* ---------- 广播信息 ---------- */
     .broadcast {
@@ -213,7 +233,19 @@
             html += '</div>';
           });
         } else {
-          html += '<div class="pending"><strong>待节目单公布</strong> —— 国乒具体对阵待前一日赛果产生后更新,请明天再来查看。</div>';
+          html += '<div class="pending"><strong>国乒对阵待节目单公布</strong> —— 以下为央视今日已排定的转播安排:</div>';
+          if (day.schedule && day.schedule.length) {
+            html += '<div class="sched-title">📺 央视转播安排</div>';
+            day.schedule.forEach(function (s) {
+              html += '<div class="sched-item">' +
+                        '<span class="sched-time">' + esc(s.time) + '</span>' +
+                        '<span class="sched-info"><span class="sched-channel">' + esc(s.channel) + '</span>' +
+                        '<div class="sched-content">' + esc(s.content) + '</div></span>' +
+                      '</div>';
+            });
+          } else {
+            html += '<div class="pending">暂无转播安排,请明天再来查看。</div>';
+          }
         }
 
         if (day.broadcast) html += '<div class="broadcast">' + esc(day.broadcast) + '</div>';
