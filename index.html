@@ -505,10 +505,12 @@
             html += '</article>';
           });
         } else {
-          // 过滤录播/录像条目,只保留直播窗口
+          // 只保留「乒乓球」直播窗口:剔除录像/录播,以及篮球/网球/田径/斯诺克/体育新闻等非乒乓球栏目
           var liveSchedule = (day.schedule || []).filter(function (s) {
-            var txt = (s.tournament || '') + ' ' + (s.content || '');
-            return txt.indexOf('录像') === -1 && txt.indexOf('录播') === -1;
+            var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
+            if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
+            var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
+            return tt.some(function (k) { return txt.indexOf(k) !== -1; });
           });
 
           html += '<div class="day__pending">' +
