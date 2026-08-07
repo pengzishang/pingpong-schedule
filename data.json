@@ -1,9 +1,168 @@
 {
   "title": "国乒赛事日历",
   "subtitle": "央视直播 · 乒乓球赛程 · 每日更新(可筛选 全部/国乒/日韩)",
-  "updatedAt": "2026-08-07 23:31",
-  "note": "【23:31 主任务编排器·并行复采串行收口】今日(8/7周五)WTT横滨冠军赛男/女单1/8决赛11场全部收官,赛果经央视体育官网(sports.cctv.com)新闻二次确认无误(蒯曼3-0斯佐科斯、王艺迪3-1郑怡静、向鹏0-3张本智和、陈垣宇0-3张禹珍等)。明日(8/8周六)男女单1/4决赛8场赛程经网易号(S2)、今日头条(S3)、腾讯新闻(S4)、Olympics.com/WTT官方(S6)4个独立源交叉认证,时间/频道/对阵与现有data.json零冲突,央视5+上午4场(10:00-13:35)、央视5下午晚间4场(16:30-20:00)窗口已锁定。后日(8/9周日)半决赛+决赛CCTV-5窗口(10:30/12:30/17:30)经腾讯/今日头条确认。失败源如实标注:电视猫本次返回CCTV-1未取到5/5+节目单、WTT官网cookie墙、央视体育无EPG模块,均不计入独立源。状态:今日全结束,刷新链将于8/8 09:00(首场赛前1h)轻量刷新盯比分。",
+  "updatedAt": "2026-08-08 07:12",
+  "note": "【07:12 主任务·编排器并行复采串行收口】今日(8/8周六)WTT横滨冠军赛男女单1/4决赛8场:央视5+上午4场(10:00-13:35)、央视5下午晚间4场(16:30-20:00)。经央视体育官方节目单(S1,权威EPG)+新浪(S2)+网易号(S3)+腾讯新闻(S4)+PP体育(S5)5个独立源交叉认证,时间/频道/对阵零冲突。国乒今日3人出战(王艺迪/陈幸同/蒯曼,均在女单),男单已无人(4人1/16决赛全出局)。插播风险经央视节目单核实:18:00《体育新闻》打断17:30张本美和/申裕斌,20:00央视转斯诺克截断19:00张本智和(仅看1小时)。明日(8/9周日)半决赛+决赛CCTV-5窗口(10:30/12:30/17:30)经今日头条(S6)+网易(S3)+Olympics/WTT官方(S7)确认,对手待今日1/4决赛产出,保留pending。后日(8/10周一)WTT欧洲大满贯瑞典站正赛首日(8/10-16,马尔默),央视5/5+选择性转播;孙颖莎伤退、王曼昱成女单头号种子、王楚钦缺席。昨日(8/7)1/8决赛11场战报原样保留。失败源如实标注:电视猫仍只取到CCTV-1未含5/5+;WTT官网cookie墙。",
   "days": [
+    {
+      "date": "2026-08-08",
+      "weekday": "周六",
+      "matches": [
+        {
+          "time": "10:00",
+          "channel": "CCTV-5+",
+          "playerHome": "王艺迪",
+          "playerHomeInfo": "中国 · 4号种子 · 世界第6",
+          "playerAway": "朱雨玲",
+          "playerAwayInfo": "中国澳门 · 前世界第一",
+          "stage": "女单1/4决赛",
+          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,中间不插其他栏目,想看哪场都能看全,放心看。",
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "中国澳门",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "10:45",
+          "channel": "CCTV-5+",
+          "playerHome": "邱党",
+          "playerHomeInfo": "德国 · 华裔 · 世界第11",
+          "playerAway": "吴晙诚",
+          "playerAwayInfo": "韩国 · 希望之星",
+          "stage": "男单1/4决赛",
+          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,这场也看得全,放心看。",
+          "sources": 5,
+          "nationHome": "德国",
+          "nationAway": "韩国",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "11:30",
+          "channel": "CCTV-5+",
+          "playerHome": "陈幸同",
+          "playerHomeInfo": "中国 · 世界第5 · 卫冕冠军",
+          "playerAway": "大藤沙月",
+          "playerAwayInfo": "日本 · 8号种子",
+          "stage": "女单1/4决赛",
+          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,陈幸同这场能看全,放心看。",
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "日本",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "12:15",
+          "channel": "CCTV-5+",
+          "playerHome": "松岛辉空",
+          "playerHomeInfo": "日本 · 新锐",
+          "playerAway": "张禹珍",
+          "playerAwayInfo": "韩国 · 5号种子 · 世界第9",
+          "stage": "男单1/4决赛",
+          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,这场也看得全。",
+          "sources": 5,
+          "nationHome": "日本",
+          "nationAway": "韩国",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "16:30",
+          "channel": "CCTV-5",
+          "playerHome": "篠塚大登",
+          "playerHomeInfo": "日本 · 世界第12",
+          "playerAway": "费利克斯·勒布伦",
+          "playerAwayInfo": "法国 · 世界第7 · 小勒布伦",
+          "stage": "男单1/4决赛",
+          "risk": "✅ 低风险(基本能看全):这场16:30开打,18:00前基本能打完,央视5这段还没到《体育新闻》中断,影响不大。",
+          "sources": 5,
+          "nationHome": "日本",
+          "nationAway": "法国",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "17:30",
+          "channel": "CCTV-5",
+          "playerHome": "张本美和",
+          "playerHomeInfo": "日本 · 世界第3 · 头号种子",
+          "playerAway": "申裕斌",
+          "playerAwayInfo": "韩国 · 7号种子 · 世界第10",
+          "stage": "女单1/4决赛",
+          "risk": "⚠️ 中风险(尾巴可能被切):这场17:30开打,18:00到18:30央视5固定播《体育新闻》,要是打满五局后半段电视上看不到,得等18:30续播,建议开央视频。⚠️ 已对照央视节目单核实:18:00确有《体育新闻》固定栏目,会打断本场。",
+          "sources": 5,
+          "nationHome": "日本",
+          "nationAway": "韩国",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "18:15",
+          "channel": "CCTV-5",
+          "playerHome": "蒯曼",
+          "playerHomeInfo": "中国 · 2号种子 · 世界第4",
+          "playerAway": "早田希娜",
+          "playerAwayInfo": "日本 · 5号种子 · 世界第7",
+          "stage": "女单1/4决赛",
+          "risk": "⚠️ 中风险(尾巴可能被切):这场在央视5的18:30-20:00段里,20:00要转斯诺克中国公开赛,万一打满五局收尾电视上看不全,建议用央视频兜底。",
+          "sources": 5,
+          "nationHome": "中国",
+          "nationAway": "日本",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "19:00",
+          "channel": "CCTV-5",
+          "playerHome": "张本智和",
+          "playerHomeInfo": "日本 · 卫冕冠军 · 东道主头号选手",
+          "playerAway": "艾利克斯·勒布伦",
+          "playerAwayInfo": "法国 · 世界第10 · 大勒布伦",
+          "stage": "男单1/4决赛",
+          "risk": "🔴 高风险(电视看不全):央视5晚上20:00就转斯诺克了,这场19:00才开打,电视上最多看一小时,想看全程只能上央视频或咪咕。⚠️ 已对照央视节目单核实:20:00确为斯诺克中国公开赛,本场必被截断。",
+          "sources": 5,
+          "nationHome": "日本",
+          "nationAway": "法国",
+          "tournament": "WTT横滨冠军赛"
+        }
+      ],
+      "broadcast": "CCTV-5+ 10:00-13:35 转播上午4场1/4决赛(整段无插播);CCTV-5 16:30-18:00 及 18:30-20:00 转播下午晚间4场(18:00-18:30《体育新闻》中断,20:00转斯诺克中国公开赛);CCTV-16 仅有深夜录像,无直播"
+    },
+    {
+      "date": "2026-08-09",
+      "weekday": "周日",
+      "matches": [],
+      "pending": true,
+      "schedule": [
+        {
+          "time": "10:30-12:00",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 半决赛(12:00《体坛快讯》中断,具体对阵待今日1/4决赛产出)",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "12:30-14:00",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 半决赛(续),14:00 转世界职业拳王争霸赛",
+          "tournament": "WTT横滨冠军赛"
+        },
+        {
+          "time": "17:30-19:30",
+          "channel": "CCTV-5",
+          "content": "横滨冠军赛 女单决赛 + 男单决赛(两场压在两小时内,19:30 转斯诺克中国公开赛,尾段有截断风险)",
+          "tournament": "WTT横滨冠军赛"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-10",
+      "weekday": "周一",
+      "matches": [],
+      "pending": true,
+      "schedule": [
+        {
+          "time": "待央视节目单公布",
+          "channel": "CCTV-5 / CCTV-5+",
+          "content": "WTT欧洲大满贯瑞典站 正赛首日(8/10-16,马尔默)。央视5/5+选择性转播重点场次,具体时段以官方节目单为准。国乒主力回归:王曼昱(女单头号种子)、林诗栋领衔,孙颖莎伤退、王楚钦缺席",
+          "tournament": "WTT欧洲大满贯瑞典站"
+        }
+      ]
+    },
     {
       "date": "2026-08-07",
       "weekday": "周五",
@@ -164,214 +323,6 @@
         }
       ],
       "broadcast": "CCTV-5+ 10:06-14:25 转播上午6场1/8决赛(比原预告的13:05顺延,14:25 才转温网男单半决赛,上午场全部完整播完);CCTV-5 16:30-18:00 及 18:30-19:30 转播晚上5场(18:00-18:30《体育新闻》中断,19:30 转中国女篮热身赛中国-尼日利亚);CCTV-16 白天无乒乓球"
-    },
-    {
-      "date": "2026-08-08",
-      "weekday": "周六",
-      "matches": [
-        {
-          "time": "10:00",
-          "channel": "CCTV-5+",
-          "playerHome": "王艺迪",
-          "playerHomeInfo": "中国 · 4号种子 · 世界第6",
-          "playerAway": "朱雨玲",
-          "playerAwayInfo": "中国澳门 · 前世界第一",
-          "stage": "女单1/4决赛",
-          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,中间不插其他栏目,想看哪场都能看全,放心看。",
-          "sources": 4,
-          "nationHome": "中国",
-          "nationAway": "中国澳门",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "10:45",
-          "channel": "CCTV-5+",
-          "playerHome": "邱党",
-          "playerHomeInfo": "德国 · 华裔 · 世界第11",
-          "playerAway": "吴晙诚",
-          "playerAwayInfo": "韩国 · 希望之星",
-          "stage": "男单1/4决赛",
-          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,这场也看得全,放心看。",
-          "sources": 4,
-          "nationHome": "德国",
-          "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "11:30",
-          "channel": "CCTV-5+",
-          "playerHome": "陈幸同",
-          "playerHomeInfo": "中国 · 世界第5 · 卫冕冠军",
-          "playerAway": "大藤沙月",
-          "playerAwayInfo": "日本 · 8号种子",
-          "stage": "女单1/4决赛",
-          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,陈幸同这场能看全,放心看。",
-          "sources": 4,
-          "nationHome": "中国",
-          "nationAway": "日本",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "12:15",
-          "channel": "CCTV-5+",
-          "playerHome": "松岛辉空",
-          "playerHomeInfo": "日本 · 新锐",
-          "playerAway": "张禹珍",
-          "playerAwayInfo": "韩国 · 5号种子 · 世界第9",
-          "stage": "男单1/4决赛",
-          "risk": "✅ 低风险(整段无插播):上午央视5+整段转1/4决赛,这场也看得全。",
-          "sources": 4,
-          "nationHome": "日本",
-          "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "16:30",
-          "channel": "CCTV-5",
-          "playerHome": "篠塚大登",
-          "playerHomeInfo": "日本 · 世界第12",
-          "playerAway": "费利克斯·勒布伦",
-          "playerAwayInfo": "法国 · 世界第7 · 小勒布伦",
-          "stage": "男单1/4决赛",
-          "risk": "✅ 低风险(基本能看全):这场16:30开打,18:00前基本能打完,央视5这段还没到《体育新闻》中断,影响不大。",
-          "sources": 4,
-          "nationHome": "日本",
-          "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "17:30",
-          "channel": "CCTV-5",
-          "playerHome": "张本美和",
-          "playerHomeInfo": "日本 · 世界第3 · 头号种子",
-          "playerAway": "申裕斌",
-          "playerAwayInfo": "韩国 · 7号种子 · 世界第10",
-          "stage": "女单1/4决赛",
-          "risk": "⚠️ 中风险(尾巴可能被切):这场17:30开打,18:00到18:30央视5固定播《体育新闻》,要是打满五局后半段电视上看不到,得等18:30续播,建议开央视频。",
-          "sources": 4,
-          "nationHome": "日本",
-          "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "18:15",
-          "channel": "CCTV-5",
-          "playerHome": "蒯曼",
-          "playerHomeInfo": "中国 · 2号种子 · 世界第4",
-          "playerAway": "早田希娜",
-          "playerAwayInfo": "日本 · 5号种子 · 世界第7",
-          "stage": "女单1/4决赛",
-          "risk": "⚠️ 中风险(尾巴可能被切):这场在央视5的18:30-20:00段里,20:00要转斯诺克中国公开赛,万一打满五局收尾电视上看不全,建议用央视频兜底。",
-          "sources": 4,
-          "nationHome": "中国",
-          "nationAway": "日本",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "19:00",
-          "channel": "CCTV-5",
-          "playerHome": "张本智和",
-          "playerHomeInfo": "日本 · 卫冕冠军 · 东道主头号选手",
-          "playerAway": "艾利克斯·勒布伦",
-          "playerAwayInfo": "法国 · 世界第10 · 大勒布伦",
-          "stage": "男单1/4决赛",
-          "risk": "🔴 高风险(电视看不全):央视5晚上20:00就转斯诺克了,这场19:00才开打,电视上最多看一小时,想看全程只能上央视频或咪咕。",
-          "sources": 4,
-          "nationHome": "日本",
-          "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
-        }
-      ],
-      "broadcast": "CCTV-5+ 10:00-13:35 转播上午4场1/4决赛(整段无插播);CCTV-5 16:30-18:00 及 18:30-20:00 转播下午晚间4场(18:00-18:30《体育新闻》中断,20:00转斯诺克中国公开赛)"
-    },
-    {
-      "date": "2026-08-09",
-      "weekday": "周日",
-      "matches": [],
-      "pending": true,
-      "schedule": [
-        {
-          "time": "10:30-12:00",
-          "channel": "CCTV-5",
-          "content": "横滨冠军赛 半决赛(12:00《体坛快讯》中断)",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "12:30-14:00",
-          "channel": "CCTV-5",
-          "content": "横滨冠军赛 半决赛(续),14:00 转世界职业拳王争霸赛",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "17:30-19:30",
-          "channel": "CCTV-5",
-          "content": "横滨冠军赛 女单决赛 + 男单决赛(两场压在两小时内,19:30 转斯诺克中国公开赛,尾段有截断风险)",
-          "tournament": "WTT横滨冠军赛"
-        }
-      ]
-    },
-    {
-      "date": "2026-08-06",
-      "weekday": "周四",
-      "matches": [
-        {
-          "time": "11:10",
-          "channel": "CCTV-5+",
-          "playerHome": "向鹏",
-          "playerHomeInfo": "中国 · 世界第18",
-          "playerAway": "西多伦科",
-          "playerAwayInfo": "俄罗斯 · 世界第16 · 中立身份(又译希德仁科)",
-          "stage": "男单1/16决赛",
-          "result": "向鹏 3-1 西多伦科（11-8/9-11/11-9/11-8）",
-          "sources": 6,
-          "nationHome": "中国",
-          "nationAway": "俄罗斯",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "12:20",
-          "channel": "CCTV-5+",
-          "playerHome": "陈垣宇",
-          "playerHomeInfo": "中国 · 世界第29",
-          "playerAway": "西蒙·高茨",
-          "playerAwayInfo": "法国 · 老将",
-          "stage": "男单1/16决赛",
-          "result": "陈垣宇 3-0 西蒙·高茨（11-5/12-10/11-2）",
-          "sources": 6,
-          "nationHome": "中国",
-          "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "17:30",
-          "channel": "CCTV-5",
-          "playerHome": "陈幸同",
-          "playerHomeInfo": "中国 · 世界第5 · 卫冕冠军",
-          "playerAway": "帕瓦德",
-          "playerAwayInfo": "法国 · 世界第37",
-          "stage": "女单1/8决赛",
-          "result": "陈幸同 3-0 帕瓦德（11-8/11-2/11-2）",
-          "sources": 7,
-          "nationHome": "中国",
-          "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
-        },
-        {
-          "time": "18:05",
-          "channel": "CCTV-5",
-          "playerHome": "陈熠",
-          "playerHomeInfo": "中国 · 世界第12 · 带伤出战",
-          "playerAway": "张本美和",
-          "playerAwayInfo": "日本 · 世界第3 · 头号种子",
-          "stage": "女单1/8决赛",
-          "result": "陈熠 2-3 张本美和（13-11/11-9/5-11/10-12/5-11）",
-          "sources": 8,
-          "nationHome": "中国",
-          "nationAway": "日本",
-          "tournament": "WTT横滨冠军赛"
-        }
-      ],
-      "broadcast": "CCTV-5+ 10:00-13:17 第1轮3(整段无插播);CCTV-5 16:30-18:00 及 18:30-20:00 转播1/8决赛1(18:00-18:30《体育新闻》中断,已应验)。今日国乒 3胜1负,陈幸同率先进八强"
     }
   ]
 }
