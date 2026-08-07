@@ -327,8 +327,8 @@
 
   <div class="wrap">
     <div class="filter" id="filter">
-      <button type="button" class="filter__btn is-active" data-scope="cn">国乒</button>
-      <button type="button" class="filter__btn" data-scope="all">全部</button>
+      <button type="button" class="filter__btn" data-scope="cn">国乒</button>
+      <button type="button" class="filter__btn is-active" data-scope="all">全部</button>
       <button type="button" class="filter__btn" data-scope="jpkr">日韩</button>
       <button type="button" class="filter__btn" data-scope="other">外协</button>
     </div>
@@ -446,8 +446,8 @@
       return out;
     }
 
-    // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
-    var FILTER = 'cn';
+    // 国籍筛选:默认全部。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
+    var FILTER = 'all';
     function applyFilter(scope) {
       FILTER = scope;
       document.querySelectorAll('.match').forEach(function (el) {
@@ -529,7 +529,7 @@
             var scopeAttr = (hasCN ? ' data-cn="1"' : '') +
                             ((hasJP || hasKR) ? ' data-jpkr="1"' : '') +
                             ((!hasCN && !hasJP && !hasKR) ? ' data-other="1"' : '');
-            html += '<article class="match' + scopeAttr + '">';
+            html += '<article class="match"' + scopeAttr + '">';
             var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
                              (m.tournament && m.stage ? ' · ' : '') +
                              (m.stage ? esc(m.stage) : '');
