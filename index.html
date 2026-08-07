@@ -121,6 +121,19 @@
     .tag--muted { background: #e4e9ef; color: var(--ink-2); }
     .tag--past  { background: #c4cdd8; color: var(--ink-2); }
 
+    /* 战报回顾分隔标题:细线 + 居中字,和上面今日内容明显分界 */
+    .recap-sep {
+      display: flex; align-items: center; gap: .8rem;
+      margin: 2.2rem 0 .2rem;
+      color: var(--ink-2);
+      font-size: 1.05rem; font-weight: 800; letter-spacing: .1em;
+    }
+    .recap-sep::before, .recap-sep::after {
+      content: ""; flex: 1; height: 2px; border-radius: 2px;
+      background: linear-gradient(to right, transparent, var(--line) 45%, var(--line) 55%, transparent);
+    }
+    .recap-sep span { padding: 0 .25rem; white-space: nowrap; }
+
     /* ---------- 比赛卡片 ---------- */
     .match { padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line); }
     .match:last-child { border-bottom: none; }
@@ -410,6 +423,7 @@
       var ordered = upcoming.concat(past);
 
       var html = '';
+      var recapInjected = false;
       ordered.forEach(function (x) {
         var day = x.day, diff = x.diff;
         var rel = '', tagClass = 'tag--soon', dayClass = '';
@@ -418,6 +432,14 @@
         else if (diff === 2) { rel = '后天'; }
         else if (diff === -1) { rel = '昨日战报'; tagClass = 'tag--past'; dayClass = ' day--past'; }
         else if (diff < -1) { rel = '已结束'; tagClass = 'tag--past'; dayClass = ' day--past'; }
+
+        // 进入回顾区时,只在首个过去日期前注入一次分隔标题
+        if (diff < 0 && !recapInjected) {
+          var recapLabel = (past.length === 1 && past[0].diff === -1) ? '昨日战报' : '往期战报';
+          html += '<div class="recap-sep"><span>—— ' + recapLabel + ' ——</span></div>';
+          recapInjected = true;
+        }
+
         html += '<section class="day' + dayClass + '">';
         html += '<div class="day__head">' +
                   '<div class="day__when">' +
