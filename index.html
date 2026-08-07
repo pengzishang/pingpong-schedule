@@ -156,6 +156,20 @@
     .match { padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line); }
     .match:last-child { border-bottom: none; }
 
+    /* 当日「已完成」分隔:细线 + 居中「已结束」,与上方未开始比赛明显分界 */
+    .match-sep {
+      display: flex; align-items: center; gap: .6rem;
+      margin: .4rem 0 .15rem;
+      padding: 0 1.1rem;
+      color: var(--ink-2);
+      font-size: .95rem; font-weight: 800; letter-spacing: .12em;
+    }
+    .match-sep::before, .match-sep::after {
+      content: ""; flex: 1; height: 1px; border-radius: 2px;
+      background: var(--line);
+    }
+    .match-sep span { padding: 0 .5rem; white-space: nowrap; background: var(--card); }
+
     .match__event {
       display: block; width: fit-content; margin: 0 auto .8rem;
       max-width: 100%;
@@ -528,7 +542,14 @@
             if (ad !== bd) return ad - bd;
             return (a.time || '').localeCompare(b.time || '');
           });
-          matches.forEach(function (m) {
+          // 首个「已结束」比赛之前插一条分隔,让「当日最后面」一眼可见
+          var firstDone = -1;
+          for (var mi = 0; mi < matches.length; mi++) { if (matches[mi].result) { firstDone = mi; break; } }
+          var sepNeeded = firstDone > 0;
+          matches.forEach(function (m, mi) {
+            if (mi === firstDone && sepNeeded) {
+              html += '<div class="match-sep"><span>已结束</span></div>';
+            }
             var hasCN = m.nationHome === '中国' || m.nationAway === '中国';
             var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
             var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
