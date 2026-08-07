@@ -522,7 +522,13 @@
                 '</div>';
 
         if (day.matches.length) {
-          day.matches.forEach(function (m) {
+          // 已完成(有 result)的比赛排到当日最后面;未完成的按时间升序在前
+          var matches = day.matches.slice().sort(function (a, b) {
+            var ad = a.result ? 1 : 0, bd = b.result ? 1 : 0;
+            if (ad !== bd) return ad - bd;
+            return (a.time || '').localeCompare(b.time || '');
+          });
+          matches.forEach(function (m) {
             var hasCN = m.nationHome === '中国' || m.nationAway === '中国';
             var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
             var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
