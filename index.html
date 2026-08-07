@@ -95,6 +95,8 @@
       box-shadow: var(--shadow);
     }
     .day--today { border-top: 4px solid var(--red); }
+    .day--past { border-top: 4px solid #c4cdd8; }
+    .day--past .day__head { background: #eef1f5; }
 
     .day__head {
       display: flex;
@@ -117,6 +119,7 @@
     .tag--today { background: var(--red); color: #fff; }
     .tag--soon  { background: var(--navy); color: #fff; }
     .tag--muted { background: #e4e9ef; color: var(--ink-2); }
+    .tag--past  { background: #c4cdd8; color: var(--ink-2); }
 
     /* ---------- 比赛卡片 ---------- */
     .match { padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line); }
@@ -391,24 +394,38 @@
       document.title = data.title + ' · 每日更新';
       document.getElementById('updatedAt').textContent = data.updatedAt;
 
-      // 只显示今天及以后的日期,昨天及更早的数据自动隐藏
       var today = new Date();
       today.setHours(0, 0, 0, 0);
-      var html = '';
-      (data.days || []).filter(function (day) {
+
+      // 拆分:今天及以后排前面(升序),昨天及更早移到末尾(降序,最近的在前)做战报回顾
+      var daysAll = (data.days || []).map(function (day) {
         var d = new Date(day.date + 'T00:00:00');
-        return d >= today;
-      }).forEach(function (day) {
-        var rel = relativeLabel(day.date);
-        var relClass = rel === '今天' ? 'tag--today' : 'tag--soon';
-        html += '<section class="day' + (rel === '今天' ? ' day--today' : '') + '">';
+        d.setHours(0, 0, 0, 0);
+        return { day: day, diff: Math.round((d - today) / 86400000) };
+      });
+      var upcoming = daysAll.filter(function (x) { return x.diff >= 0; })
+                            .sort(function (a, b) { return a.diff - b.diff; });
+      var past = daysAll.filter(function (x) { return x.diff < 0; })
+                        .sort(function (a, b) { return b.diff - a.diff; });
+      var ordered = upcoming.concat(past);
+
+      var html = '';
+      ordered.forEach(function (x) {
+        var day = x.day, diff = x.diff;
+        var rel = '', tagClass = 'tag--soon', dayClass = '';
+        if (diff === 0) { rel = '今天'; tagClass = 'tag--today'; dayClass = ' day--today'; }
+        else if (diff === 1) { rel = '明天'; }
+        else if (diff === 2) { rel = '后天'; }
+        else if (diff === -1) { rel = '昨日战报'; tagClass = 'tag--past'; dayClass = ' day--past'; }
+        else if (diff < -1) { rel = '已结束'; tagClass = 'tag--past'; dayClass = ' day--past'; }
+        html += '<section class="day' + dayClass + '">';
         html += '<div class="day__head">' +
                   '<div class="day__when">' +
                     '<span class="day__date">' + esc(day.date) + '</span>' +
                     '<span class="day__week">' + esc(day.weekday) + '</span>' +
                   '</div>' +
                   '<div class="day__tags">' +
-                    (rel ? '<span class="tag ' + relClass + '">' + esc(rel) + '</span>' : '') +
+                    (rel ? '<span class="tag ' + tagClass + '">' + esc(rel) + '</span>' : '') +
                     '<span class="tag tag--muted">' + (day.matches.length ? day.matches.length + ' 场' : '待公布') + '</span>' +
                   '</div>' +
                 '</div>';
