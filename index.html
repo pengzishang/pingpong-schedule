@@ -484,6 +484,8 @@
       document.querySelectorAll('.filter__btn').forEach(function (b) { b.classList.remove('is-active'); });
       btn.classList.add('is-active');
       applyFilter(btn.dataset.scope);
+      // 切换 tab 时回到页面最顶上,避免停在原滚动位置
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     });
 
     function render(data) {
