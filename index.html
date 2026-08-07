@@ -223,25 +223,44 @@
       background: rgba(14,42,71,.045);
     }
 
-    /* ---------- 待公布 / 转播安排 ---------- */
+    /* ---------- 待公布 / 转播安排(重新设计:清爽时间卡) ---------- */
     .day__pending {
-      padding: 1.1rem 1.1rem .4rem;
-      font-size: 1.05rem; color: var(--ink-2);
+      padding: 1.25rem 1.1rem .6rem;
+      text-align: center;
     }
-    .day__pending strong { color: var(--ink); }
+    .pending__head {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: 1.15rem; font-weight: 800; color: var(--navy);
+      background: #eaf1f8; border: 1px solid #cdddee;
+      padding: .35rem .95rem; border-radius: 2rem;
+    }
+    .pending__note {
+      margin-top: .55rem;
+      font-size: .95rem; color: var(--ink-2); line-height: 1.55;
+    }
 
-    .sched { padding: .2rem 0 .4rem; }
+    .sched { padding: .35rem .85rem .85rem; }
     .sched__row {
-      display: flex; align-items: center; gap: .8rem;
-      padding: .8rem 1.1rem; border-top: 1px solid var(--line);
+      display: flex; align-items: center; gap: .75rem;
+      margin: .55rem 0; padding: .75rem .9rem;
+      background: #f7f9fb; border: 1px solid var(--line); border-radius: .85rem;
     }
-    .sched__time { font-size: 1.35rem; font-weight: 800; color: var(--navy); white-space: nowrap; }
+    .sched__time {
+      flex-shrink: 0;
+      font-size: 1.2rem; font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+      min-width: 5.2rem; text-align: left;
+    }
     .sched__main { min-width: 0; }
     .sched__chan {
-      display: inline-block; font-size: .85rem; font-weight: 700; color: #fff;
-      background: var(--navy); padding: .2rem .65rem; border-radius: 2rem; margin-bottom: .25rem;
+      display: inline-block; font-size: .82rem; font-weight: 700; color: #fff;
+      background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
     }
-    .sched__text { font-size: 1rem; color: var(--ink); line-height: 1.5; }
+    .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; }
+    .sched__empty {
+      padding: 1rem 1.1rem 1.2rem;
+      font-size: 1rem; color: var(--ink-2); text-align: center;
+    }
 
     /* ---------- 转播安排(日底) ---------- */
     .day__broadcast {
@@ -486,10 +505,20 @@
             html += '</article>';
           });
         } else {
-          html += '<div class="day__pending"><strong>国乒对阵待节目单公布</strong> · 以下为央视已排定的转播安排</div>';
-          if (day.schedule && day.schedule.length) {
+          // 过滤录播/录像条目,只保留直播窗口
+          var liveSchedule = (day.schedule || []).filter(function (s) {
+            var txt = (s.tournament || '') + ' ' + (s.content || '');
+            return txt.indexOf('录像') === -1 && txt.indexOf('录播') === -1;
+          });
+
+          html += '<div class="day__pending">' +
+                    '<div class="pending__head">📋 对阵待公布</div>' +
+                    '<div class="pending__note">以下为国乒比赛可能落地的央视直播窗口<br>官方对阵表公布后自动替换为具体比赛</div>' +
+                  '</div>';
+
+          if (liveSchedule.length) {
             html += '<div class="sched">';
-            day.schedule.forEach(function (s) {
+            liveSchedule.forEach(function (s) {
               html += '<div class="sched__row">' +
                         '<span class="sched__time">' + esc(s.time) + '</span>' +
                         '<div class="sched__main">' +
@@ -500,7 +529,7 @@
             });
             html += '</div>';
           } else {
-            html += '<div class="day__pending">暂无转播安排,请明天再来查看。</div>';
+            html += '<div class="sched__empty">暂无已确认的直播窗口,请稍后再来查看。</div>';
           }
         }
 
