@@ -117,7 +117,7 @@
     .day--past .day__head { background: #eef1f5; }
 
     .day__head {
-      display: flex;
+      display: flex; flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: .6rem;
@@ -125,11 +125,11 @@
       background: #f4f7fa;
       border-bottom: 1px solid var(--line);
     }
-    .day__when { display: flex; align-items: baseline; gap: .55rem; min-width: 0; }
+    .day__when { display: flex; flex-wrap: wrap; align-items: baseline; gap: .55rem; min-width: 0; }
     .day__date { font-size: var(--fs-date); font-weight: 800; color: var(--navy); }
     .day__week { font-size: 1.05rem; color: var(--ink-2); font-weight: 600; }
 
-    .day__tags { display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
+    .day__tags { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; flex-shrink: 0; }
     .tag {
       font-size: .92rem; font-weight: 800;
       padding: .25rem .7rem; border-radius: 2rem; white-space: nowrap;
@@ -176,10 +176,11 @@
       font-size: 1rem; font-weight: 700; color: var(--navy);
       background: #eaf1f8; border: 1px solid #cdddee;
       padding: .3rem .9rem; border-radius: 2rem; text-align: center;
+      word-break: break-word;
     }
 
     .match__bar {
-      display: flex; align-items: center; justify-content: center; gap: .7rem;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem .7rem;
       margin-bottom: .7rem;
     }
     .match__time {
@@ -233,10 +234,10 @@
     /* 进行中:红色主题 + 顶部横幅,与已结束(绿)明显区分,适老化高对比 */
     .match__result--live { background: var(--red-soft); border-color: #e6b3b3; }
     .match__live {
-      display: flex; align-items: center; gap: .5rem;
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem;
       margin-bottom: .55rem; padding: .45rem .7rem;
       background: var(--red); color: #fff;
-      font-size: 1.05rem; font-weight: 800; line-height: 1.2;
+      font-size: 1.05rem; font-weight: 800; line-height: 1.2; text-align: center;
       border-radius: .5rem;
     }
     .score-table--live th, .score-table--live td { border-color: rgba(214,40,40,.28); }
@@ -281,7 +282,7 @@
     .risk--low  { border-color: #a9dcc0; background: var(--green-soft); }
 
     .risk__head {
-      display: flex; align-items: center; gap: .5rem;
+      display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem;
       padding: .55rem .8rem;
       border-bottom: 1px solid rgba(14,32,43,.08);
     }
@@ -322,10 +323,10 @@
       text-align: center;
     }
     .pending__head {
-      display: inline-flex; align-items: center; gap: .5rem;
+      display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem;
       font-size: 1.15rem; font-weight: 800; color: var(--navy);
       background: #eaf1f8; border: 1px solid #cdddee;
-      padding: .35rem .95rem; border-radius: 2rem;
+      padding: .35rem .95rem; border-radius: 2rem; text-align: center;
     }
     .pending__note {
       margin-top: .55rem;
@@ -334,22 +335,30 @@
 
     .sched { padding: .35rem .85rem .85rem; }
     .sched__row {
-      display: flex; align-items: center; gap: .75rem;
+      display: flex; align-items: flex-start; gap: .75rem;
       margin: .55rem 0; padding: .75rem .9rem;
       background: #f7f9fb; border: 1px solid var(--line); border-radius: .85rem;
     }
     .sched__time {
       flex-shrink: 0;
-      font-size: 1.2rem; font-weight: 800; color: var(--navy);
-      font-variant-numeric: tabular-nums; line-height: 1.1;
-      min-width: 5.2rem; text-align: left;
+      display: flex; flex-direction: column; align-items: flex-start;
+      line-height: 1.15;
+      min-width: 3.2rem; text-align: left;
+    }
+    .sched__time-start {
+      font-size: 1.15rem; font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+    .sched__time-end {
+      font-size: .88rem; font-weight: 700; color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
     }
     .sched__main { min-width: 0; }
     .sched__chan {
       display: inline-block; font-size: .82rem; font-weight: 700; color: #fff;
       background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
     }
-    .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; }
+    .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; word-break: break-word; }
     .sched__empty {
       padding: 1rem 1.1rem 1.2rem;
       font-size: 1rem; color: var(--ink-2); text-align: center;
@@ -761,8 +770,11 @@
           if (liveSchedule.length) {
             html += '<div class="sched">';
             liveSchedule.forEach(function (s) {
+              var tp = (s.time || '').split('-');
+              var timeHtml = '<span class="sched__time-start">' + esc(tp[0] || '') + '</span>' +
+                             (tp[1] ? '<span class="sched__time-end">' + esc(tp[1]) + '</span>' : '');
               html += '<div class="sched__row">' +
-                        '<span class="sched__time">' + esc(s.time) + '</span>' +
+                        '<span class="sched__time">' + timeHtml + '</span>' +
                         '<div class="sched__main">' +
                           '<span class="sched__chan">' + esc(s.channel) + '</span>' +
                           '<div class="sched__text">' + (s.tournament ? '🏆 ' + esc(s.tournament) + ' · ' : '') + esc(s.content) + '</div>' +
