@@ -230,7 +230,23 @@
       background: rgba(10,122,58,.08) !important; color: var(--green); font-weight: 800;
     }
     .score-table__score.is-winner { color: var(--green); font-weight: 800; background: rgba(10,122,58,.06); }
-    /* 比赛总结(已结束)/ 看点(未开始):统一便签卡,区分配色,零动效适老化 */
+    /* 进行中:红色主题 + 顶部横幅,与已结束(绿)明显区分,适老化高对比 */
+    .match__result--live { background: var(--red-soft); border-color: #e6b3b3; }
+    .match__live {
+      display: flex; align-items: center; gap: .5rem;
+      margin-bottom: .55rem; padding: .45rem .7rem;
+      background: var(--red); color: #fff;
+      font-size: 1.05rem; font-weight: 800; line-height: 1.2;
+      border-radius: .5rem;
+    }
+    .score-table--live th, .score-table--live td { border-color: rgba(214,40,40,.28); }
+    .score-table--live .score-table__total {
+      background: rgba(214,40,40,.10) !important; color: var(--red); font-weight: 800;
+    }
+    .score-table--live .score-table__score.is-winner {
+      color: var(--red); font-weight: 800; background: rgba(214,40,40,.07);
+    }
+    /* 比赛总结(已结束)/ 看点(未开始/进行中):统一便签卡,区分配色,零动效适老化 */
     .match__note {
       margin-top: .7rem;
       border-radius: .7rem;
@@ -524,6 +540,36 @@
       return out;
     }
 
+    // 进行中比赛:红色横幅 + 当前比分表(复用 parseResult,配色由绿转红区分已结束)
+    function renderLive(m) {
+      var banner = '<div class="match__live">🔴 进行中 · 当前比分</div>';
+      var p = parseResult(m.live);
+      if (!p || !p.sets.length) {
+        return banner + '<div class="match__result match__result--live">' + esc(m.live) + '</div>';
+      }
+      var out = banner + '<div class="match__result match__result--live"><div class="score-table-wrap"><table class="score-table score-table--live">';
+      out += '<thead><tr><th class="score-table__player"></th>';
+      for (var i = 0; i < p.sets.length; i++) {
+        out += '<th class="score-table__set">G' + (i + 1) + '</th>';
+      }
+      out += '<th class="score-table__total">总分</th></tr></thead><tbody>';
+      var rows = [
+        { name: p.homeName || m.playerHome, total: p.homeWins, idx: 0 },
+        { name: p.awayName || m.playerAway, total: p.awayWins, idx: 1 }
+      ];
+      rows.forEach(function (r) {
+        out += '<td class="score-table__player" title="' + esc(r.name) + '">' + esc(r.name) + '</td>';
+        p.sets.forEach(function (set) {
+          var score = set[r.idx];
+          var isWinner = score === Math.max(set[0], set[1]);
+          out += '<td class="score-table__score' + (isWinner ? ' is-winner' : '') + '">' + esc(String(score)) + '</td>';
+        });
+        out += '<td class="score-table__total">' + esc(String(r.total)) + '</td></tr>';
+      });
+      out += '</tbody></table></div></div>';
+      return out;
+    }
+
     // 把风险说明字符串拆成「级别徽章 + 正文 + 证据 + 数据」分层卡片
     // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
     // 正文中 ⚠️ 引导证据可靠性提示,📊 引导交手数据(后者恒在末尾)
@@ -683,6 +729,10 @@
                           '<div class="note__body">' + esc(m.summary) + '</div>' +
                         '</div>';
               }
+            } else if (m.live) {
+              // 进行中:红色横幅 + 当前比分表;转播风险仍提示(电视看不全等)
+              html += renderLive(m);
+              if (m.risk) html += renderRisk(m.risk);
             } else {
               if (m.risk) html += renderRisk(m.risk);
               if (m.watchpoint) {
