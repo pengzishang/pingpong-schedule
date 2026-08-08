@@ -278,7 +278,7 @@
       padding: .65rem .85rem .75rem;
       font-size: 1rem; line-height: 1.62; color: var(--ink);
     }
-    /* 风险提示:分层卡片(严重级别徽章 + 正文 + 证据 + 数据),告别一坨字 */
+    /* 风险提示:结构化卡片——标签式影响点 + 可视化时间轴 + 紧凑证据/数据,拒绝大段文字 */
     .match__risk {
       margin-top: .85rem;
       border-radius: .7rem;
@@ -310,20 +310,75 @@
 
     .risk__type { font-size: .9rem; font-weight: 700; color: var(--ink-2); }
 
-    .risk__body {
-      padding: .7rem .85rem .75rem;
-      font-size: 1rem; line-height: 1.62; color: var(--ink);
+    /* 影响点:短句标签流,一行一个结论 */
+    .risk__impacts {
+      display: flex; flex-direction: column; gap: .35rem;
+      padding: .65rem .85rem .5rem;
     }
-    .risk__ev, .risk__stat {
+    .risk__impact {
+      display: flex; align-items: flex-start; gap: .4rem;
+      font-size: .98rem; line-height: 1.45; color: var(--ink);
+      font-weight: 600;
+    }
+    .risk__impact::before {
+      content: "•";
+      flex-shrink: 0;
+      color: var(--amber); font-weight: 800; font-size: 1.1rem; line-height: 1;
+      margin-top: .05rem;
+    }
+    .risk--high .risk__impact::before { color: var(--red); }
+    .risk--low  .risk__impact::before { color: var(--green); }
+
+    /* 时间冲突可视化:横向时间轴,冲突段标红,直播段标绿 */
+    .risk__timeline {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
+      padding: .45rem .85rem .55rem;
+    }
+    .risk__slot {
+      flex: 1 1 auto; min-width: 4.2rem; max-width: 100%;
+      padding: .35rem .5rem;
+      background: #fff; border: 1px solid var(--line); border-radius: .55rem;
+      font-size: .82rem; font-weight: 700; color: var(--ink); text-align: center;
+      line-height: 1.25;
+    }
+    .risk__slot--block { background: #f0f2f5; color: var(--ink-2); border-color: #d9dee5; }
+    .risk__slot--live { background: var(--green-soft); color: var(--green); border-color: #a9dcc0; }
+    .risk__slot--cut { background: var(--red-soft); color: var(--red); border-color: #e6b3b3; }
+    .risk__slot__time {
+      display: block; font-size: .78rem; font-weight: 800; color: var(--navy);
+      margin-bottom: .05rem;
+    }
+
+    /* 证据/数据:紧凑小字 + 双栏数据卡 */
+    .risk__ev {
       display: flex; gap: .35rem; align-items: flex-start;
-      padding: .5rem .85rem;
-      font-size: .92rem; line-height: 1.55;
+      padding: .45rem .85rem;
+      font-size: .86rem; line-height: 1.5;
       border-top: 1px dashed rgba(14,32,43,.12);
+      color: var(--ink-2);
     }
-    .risk__ev { color: var(--ink-2); }
     .risk__stat {
+      padding: .55rem .85rem .65rem;
+      font-size: .92rem; line-height: 1.5;
+      border-top: 1px dashed rgba(14,32,43,.12);
       color: var(--navy); font-weight: 600;
       background: rgba(14,42,71,.045);
+    }
+    .risk__stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .5rem;
+      margin-top: .35rem;
+    }
+    .risk__stat-card {
+      background: #fff; border: 1px solid rgba(14,42,71,.12); border-radius: .55rem;
+      padding: .45rem .5rem; text-align: center;
+    }
+    .risk__stat-card__label {
+      font-size: .72rem; font-weight: 700; color: var(--ink-2);
+      margin-bottom: .1rem;
+    }
+    .risk__stat-card__val {
+      font-size: .95rem; font-weight: 800; color: var(--navy);
+      line-height: 1.2;
     }
 
     /* ---------- 待公布 / 转播安排(重新设计:清爽时间卡) ---------- */
@@ -690,7 +745,92 @@
       return out;
     }
 
-    // 把风险说明字符串拆成「级别徽章 + 正文 + 证据 + 数据」分层卡片
+    // 从风险正文里提取时间冲突,生成可视化时间轴;同时返回被消耗掉的时间描述,避免在影响点里重复
+    function extractTimeline(body) {
+      if (!body) return { slots: [], consumed: [] };
+      var slots = [], consumed = [];
+      var pos = 0;
+      // 辅助:抓节目名(《》优先,否则 2~6 个汉字),去掉末尾语气词
+      function grabProgram(after) {
+        var book = after.match(/^《([^》]+)》/);
+        if (book) return { text: book[1], len: book[0].length };
+        var plain = after.match(/^[\u4e00-\u9fa5]{2,8}/);
+        if (plain) return { text: plain[0].replace(/[了呢吧啊]+$/g, ''), len: plain[0].length };
+        return null;
+      }
+      // 1) 连续时段 HH:MM-HH:MM
+      var rangeRe = /(\d{1,2}:\d{2})-(\d{1,2}:\d{2})/g;
+      body.replace(rangeRe, function (m, a, b) {
+        var idx = body.indexOf(m, pos);
+        pos = idx + m.length;
+        var after = body.slice(pos);
+        var prog = grabProgram(after.replace(/^(?:固定|连续|全程)?(?:播|转)?/, ''));
+        var text = prog ? prog.text : '其他节目';
+        slots.push({ type: 'block', start: a, end: b, text: text });
+        // 把包含该时段的整句标为已消耗(从句首到节目名后)
+        var sentStart = Math.max(0, body.lastIndexOf('，', idx) + 1, body.lastIndexOf(',', idx) + 1, body.lastIndexOf('；', idx) + 1, body.lastIndexOf(';', idx) + 1);
+        var sentEnd = prog ? (pos + prog.len) : (pos + 8);
+        consumed.push({ start: sentStart, end: Math.min(sentEnd, body.length) });
+        return m;
+      });
+      // 2) 单独时间点 HH:MM
+      var seen = {};
+      slots.forEach(function (sl) { seen[sl.start] = 1; if (sl.end) seen[sl.end] = 1; });
+      var pointRe = /(\d{1,2}:\d{2})(?!\s*-)/g;
+      var match;
+      while ((match = pointRe.exec(body)) !== null) {
+        var t = match[1], idx = match.index;
+        if (seen[t]) continue;
+        var after = body.slice(idx + t.length);
+        var isCut = /(?:^|\s).{0,10}?(?:转|切|换成|播|固定播)/.test(after.slice(0, 24));
+        var isStart = /(?:开打|开赛|开始)/.test(after.slice(0, 16));
+        var type = isCut ? 'cut' : (isStart ? 'live' : 'block');
+        var text = '其他节目';
+        if (type === 'live') {
+          text = '开赛';
+        } else {
+          // 从"转/播/切/换成"之后开始抓节目名,避免把时间后面的"央视5"误当节目
+          var cutMatch = after.match(/(?:转|切|换成|播|固定播)\s*/);
+          var startFrom = cutMatch ? after.slice(cutMatch.index + cutMatch[0].length) : after;
+          var cleaned = startFrom.replace(/^(?:\s*(?:晚上|下午|上午))?\s*(?:就|将|会)?\s*/, '');
+          var prog = grabProgram(cleaned);
+          if (prog) text = prog.text;
+        }
+        slots.push({ type: type, start: t, end: '', text: text });
+        // 消耗该时间所在的短句
+        var sentStart = Math.max(0, body.lastIndexOf('，', idx) + 1, body.lastIndexOf(',', idx) + 1, body.lastIndexOf('；', idx) + 1, body.lastIndexOf(';', idx) + 1);
+        var sentEnd = idx + t.length + 12;
+        consumed.push({ start: sentStart, end: Math.min(sentEnd, body.length) });
+      }
+      slots.sort(function (a, b) { return a.start.localeCompare(b.start); });
+      return { slots: slots, consumed: consumed };
+    }
+
+    // 把数据段拆成选手对比卡片,如 "A(...)对B(...)" 或 "A(...) vs B(...)"
+    function renderStatCards(stat) {
+      var s = esc(stat).replace(/^📊\s*/, '');
+      var m = s.match(/^(.+?)\((.+?)\)\s*(?:对|vs|VS)\s*(.+?)\((.+?)\)(.*)$/);
+      if (!m) return '<div class="risk__stat">' + s + '</div>';
+      var rest = m[5].trim().replace(/^[，,。；;]+/, '');
+      var cards = [
+        { name: m[1].trim(), info: m[2].trim() },
+        { name: m[3].trim(), info: m[4].trim() }
+      ];
+      var out = '<div class="risk__stat">📊 交手数据' +
+                '<div class="risk__stat-grid">';
+      cards.forEach(function (c) {
+        out += '<div class="risk__stat-card">' +
+                 '<div class="risk__stat-card__label">' + c.name + '</div>' +
+                 '<div class="risk__stat-card__val">' + c.info + '</div>' +
+               '</div>';
+      });
+      out += '</div>';
+      if (rest) out += '<div style="margin-top:.4rem;font-size:.88rem;color:var(--ink);">' + rest + '</div>';
+      out += '</div>';
+      return out;
+    }
+
+    // 把风险说明字符串拆成结构化卡片:徽章/标题 + 影响点标签 + 时间轴 + 证据小注 + 数据卡片
     // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
     // 正文中 ⚠️ 引导证据可靠性提示,📊 引导交手数据(后者恒在末尾)
     function renderRisk(risk) {
@@ -709,14 +849,49 @@
       var evIdx = body.indexOf('⚠️');
       if (evIdx !== -1) { evidence = body.slice(evIdx).trim(); body = body.slice(0, evIdx).trim(); }
 
+      // 影响点:按短句切分;已被时间轴消耗的时间描述句不再重复列出
+      var tl = extractTimeline(body);
+      function isConsumed(p) {
+        // 若短句含 HH:MM 且基本为时间描述,认为已被时间轴覆盖
+        if (/\d{1,2}:\d{2}/.test(p)) return true;
+        // 若短句完全落在 consumed 区间内
+        var start = body.indexOf(p);
+        if (start === -1) return false;
+        var end = start + p.length;
+        return tl.consumed.some(function (r) { return r.start <= start && r.end >= end; });
+      }
+      var impacts = [];
+      body.split(/[,，;；。]/).map(function (p) { return p.trim(); }).filter(Boolean).forEach(function (p) {
+        if (p.length > 2 && !isConsumed(p)) impacts.push(p);
+      });
+
       var out = '<div class="match__risk ' + sev.cls + '">';
       out += '<div class="risk__head">';
       out += '<span class="risk__badge">' + esc((sev.emoji ? sev.emoji + ' ' : '') + sev.label) + '</span>';
       if (sev.type) out += '<span class="risk__type">' + esc(sev.type) + '</span>';
       out += '</div>';
-      if (body) out += '<div class="risk__body">' + esc(body) + '</div>';
+
+      if (impacts.length) {
+        out += '<div class="risk__impacts">';
+        impacts.forEach(function (p) { out += '<div class="risk__impact">' + esc(p) + '</div>'; });
+        out += '</div>';
+      }
+
+      if (tl.slots.length) {
+        out += '<div class="risk__timeline">';
+        tl.slots.forEach(function (sl) {
+          var cls = 'risk__slot';
+          if (sl.type === 'live') cls += ' risk__slot--live';
+          else if (sl.type === 'cut') cls += ' risk__slot--cut';
+          else cls += ' risk__slot--block';
+          var time = sl.end ? sl.start + '-' + sl.end : sl.start;
+          out += '<div class="' + cls + '"><span class="risk__slot__time">' + time + '</span>' + esc(sl.text) + '</div>';
+        });
+        out += '</div>';
+      }
+
       if (evidence) out += '<div class="risk__ev">' + esc(evidence) + '</div>';
-      if (stat) out += '<div class="risk__stat">' + esc(stat) + '</div>';
+      if (stat) out += renderStatCards(stat);
       out += '</div>';
       return out;
     }
