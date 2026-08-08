@@ -27,6 +27,7 @@
       --amber-soft:#fdf3e2;
       --line:      #d9e0e8;   /* 分隔线/边框 */
       --radius:    18px;
+      --filter-h:  4.3rem;   /* 粘性筛选条总高,日期头部吸顶精确贴其下沿 */
       --shadow:    0 1px 2px rgba(14,32,43,.05), 0 10px 28px rgba(14,32,43,.07);
 
       --fs-title: clamp(1.5rem, 4.2vw, 1.95rem);
@@ -52,11 +53,13 @@
 
     .wrap { max-width: 480px; margin: 0 auto; padding: 0 1rem; }
 
-    /* ---------- 国籍筛选条(粘性) ---------- */
+    /* ---------- 国籍筛选条(粘性,占顶部) ---------- */
     .filter {
-      position: sticky; top: 0; z-index: 5;
-      display: flex; gap: .5rem;
-      padding: .65rem 0 .55rem; margin-bottom: .2rem;
+      position: sticky; top: 0; z-index: 6;
+      height: var(--filter-h);
+      box-sizing: border-box;
+      display: flex; gap: .5rem; align-items: center;
+      padding: 0 .2rem;
       background: var(--page);
       border-bottom: 1px solid var(--line);
     }
@@ -104,19 +107,24 @@
     .top__updated strong { color: #fff; font-weight: 700; }
 
     /* ---------- 日期卡片 ---------- */
+    /* 注意:不能设 overflow:hidden,否则内部 .day__head 的 sticky 会被截断失效 */
     .day {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       margin: 1.4rem 0;
-      overflow: hidden;
       box-shadow: var(--shadow);
     }
     .day--today { border-top: 4px solid var(--red); }
     .day--past { border-top: 4px solid #c4cdd8; }
     .day--past .day__head { background: #eef1f5; }
+    /* 卡片圆角兜底:首子(日期头)左上/右上、末子(转播安排/比赛)左下/右下 */
+    .day__head { border-radius: var(--radius) var(--radius) 0 0; }
+    .day > :last-child { border-radius: 0 0 var(--radius) var(--radius); }
 
     .day__head {
+      position: sticky; top: var(--filter-h);
+      z-index: 4;
       display: flex; flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
@@ -124,6 +132,7 @@
       padding: .95rem 1.1rem;
       background: #f4f7fa;
       border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(14,32,43,.08);
     }
     .day__when { display: flex; flex-wrap: wrap; align-items: baseline; gap: .55rem; min-width: 0; }
     .day__date { font-size: var(--fs-date); font-weight: 800; color: var(--navy); }
