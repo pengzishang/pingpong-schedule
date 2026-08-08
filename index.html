@@ -564,6 +564,21 @@
       });
     }
 
+    // 比赛总结里去掉比分:比分已在上方比分表体现,总结只讲过程/意义,避免重复。
+    // 只剥离「数字-数字」形式的比分(含全场与单局、以及含比分的括号组),不碰「三局/第四局」等中文局数表述。
+    function cleanSummary(t) {
+      t = String(t).trim();
+      // ① 含比分的括号组(全场比分、单局比分串):整组删除
+      t = t.replace(/[（(][^（）()]*\d{1,2}-\d{1,2}[^（）()]*[）)]/g, '');
+      // ② 以X-Y / 连续比分串(11-5、11-7 / 11-5/11-3/...):整段删除
+      t = t.replace(/以?\d{1,2}-\d{1,2}([、／/]\d{1,2}-\d{1,2})*/g, '');
+      // ③ 清理删除后残留的多余顿号/逗号与首尾空白
+      t = t.replace(/[、，,]\s*(?=[、，,）)])/g, '');   // 标点后紧跟标点/右括号
+      t = t.replace(/^\s*[、，,]+|[、，,]+\s*$/g, '');     // 首尾残留标点
+      t = t.replace(/\s*（\s*/g, '（').replace(/\s*）\s*/g, '）'); // 括号靠拢
+      return t.trim();
+    }
+
     function relativeLabel(dateStr) {
       var today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -1006,7 +1021,7 @@
               if (m.summary) {
                 html += '<div class="match__note note--summary">' +
                           '<div class="note__head">📝 比赛总结</div>' +
-                          '<div class="note__body">' + esc(m.summary) + '</div>' +
+                          '<div class="note__body">' + esc(cleanSummary(m.summary)) + '</div>' +
                         '</div>';
               }
             } else if (m.live) {
