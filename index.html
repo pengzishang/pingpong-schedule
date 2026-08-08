@@ -118,7 +118,7 @@
     .day--today { border-top: 4px solid var(--red); }
     .day--past { border-top: 4px solid #c4cdd8; }
     .day--past .day__head { background: #eef1f5; }
-    /* 卡片圆角兜底:首子(日期头)左上/右上、末子(转播安排/比赛)左下/右下 */
+    /* 卡片圆角兜底:首子(日期头)左上/右上、末子(待公布/比赛)左下/右下 */
     .day__head { border-radius: var(--radius) var(--radius) 0 0; }
     .day > :last-child { border-radius: 0 0 var(--radius) var(--radius); }
 
@@ -349,14 +349,7 @@
       margin-bottom: .05rem;
     }
 
-    /* 证据/数据:紧凑小字 + 双栏数据卡 */
-    .risk__ev {
-      display: flex; gap: .35rem; align-items: flex-start;
-      padding: .45rem .85rem;
-      font-size: .86rem; line-height: 1.5;
-      border-top: 1px dashed rgba(14,32,43,.12);
-      color: var(--ink-2);
-    }
+    /* 数据:紧凑小字 + 双栏数据卡 */
     .risk__stat {
       padding: .55rem .85rem .65rem;
       font-size: .92rem; line-height: 1.5;
@@ -381,7 +374,7 @@
       line-height: 1.2;
     }
 
-    /* ---------- 待公布 / 转播安排(重新设计:清爽时间卡) ---------- */
+    /* ---------- 待公布直播窗口(重新设计:清爽时间卡) ---------- */
     .day__pending {
       padding: 1.25rem 1.1rem .6rem;
       text-align: center;
@@ -465,14 +458,6 @@
       padding: 1rem 1.1rem 1.2rem;
       font-size: 1rem; color: var(--ink-2); text-align: center;
     }
-
-    /* ---------- 转播安排(日底) ---------- */
-    .day__broadcast {
-      padding: .85rem 1.1rem 1rem;
-      font-size: .95rem; color: var(--ink-2); line-height: 1.6;
-      background: #f7f9fb; border-top: 1px dashed var(--line);
-    }
-    .day__broadcast b { color: var(--navy); }
 
     /* ---------- 空窗期:下一场 ---------- */
     .day--next { border-top: 4px solid var(--navy); }
@@ -830,9 +815,9 @@
       return out;
     }
 
-    // 把风险说明字符串拆成结构化卡片:徽章/标题 + 影响点标签 + 时间轴 + 证据小注 + 数据卡片
+    // 把风险说明字符串拆成结构化卡片:徽章/标题 + 影响点标签 + 时间轴 + 数据卡片
     // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
-    // 正文中 ⚠️ 引导证据可靠性提示,📊 引导交手数据(后者恒在末尾)
+    // 正文中 ⚠️ 引导证据来源提示(仅用于校验,不展示),📊 引导交手数据(恒在末尾)
     function renderRisk(risk) {
       if (!risk) return '';
       var s = String(risk).trim();
@@ -846,6 +831,7 @@
       var stat = '', evidence = '', body = s;
       var statIdx = s.lastIndexOf('📊');
       if (statIdx !== -1) { stat = s.slice(statIdx).trim(); body = s.slice(0, statIdx).trim(); }
+      // 证据段仅作校验,不渲染到页面
       var evIdx = body.indexOf('⚠️');
       if (evIdx !== -1) { evidence = body.slice(evIdx).trim(); body = body.slice(0, evIdx).trim(); }
 
@@ -890,7 +876,6 @@
         out += '</div>';
       }
 
-      if (evidence) out += '<div class="risk__ev">' + esc(evidence) + '</div>';
       if (stat) out += renderStatCards(stat);
       out += '</div>';
       return out;
@@ -909,7 +894,7 @@
       document.querySelectorAll('.day').forEach(function (sec) {
         var anyVisible = false;
         sec.querySelectorAll('.match').forEach(function (m) { if (m.style.display !== 'none') anyVisible = true; });
-        var hasStatic = sec.querySelector('.day__pending, .day__broadcast');
+        var hasStatic = sec.querySelector('.day__pending');
         sec.style.display = (anyVisible || hasStatic) ? '' : 'none';
       });
     }
@@ -1073,7 +1058,6 @@
           }
         }
 
-        if (day.broadcast) html += '<div class="day__broadcast"><b>📺 转播安排:</b> ' + esc(day.broadcast) + '</div>';
         html += '</section>';
       });
 
