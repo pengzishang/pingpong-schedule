@@ -368,6 +368,44 @@
       background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
     }
     .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; word-break: break-word; }
+    /* 待公布窗口拆成「对决」卡片:阶段 + 双方 + 状态,干净可读 */
+    .sched__list { display: flex; flex-direction: column; gap: .55rem; }
+    .sched__duel {
+      padding: .55rem .7rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: .7rem;
+    }
+    .sched__duel-stage {
+      font-size: .88rem; font-weight: 800; color: var(--navy);
+      margin-bottom: .25rem; line-height: 1.2;
+    }
+    .sched__duel-players {
+      font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.45;
+      word-break: break-word;
+    }
+    .sched__vs {
+      display: inline-block;
+      margin: 0 .35rem;
+      padding: .1rem .42rem;
+      font-size: .78rem; font-weight: 800; color: #fff;
+      background: var(--red); border-radius: 2rem;
+      vertical-align: middle; line-height: 1;
+    }
+    .sched__duel-status { margin-top: .35rem; }
+    .sched__status {
+      display: inline-block;
+      font-size: .74rem; font-weight: 800;
+      padding: .12rem .45rem; border-radius: 2rem;
+      line-height: 1.2;
+    }
+    .sched__status.is-locked { background: var(--green-soft); color: var(--green); border: 1px solid #a9dcc0; }
+    .sched__status.is-pending { background: #e4e9ef; color: var(--ink-2); border: 1px solid var(--line); }
+    .sched__note {
+      font-size: .9rem; color: var(--ink-2); line-height: 1.5;
+      padding: .35rem .5rem;
+      background: #f0f2f5; border-radius: .5rem;
+    }
     .sched__empty {
       padding: 1rem 1.1rem 1.2rem;
       font-size: 1rem; color: var(--ink-2); text-align: center;
@@ -588,6 +626,70 @@
       return out;
     }
 
+    // 把转播窗口的冗长 content 拆成「对决」卡片,只保留阶段/双方/状态;中断/转台提示单独成注
+    function renderScheduleContent(s) {
+      var tournament = (s.tournament || '').trim();
+      var content = String(s.content || '').trim();
+      if (tournament) {
+        // 去掉开头的完整赛事名(如 "WTT欧洲大满贯瑞典站...")
+        if (content.indexOf(tournament) === 0) {
+          content = content.slice(tournament.length).replace(/^\s*[·]\s*/, '').trim();
+        }
+        // 去掉开头的赛事简称(如 tournament 为 "WTT横滨冠军赛" 时去掉 "横滨冠军赛")
+        var shortTournament = tournament.replace(/^(WTT|ITTF|国际乒联)\s*/, '').trim();
+        if (shortTournament && content.indexOf(shortTournament) === 0) {
+          content = content.slice(shortTournament.length).replace(/^\s*[·]\s*/, '').trim();
+        }
+      }
+
+      var segs = content.split(/[;。]/).map(function (p) { return p.trim(); }).filter(Boolean);
+      if (!segs.length) {
+        return '<div class="sched__text">' + esc(content || '对阵待公布') + '</div>';
+      }
+
+      var out = '<div class="sched__list">';
+      segs.forEach(function (seg) {
+        var status = '';
+        if (seg.indexOf('已锁定') !== -1) {
+          status = '<span class="sched__status is-locked">已锁定</span>';
+          seg = seg.replace(/已锁定/g, '').trim();
+        }
+        if (seg.indexOf('待定') !== -1) {
+          status = '<span class="sched__status is-pending">待定</span>';
+          seg = seg.replace(/待定/g, '').trim();
+        }
+        seg = seg.replace(/[;。,，]+$/, '').trim();
+
+        var isDuel = seg.replace(/[（(].*?[）)]/g, '').indexOf('vs') !== -1;
+        var isFinal = /决赛/.test(seg);
+        if (isDuel || isFinal) {
+          var vsIdx = seg.toLowerCase().indexOf('vs');
+          var colonIdx = seg.indexOf(':');
+          var stage = '', players = seg;
+          // 只有 vs 前面的 ":" 才是阶段分隔(避免 18:15/19:30 这类时间里的冒号误切)
+          if (vsIdx !== -1 && colonIdx !== -1 && colonIdx < vsIdx) {
+            stage = seg.slice(0, colonIdx).trim();
+            players = seg.slice(colonIdx + 1).trim();
+          }
+          // 无阶段但开头是"另一场"时,把它提作小标题
+          if (!stage && players.indexOf('另一场') === 0) {
+            stage = '另一场';
+            players = players.slice(3).replace(/^\s*/, '');
+          }
+          players = esc(players).replace(/\b(vs|VS|Vs)\b/g, '<span class="sched__vs">$1</span>');
+          out += '<div class="sched__duel">';
+          if (stage) out += '<div class="sched__duel-stage">' + esc(stage) + '</div>';
+          out += '<div class="sched__duel-players">' + players + '</div>';
+          if (status) out += '<div class="sched__duel-status">' + status + '</div>';
+          out += '</div>';
+        } else {
+          out += '<div class="sched__note">' + esc(seg) + '</div>';
+        }
+      });
+      out += '</div>';
+      return out;
+    }
+
     // 把风险说明字符串拆成「级别徽章 + 正文 + 证据 + 数据」分层卡片
     // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
     // 正文中 ⚠️ 引导证据可靠性提示,📊 引导交手数据(后者恒在末尾)
@@ -786,7 +888,7 @@
                         '<span class="sched__time">' + timeHtml + '</span>' +
                         '<div class="sched__main">' +
                           '<span class="sched__chan">' + esc(s.channel) + '</span>' +
-                          '<div class="sched__text">' + (s.tournament ? '🏆 ' + esc(s.tournament) + ' · ' : '') + esc(s.content) + '</div>' +
+                          renderScheduleContent(s) +
                         '</div>' +
                       '</div>';
             });
