@@ -207,6 +207,28 @@
       background: var(--green-soft); border: 1px solid #a9dcc0; border-radius: .6rem;
       text-align: center;
     }
+    /* 比赛总结(已结束)/ 看点(未开始):统一便签卡,区分配色,零动效适老化 */
+    .match__note {
+      margin-top: .7rem;
+      border-radius: .7rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .note--summary { border-color: #bcd4e6; background: #eef5fb; }
+    .note--watch   { border-color: #d9c7e8; background: #f5eefb; }
+    .note__head {
+      display: flex; align-items: center; gap: .45rem;
+      padding: .5rem .8rem;
+      font-size: .95rem; font-weight: 800;
+      border-bottom: 1px solid rgba(14,32,43,.08);
+    }
+    .note--summary .note__head { background: rgba(14,42,71,.06); color: var(--navy); }
+    .note--watch   .note__head { background: rgba(106,40,156,.06); color: #6a289c; }
+    .note__body {
+      padding: .65rem .85rem .75rem;
+      font-size: 1rem; line-height: 1.62; color: var(--ink);
+    }
     /* 风险提示:分层卡片(严重级别徽章 + 正文 + 证据 + 数据),告别一坨字 */
     .match__risk {
       margin-top: .85rem;
@@ -583,8 +605,20 @@
                     '</div>';
             if (m.result) {
               html += '<div class="match__result">' + esc(m.result) + '</div>';
-            } else if (m.risk) {
-              html += renderRisk(m.risk);
+              if (m.summary) {
+                html += '<div class="match__note note--summary">' +
+                          '<div class="note__head">📝 比赛总结</div>' +
+                          '<div class="note__body">' + esc(m.summary) + '</div>' +
+                        '</div>';
+              }
+            } else {
+              if (m.risk) html += renderRisk(m.risk);
+              if (m.watchpoint) {
+                html += '<div class="match__note note--watch">' +
+                          '<div class="note__head">👀 看点</div>' +
+                          '<div class="note__body">' + esc(m.watchpoint) + '</div>' +
+                        '</div>';
+              }
             }
             html += '</article>';
           });

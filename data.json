@@ -20,7 +20,8 @@
           "sources": 6,
           "nationHome": "中国",
           "nationAway": "中国澳门",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "国乒德比!4号种子王艺迪对阵前世界第一朱雨玲(现中国澳门),两人知根知底,这场胜负看临场手感,王艺迪冲四强不容有失。"
         },
         {
           "time": "10:45",
@@ -34,7 +35,8 @@
       "sources": 5,
       "nationHome": "德国",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "德国华裔邱党对韩国新星吴晙诚,欧洲弧圈对撞韩国快攻,新生代与中生代的一场对话。"
         },
         {
           "time": "11:30",
@@ -48,7 +50,8 @@
       "sources": 5,
           "nationHome": "中国",
           "nationAway": "日本",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "卫冕冠军陈幸同迎战日本8号种子大藤沙月,国乒女单独苗冲冠路上的硬仗,需提防对手的速度。"
         },
         {
           "time": "12:15",
@@ -62,7 +65,8 @@
           "sources": 4,
           "nationHome": "日本",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "日本新锐松岛辉空挑战韩国5号种子张禹珍,张禹珍刚淘汰陈垣宇状态正佳,松岛能否爆冷值得一看。"
         },
         {
           "time": "16:30",
@@ -76,7 +80,8 @@
           "sources": 5,
           "nationHome": "日本",
           "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "日本世界第12篠塚大登对法国小勒布伦,左手爆冲对轰,速度与力量的对决,下午这场电视基本能看全。"
         },
         {
           "time": "17:30",
@@ -90,7 +95,8 @@
           "sources": 5,
           "nationHome": "日本",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "日本头号种子张本美和对韩国7号种子申裕斌,两位00后顶尖女将碰撞,悬念十足,但18:00《体育新闻》可能切尾。"
         },
         {
           "time": "18:30",
@@ -118,7 +124,8 @@
           "sources": 5,
           "nationHome": "日本",
           "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "watchpoint": "卫冕冠军张本智和碰法国大勒布伦,哥哥火力全开,张本刚淘汰向鹏气势正旺,但19:00开打电视看不全需上央视频。"
         }
       ],
       "broadcast": "CCTV-5+ 10:00-13:35 转播上午4场1/4决赛(整段无插播);CCTV-5 16:30-18:00 及 18:30-20:00 转播下午晚间4场(18:00-18:30《体育新闻》中断,20:00转斯诺克中国公开赛);CCTV-16 仅有深夜录像,无直播"
@@ -184,7 +191,8 @@
           "sources": 5,
           "nationHome": "中国澳门",
           "nationAway": "乌克兰",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "前世界第一朱雨玲对阵乌克兰老将,先丢一局后连扳三局逆转,次局16-14的拉锯稳住局势,老将经验尽显,顺利晋级女单八强。"
         },
         {
           "time": "10:35",
@@ -198,7 +206,8 @@
           "sources": 4,
           "nationHome": "韩国",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "韩国德比,20岁希望之星吴晙诚直落三局掀翻队友林仲勋,第三局12-10拿下关键分,展现韩国男单新生代冲劲。"
         },
         {
           "time": "11:10",
@@ -212,7 +221,8 @@
           "sources": 5,
           "nationHome": "日本",
           "nationAway": "美国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "日本8号种子大藤沙月对阵美国华裔老将张安,整体压制仅丢一局,轻松晋级女单八强。"
         },
         {
           "time": "11:45",
@@ -226,7 +236,8 @@
           "sources": 3,
           "nationHome": "德国",
           "nationAway": "美国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "德国华裔邱党直落三局淘汰美国好手贾哈,发球和正手衔接流畅,干净利落闯进八强。"
         },
         {
           "time": "12:20",
@@ -240,7 +251,8 @@
           "sources": 6,
           "nationHome": "印度",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "印度长胶怪球手阿库拉先丢两局后连扳两局追平,可惜决胜局5-11落败,韩国7号种子申裕斌顶住怪球过关。"
         },
         {
           "time": "12:55",
@@ -254,7 +266,8 @@
           "sources": 7,
           "nationHome": "中国",
           "nationAway": "中国台北",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "国乒4号种子王艺迪首局14-16惜败后连扳三局逆转中国台北老将郑怡静,调整能力出色,晋级女单八强。"
         },
         {
           "time": "16:30",
@@ -268,7 +281,8 @@
           "sources": 7,
           "nationHome": "中国",
           "nationAway": "日本",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "国乒小将向鹏三局比分都咬得很紧却未能拿下关键分,不敌卫冕冠军张本智和止步。本站国乒男单四人全部出局。"
         },
         {
           "time": "17:30",
@@ -282,7 +296,8 @@
           "sources": 5,
           "nationHome": "日本",
           "nationAway": "中国台北",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "日本5号种子早田希娜前三局强势,仅第三局被中国台北小将叶伊恬扳回,轻松晋级八强。"
         },
         {
           "time": "18:05",
@@ -296,7 +311,8 @@
           "sources": 6,
           "nationHome": "中国",
           "nationAway": "韩国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "国乒小将陈垣宇面对韩国5号种子张禹珍,三局都没能咬住,本站国乒男单再添一场失利。"
         },
         {
           "time": "18:40",
@@ -310,7 +326,8 @@
           "sources": 5,
           "nationHome": "中国",
           "nationAway": "罗马尼亚",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "国乒2号种子蒯曼直落三局横扫罗马尼亚搏杀型选手斯佐科斯,全程掌控节奏,干净晋级女单八强。"
         },
         {
           "time": "19:15",
@@ -324,7 +341,8 @@
           "sources": 3,
           "nationHome": "斯洛文尼亚",
           "nationAway": "法国",
-          "tournament": "WTT横滨冠军赛"
+          "tournament": "WTT横滨冠军赛",
+          "summary": "斯洛文尼亚的约奇克先丢一局后连扳两局(含11-0),可惜第四局11-8被法国大勒布伦拿下,遗憾止步。"
         }
       ],
       "broadcast": "CCTV-5+ 10:06-14:25 转播上午6场1/8决赛(比原预告的13:05顺延,14:25 才转温网男单半决赛,上午场全部完整播完);CCTV-5 16:30-18:00 及 18:30-19:30 转播晚上5场(18:00-18:30《体育新闻》中断,19:30 转中国女篮热身赛中国-尼日利亚);CCTV-16 白天无乒乓球"
