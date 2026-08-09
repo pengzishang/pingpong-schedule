@@ -486,6 +486,29 @@
       border: 2px solid #e6b3b3; border-radius: var(--radius);
       font-size: 1.05rem; text-align: center;
     }
+
+    /* ---------- 直播中标识(适老化:静态高亮,无闪烁动效) ---------- */
+    /* 比赛卡:红色左边框 + 淡红底,一眼区别于未开始/已结束 */
+    .match--live {
+      border-left: 6px solid var(--red);
+      background: linear-gradient(to right, rgba(214,40,40,.06), #fff 40%);
+    }
+    /* 直播中胶囊徽章:放在时间行/时段行,红底白字 + 小白点 */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .9rem; font-weight: 800; color: #fff;
+      background: var(--red); padding: .2rem .65rem; border-radius: 2rem;
+      white-space: nowrap; line-height: 1.3;
+    }
+    .live-badge::before {
+      content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+      background: #fff; flex-shrink: 0;
+    }
+    /* 转播时段卡:直播中高亮 */
+    .sched__row--live {
+      border-color: var(--red);
+      background: rgba(214,40,40,.05);
+    }
   </style>
 </head>
 <body>
@@ -549,14 +572,46 @@
     }
 
     // 加时间戳 + no-store,绕开 GitHub Pages 的 max-age=600 缓存,保证每次打开都拿最新数据
-    fetch('data.json?t=' + Date.now(), { cache: 'no-store' })
-      .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-      .then(render)
-      .catch(function (err) {
-        document.getElementById('updatedAt').textContent = '加载失败';
-        document.getElementById('days').innerHTML =
-          '<div class="error">数据加载失败(' + err.message + ')<br>请稍后刷新,或稍后再来访问。</div>';
-      });
+    function loadData() {
+      return fetch('data.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); });
+    }
+    loadData().then(render).catch(function (err) {
+      document.getElementById('updatedAt').textContent = '加载失败';
+      document.getElementById('days').innerHTML =
+        '<div class="error">数据加载失败(' + err.message + ')<br>请稍后刷新,或稍后再来访问。</div>';
+    });
+    // 赛中比分每 60s 轮询一次,直播中的比赛分数自动更新(配合刷新链写入的 live 字段)
+    setInterval(function () {
+      loadData().then(function (d) { render(d, true); }).catch(function () {});
+    }, 60000);
+
+    // ---- 直播中自动判定:根据当前时间,标记正在进行的比赛 ----
+    function parseDt(dateStr, timeStr) {
+      if (!dateStr || !timeStr) return null;
+      var d = new Date(dateStr + 'T' + timeStr + ':00');
+      return isNaN(d.getTime()) ? null : d;
+    }
+    function isLiveMatch(day, m, now) {
+      if (!m || m.result) return false;
+      var startDt = parseDt(day.date, m.time);
+      if (!startDt) return false;
+      var endDt = new Date(startDt.getTime() + 2.5 * 3600 * 1000); // 单场上限约 2.5h
+      return now >= startDt && now < endDt;
+    }
+    // 转播时段卡(如 "10:30-12:00")的直播中判定
+    function isLiveSchedule(dayDate, timeStr, now) {
+      if (!dayDate || !timeStr) return false;
+      var parts = String(timeStr).split('-');
+      if (parts.length === 2) {
+        var s = parseDt(dayDate, parts[0].trim());
+        var e = parseDt(dayDate, parts[1].trim());
+        if (s && e) return now >= s && now < e;
+      }
+      var single = parseDt(dayDate, timeStr.trim());
+      if (single) return now >= single && now < new Date(single.getTime() + 2.5 * 3600 * 1000);
+      return false;
+    }
 
     function esc(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
@@ -923,10 +978,11 @@
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     });
 
-    function render(data) {
+    function render(data, fromPoll) {
       document.title = data.title + ' · 每日更新';
       document.getElementById('updatedAt').textContent = data.updatedAt;
 
+      var now = new Date();
       var today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -987,12 +1043,13 @@
             if (mi === firstDone && sepNeeded) {
               html += '<div class="match-sep"><span>已结束</span></div>';
             }
+            var live = isLiveMatch(day, m, now);
             var hasCN = m.nationHome === '中国' || m.nationAway === '中国';
             var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
             var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
             var scopeAttr = (hasCN ? ' data-cn="1"' : '') +
                             ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
-            html += '<article class="match"' + scopeAttr + '">';
+            html += '<article class="match' + (live ? ' match--live' : '') + '"' + scopeAttr + '">';
             var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
                              (m.tournament && m.stage ? ' · ' : '') +
                              (m.stage ? esc(m.stage) : '');
@@ -1000,6 +1057,7 @@
             html += '<div class="match__bar">' +
                       '<span class="match__time">' + esc(m.time) + '</span>' +
                       '<span class="match__chan">' + esc(m.channel) + '</span>' +
+                      (live ? '<span class="live-badge">直播中</span>' : '') +
                     '</div>';
             var homeInfo = ordinalizeInfo(m.playerHomeInfo);
             var awayInfo = ordinalizeInfo(m.playerAwayInfo);
@@ -1056,13 +1114,15 @@
           if (liveSchedule.length) {
             html += '<div class="sched">';
             liveSchedule.forEach(function (s) {
+              var sLive = isLiveSchedule(day.date, s.time, now);
               var tp = (s.time || '').split('-');
               var timeHtml = '<span class="sched__time-start">' + esc(tp[0] || '') + '</span>' +
                              (tp[1] ? '<span class="sched__time-end">' + esc(tp[1]) + '</span>' : '');
-              html += '<div class="sched__row">' +
+              html += '<div class="sched__row' + (sLive ? ' sched__row--live' : '') + '">' +
                         '<span class="sched__time">' + timeHtml + '</span>' +
                         '<div class="sched__main">' +
                           '<span class="sched__chan">' + esc(s.channel) + '</span>' +
+                          (sLive ? ' <span class="live-badge">直播中</span>' : '') +
                           renderScheduleContent(s) +
                         '</div>' +
                       '</div>';
@@ -1089,7 +1149,9 @@
                 '</section>';
       }
 
+      var keepY = (fromPoll === true) ? window.scrollY : 0;
       document.getElementById('days').innerHTML = html;
+      if (keepY) window.scrollTo(0, keepY);
       applyFilter(FILTER);
     }
   </script>
