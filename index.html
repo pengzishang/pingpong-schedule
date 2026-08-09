@@ -374,21 +374,22 @@
       line-height: 1.2;
     }
 
-    /* ---------- 待公布直播窗口(重新设计:清爽时间卡) ---------- */
+    /* ---------- 待公布:精简,直接说下一场时间,不堆解释 ---------- */
     .day__pending {
-      padding: 1.25rem 1.1rem .6rem;
-      text-align: center;
+      display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .7rem;
+      padding: .9rem 1.1rem 1rem;
     }
-    .pending__head {
-      display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem;
-      font-size: 1.15rem; font-weight: 800; color: var(--navy);
+    .pending__badge {
+      display: inline-flex; align-items: center;
+      font-size: .85rem; font-weight: 800; color: var(--navy);
       background: #eaf1f8; border: 1px solid #cdddee;
-      padding: .35rem .95rem; border-radius: 2rem; text-align: center;
+      padding: .2rem .65rem; border-radius: 2rem;
     }
-    .pending__note {
-      margin-top: .55rem;
-      font-size: .95rem; color: var(--ink-2); line-height: 1.55;
+    .pending__next {
+      font-size: 1rem; font-weight: 600; color: var(--ink);
+      word-break: break-word;
     }
+    .pending__next strong { color: var(--navy); font-weight: 800; }
 
     .sched { padding: .35rem .85rem .85rem; }
     .sched__row {
@@ -1106,9 +1107,21 @@
             return tt.some(function (k) { return txt.indexOf(k) !== -1; });
           });
 
+          // 待公布:精简,直接说下一场时间,不堆解释
+          var nextTime = '', nextEv = '';
+          if (liveSchedule.length) {
+            var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
+            nextTime = (firstS.time || '').split('-')[0] || '';
+            nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
+          } else if (data.nextEvent && data.nextEvent.date) {
+            nextTime = data.nextEvent.date;
+            nextEv = data.nextEvent.note || '国乒比赛';
+          }
           html += '<div class="day__pending">' +
-                    '<div class="pending__head">📋 对阵待公布</div>' +
-                    '<div class="pending__note">以下为国乒比赛可能落地的央视直播窗口<br>官方对阵表公布后自动替换为具体比赛</div>' +
+                    '<span class="pending__badge">📋 待公布</span>' +
+                    (nextTime
+                      ? '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>'
+                      : '<span class="pending__next">具体赛程待官方公布</span>') +
                   '</div>';
 
           if (liveSchedule.length) {
@@ -1128,8 +1141,6 @@
                       '</div>';
             });
             html += '</div>';
-          } else {
-            html += '<div class="sched__empty">暂无已确认的直播窗口,请稍后再来查看。</div>';
           }
         }
 
