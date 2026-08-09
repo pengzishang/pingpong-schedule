@@ -10,10 +10,11 @@ permissions:
   pages: write
   id-token: write
 
-# 官方要求:Pages 部署不可互相取消,否则会出现 "Deployment cancelled."
+# 自动化每小时会多次推送(主任务+刷新链),cancel-in-progress:false 会让部署互相排队/被取消并卡死 pending,
+# 导致线上站点停在旧版本。改为 true:新推送直接顶掉正在跑的部署,始终部署最新一次提交,避免队列堆积。
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
