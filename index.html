@@ -804,9 +804,11 @@
     // 从风险正文里提取时间冲突,生成可视化时间轴;同时返回被消耗掉的时间描述,避免在影响点里重复
     function extractTimeline(body) {
       if (!body) return { slots: [], consumed: [] };
+      // 正面直播描述(并机/全程/固定/同步/无插播):不拆时间轴,让原文作为普通影响点
+      if (/并机直播|全程直播|固定直播|同步直播|无插播/.test(body)) return { slots: [], consumed: [] };
       var slots = [], consumed = [];
       var pos = 0;
-      // 辅助:抓节目名(《》优先,否则 2~6 个汉字),去掉末尾语气词
+      // 辅助:抓节目名(《》优先,否则 2~8 个汉字),去掉末尾语气词
       function grabProgram(after) {
         var book = after.match(/^《([^》]+)》/);
         if (book) return { text: book[1], len: book[0].length };
@@ -838,15 +840,16 @@
         var t = match[1], idx = match.index;
         if (seen[t]) continue;
         var after = body.slice(idx + t.length);
-        var isCut = /(?:^|\s).{0,10}?(?:转|切|换成|播|固定播)/.test(after.slice(0, 24));
+        // 只把真正的冲突词当成 cut;"直播"里的"播"不算
+        var isCut = /(?:^|\s).{0,10}?(?:转[成到]?|切换|换成|改播|插播|中断|暂停|不播|临时改|调整|取消)/.test(after.slice(0, 24));
         var isStart = /(?:开打|开赛|开始)/.test(after.slice(0, 16));
         var type = isCut ? 'cut' : (isStart ? 'live' : 'block');
         var text = '其他节目';
         if (type === 'live') {
           text = '开赛';
         } else {
-          // 从"转/播/切/换成"之后开始抓节目名,避免把时间后面的"央视5"误当节目
-          var cutMatch = after.match(/(?:转|切|换成|播|固定播)\s*/);
+          // 从"转/切换/换成/改播"之后开始抓节目名,避免把时间后面的"央视5"误当节目
+          var cutMatch = after.match(/(?:转[成到]?|切换|换成|改播)\s*/);
           var startFrom = cutMatch ? after.slice(cutMatch.index + cutMatch[0].length) : after;
           var cleaned = startFrom.replace(/^(?:\s*(?:晚上|下午|上午))?\s*(?:就|将|会)?\s*/, '');
           var prog = grabProgram(cleaned);
@@ -887,28 +890,37 @@
     }
 
     // 把风险说明字符串拆成结构化卡片:徽章/标题 + 影响点标签 + 时间轴 + 数据卡片
-    // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选括号标注;
+    // 数据源约定:🔴/✅/⚠️ 开头为严重级别,(类型)为可选短括号标注;
     // 正文中 ⚠️ 引导证据来源提示(仅用于校验,不展示),📊 引导交手数据(恒在末尾)
     function renderRisk(risk) {
       if (!risk) return '';
       var s = String(risk).trim();
       var sev = { emoji: '', label: '风险提示', type: '', cls: 'risk--mid' };
-      var m = s.match(/^(🔴|✅|⚠️)\s*(高风险|低风险|中风险)(?:\(([^)]+)\))?[:：]/);
+      // 冒号可选;括号内容若超长或含标点则视为正文而非类型
+      var m = s.match(/^(🔴|✅|⚠️)\s*(高风险|低风险|中风险)(?:\(([^)]+)\))?[:：]?/);
       if (m) {
-        sev.emoji = m[1]; sev.label = m[2]; sev.type = m[3] || '';
+        var maybeType = m[3] || '';
+        sev.emoji = m[1]; sev.label = m[2];
         sev.cls = m[1] === '🔴' ? 'risk--high' : (m[1] === '✅' ? 'risk--low' : 'risk--mid');
-        s = s.slice(m[0].length).trim();
+        if (maybeType.length <= 14 && !/[:：,，;；。]/.test(maybeType)) {
+          sev.type = maybeType;
+          s = s.slice(m[0].length).trim();
+        } else {
+          // 括号内容不像类型,只去掉 emoji+级别,保留括号内容
+          var cutTo = m[0].indexOf(m[2]) + m[2].length;
+          s = s.slice(cutTo).trim().replace(/^[（(]+|[）)]+$/g, '');
+        }
       }
-      var stat = '', evidence = '', body = s;
+      var stat = '', body = s;
       var statIdx = s.lastIndexOf('📊');
-      if (statIdx !== -1) { stat = s.slice(statIdx).trim(); body = s.slice(0, statIdx).trim(); }
-      // 证据段仅作校验,不渲染到页面
-      var evIdx = body.indexOf('⚠️');
-      if (evIdx !== -1) { evidence = body.slice(evIdx).trim(); body = body.slice(0, evIdx).trim(); }
+      if (statIdx !== -1) { stat = s.slice(statIdx).trim().replace(/^[;；\s]+/, ''); body = s.slice(0, statIdx).trim(); }
+      // 仅去掉明显是证据来源校验的套话
+      body = body.replace(/(⚠️\s*)?(已对照[^。，；]*核实|来源[^。，；]*确认|证据[^。，；]*显示|当前时段无冲突|请以实际播出为准)[，,。；;]?/g, '').trim();
 
       // 影响点:按短句切分;已被时间轴消耗的时间描述句不再重复列出
       var tl = extractTimeline(body);
       function isConsumed(p) {
+        if (!tl.slots.length) return false;
         // 若短句含 HH:MM 且基本为时间描述,认为已被时间轴覆盖
         if (/\d{1,2}:\d{2}/.test(p)) return true;
         // 若短句完全落在 consumed 区间内
@@ -919,8 +931,12 @@
       }
       var impacts = [];
       body.split(/[,，;；。]/).map(function (p) { return p.trim(); }).filter(Boolean).forEach(function (p) {
-        if (p.length > 2 && !isConsumed(p)) impacts.push(p);
+        var clean = p.replace(/^[（(]+|[）)]+$/g, '').trim();
+        if (clean.length > 2 && !isConsumed(clean)) impacts.push(clean);
       });
+
+      // 无实质内容的风险提示直接不渲染
+      if (!impacts.length && !tl.slots.length && !stat) return '';
 
       var out = '<div class="match__risk ' + sev.cls + '">';
       out += '<div class="risk__head">';
