@@ -491,13 +491,22 @@
       margin-bottom: .45rem;
     }
     .replay__item {
-      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
       padding: .45rem .65rem;
       background: #fff; border: 1px solid var(--line); border-radius: .6rem;
       margin-bottom: .45rem;
       font-size: .95rem;
     }
     .replay__item:last-child { margin-bottom: 0; }
+    .replay__line1 {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
+    }
+    .replay__line2 {
+      margin-top: .35rem;
+      display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .25rem;
+      font-weight: 600; color: var(--ink);
+    }
+    .replay__line2 .replay__flag { font-size: 1.05rem; line-height: 1; margin-right: .15rem; }
+    .replay__vs { color: var(--ink-2); font-weight: 700; margin: 0 .25rem; }
     .replay__time { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
     .replay__chan { font-size: .8rem; font-weight: 700; color: #fff; background: var(--navy); padding: .16rem .55rem; border-radius: 2rem; }
     .replay__match { color: var(--ink); font-weight: 600; }
@@ -709,10 +718,17 @@
       if (!isNaN(h) && h >= 23) return addDays(day.date, 1);   // 23:00-23:59 视为前一日深夜,重播到次日
       return day.date;                                          // 00:00-06:00 已是次日凌晨,重播随当场所在日
     }
-    // 当日「今日重播」汇总区:列出归属到这一天的所有重播(含跨日过来的),兜底让老人一开当天先看见
+    // 当日「今日重播」汇总区:只列出中国队相关场次(陆/港/澳/台),分两行展示——第一行重播时间+昨夜直播时间,第二行国旗贴选手名
     function renderReplayZone(dateStr, items) {
       if (!items || !items.length) return '';
-      var rows = items.map(function (it) {
+      // 汇总区只展示中国队相关场次,避免外协对阵挤占老人视线
+      var cnItems = items.filter(function (it) {
+        var m = it.m;
+        return (m.nationHome && m.nationHome.indexOf('中国') !== -1) ||
+               (m.nationAway && m.nationAway.indexOf('中国') !== -1);
+      });
+      if (!cnItems.length) return '';
+      var rows = cnItems.map(function (it) {
         var m = it.m;
         var hasCN = m.nationHome === '中国' || m.nationAway === '中国';
         var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
@@ -720,11 +736,16 @@
         var scopeAttr = (hasCN ? ' data-cn="1"' : '') + ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
         var rp = m.replay;
         return '<div class="replay__item"' + scopeAttr + '>' +
-                 '<span class="replay__time">📺 ' + esc(rp.time) + '</span>' +
-                 '<span class="replay__chan">' + esc(rp.channel) + '</span>' +
-                 '<span class="replay__flag">' + flagFor(m.nationHome) + ' ' + flagFor(m.nationAway) + '</span>' +
-                 '<span class="replay__match">' + esc(m.playerHome) + ' VS ' + esc(m.playerAway) + '</span>' +
-                 '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' +
+                 '<div class="replay__line1">' +
+                   '<span class="replay__time">📺 ' + esc(rp.time) + '</span>' +
+                   '<span class="replay__chan">' + esc(rp.channel) + '</span>' +
+                   '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' +
+                 '</div>' +
+                 '<div class="replay__line2">' +
+                   '<span class="replay__flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) +
+                   '<span class="replay__vs">VS</span>' +
+                   '<span class="replay__flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) +
+                 '</div>' +
                '</div>';
       }).join('');
       return '<div class="day__replays">' +
