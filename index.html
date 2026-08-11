@@ -501,6 +501,8 @@
     .replay__time { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
     .replay__chan { font-size: .8rem; font-weight: 700; color: #fff; background: var(--navy); padding: .16rem .55rem; border-radius: 2rem; }
     .replay__match { color: var(--ink); font-weight: 600; }
+    .replay__flag { font-size: 1rem; line-height: 1; letter-spacing: .04rem; }
+    .replay__live { color: var(--ink-2); font-weight: 600; font-size: .85rem; }
 
     /* ---------- 页脚 ---------- */
     footer { margin-top: 2rem; text-align: center; }
@@ -720,7 +722,9 @@
         return '<div class="replay__item"' + scopeAttr + '>' +
                  '<span class="replay__time">📺 ' + esc(rp.time) + '</span>' +
                  '<span class="replay__chan">' + esc(rp.channel) + '</span>' +
+                 '<span class="replay__flag">' + flagFor(m.nationHome) + ' ' + flagFor(m.nationAway) + '</span>' +
                  '<span class="replay__match">' + esc(m.playerHome) + ' VS ' + esc(m.playerAway) + '</span>' +
+                 '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' +
                '</div>';
       }).join('');
       return '<div class="day__replays">' +
@@ -1217,7 +1221,9 @@
               var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
               html += '<div class="match__replay">' +
                         '<span class="replay__time">📺 重播 ' + esc(m.replay.time) + '</span>' +
-                        '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' + rNote +
+                        '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' +
+                        '<span class="replay__flag">' + flagFor(m.nationHome) + ' ' + flagFor(m.nationAway) + '</span>' +
+                        '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' + rNote +
                       '</div>';
             }
 
