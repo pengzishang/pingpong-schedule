@@ -490,6 +490,13 @@
       font-size: .95rem; font-weight: 800; color: var(--red);
       margin-bottom: .45rem;
     }
+    /* 当日底部「已重播」归档区:灰底静音符,与顶部「今日重播」(红/待看)明显区分 */
+    .day__replays--done {
+      background: linear-gradient(to right, rgba(88,100,116,.05), rgba(88,100,116,0) 60%);
+      border-bottom: none;
+      border-top: 1px solid var(--line);
+    }
+    .replays__head--done { color: var(--ink-2); }
     .replay__item {
       padding: .45rem .65rem;
       background: #fff; border: 1px solid var(--line); border-radius: .6rem;
@@ -718,17 +725,32 @@
       if (!isNaN(h) && h >= 23) return addDays(day.date, 1);   // 23:00-23:59 视为前一日深夜,重播到次日
       return day.date;                                          // 00:00-06:00 已是次日凌晨,重播随当场所在日
     }
-    // 当日「今日重播」汇总区:只列出中国队相关场次(陆/港/澳/台),分两行展示——第一行重播时间+昨夜直播时间,第二行国旗贴选手名
-    function renderReplayZone(dateStr, items) {
+    // 重播是否已过时间:以「重播归属日 + 重播时间」与当前时间比较;用于把已播的归档到当日底部
+    function isReplayPassed(day, m, now) {
+      var rp = m.replay;
+      if (!rp || !rp.time) return false;
+      var dt = parseDt(replayTargetDate(day, m), rp.time);
+      if (!dt) return false;
+      return dt.getTime() < now.getTime();
+    }
+    // 当日重播汇总区:只列中国队相关场次(陆/港/澳/台),分两行——第一行重播时间+昨夜直播时间,第二行国旗贴选手名
+    // mode: 'upcoming' = 未过时间(待看,置顶「今日重播」); 'past' = 已过时间(已播,归档到当日底部「今日已重播」)
+    function renderReplayZone(dateStr, items, now, mode) {
       if (!items || !items.length) return '';
+      var isPast = (mode === 'past');
       // 汇总区只展示中国队相关场次,避免外协对阵挤占老人视线
       var cnItems = items.filter(function (it) {
         var m = it.m;
         return (m.nationHome && m.nationHome.indexOf('中国') !== -1) ||
                (m.nationAway && m.nationAway.indexOf('中国') !== -1);
       });
-      if (!cnItems.length) return '';
-      var rows = cnItems.map(function (it) {
+      // 按时间是否已过分流:upcoming 留顶部待看,past 归底部已播
+      var modeItems = cnItems.filter(function (it) {
+        var passed = isReplayPassed(it.day, it.m, now);
+        return isPast ? passed : !passed;
+      });
+      if (!modeItems.length) return '';
+      var rows = modeItems.map(function (it) {
         var m = it.m;
         var hasCN = m.nationHome === '中国' || m.nationAway === '中国';
         var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
@@ -748,8 +770,11 @@
                  '</div>' +
                '</div>';
       }).join('');
-      return '<div class="day__replays">' +
-               '<div class="replays__head">📺 今日重播</div>' + rows +
+      var headTitle = isPast ? '📼 今日已重播' : '📺 今日重播';
+      var boxCls = isPast ? 'day__replays day__replays--done' : 'day__replays';
+      var headCls = isPast ? 'replays__head replays__head--done' : 'replays__head';
+      return '<div class="' + boxCls + '">' +
+               '<div class="' + headCls + '">' + headTitle + '</div>' + rows +
              '</div>';
     }
 
@@ -1086,13 +1111,12 @@
         sec.querySelectorAll('.replay__item').forEach(function (r) { if (r.style.display !== 'none') anyVisible = true; });
         var hasStatic = sec.querySelector('.day__pending');
         sec.style.display = (anyVisible || hasStatic) ? '' : 'none';
-        // 某天筛选后无任何可见重播,则隐藏整个「今日重播」区(不留空标题)
-        var rep = sec.querySelector('.day__replays');
-        if (rep) {
+        // 某天筛选后无可见重播,则隐藏对应重播区(upcoming/past 两个区分别处理,不留空标题)
+        sec.querySelectorAll('.day__replays').forEach(function (rep) {
           var anyRep = false;
           rep.querySelectorAll('.replay__item').forEach(function (r) { if (r.style.display !== 'none') anyRep = true; });
           rep.style.display = anyRep ? '' : 'none';
-        }
+        });
       });
     }
     document.getElementById('filter').addEventListener('click', function (e) {
@@ -1166,8 +1190,8 @@
                   '</div>' +
                 '</div>';
 
-        // 当日「今日重播」汇总区(兜底跨日重播,老人一开当天就看见);无重播则不渲染
-        html += renderReplayZone(day.date, replayGroups[day.date]);
+        // 当日「今日重播」汇总区:未过时间的重播(待看)置顶,老人一开当天先看见;无则隐藏
+        html += renderReplayZone(day.date, replayGroups[day.date], now, 'upcoming');
 
         if (day.matches.length) {
           // 已完成(有 result)的比赛排到当日最后面;未完成的按时间升序在前
@@ -1236,12 +1260,14 @@
                         '</div>';
               }
             }
-            // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」
+            // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」;已过时间改「已重播」
             if (m.replay) {
               var rTd = replayTargetDate(day, m);
               var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
+              var rPassed = isReplayPassed(day, m, now);
+              var rLabel = rPassed ? '📼 已重播 ' : '📺 重播 ';
               html += '<div class="match__replay">' +
-                        '<span class="replay__time">📺 重播 ' + esc(m.replay.time) + '</span>' +
+                        '<span class="replay__time">' + rLabel + esc(m.replay.time) + '</span>' +
                         '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' +
                         '<span class="replay__flag">' + flagFor(m.nationHome) + ' ' + flagFor(m.nationAway) + '</span>' +
                         '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' + rNote +
@@ -1295,6 +1321,9 @@
             html += '</div>';
           }
         }
+
+        // 当日底部「今日已重播」归档区:已过时间的重播(已播)放当日下方,不占顶部待看位
+        html += renderReplayZone(day.date, replayGroups[day.date], now, 'past');
 
         html += '</section>';
       });
