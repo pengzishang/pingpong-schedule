@@ -2,7 +2,7 @@
 
 ## 单链滚动刷新机制(「轻量刷新」once 链)
 - 全局同时仅 1 个 name 含「刷新」的 once 任务;旧链删除后再建新链,保证唯一。
-- 每次运行:读 data.json → 并行采集(4组 subagent 扇出;降级则编排器自采) → 串行交叉认证 → 更新 data.json(只改 result/risk/time/channel/schedule,保留四日期与昨日战报,subtitle 维持) → git add/commit/push(origin+gitee) → 按「刷新时刻计算」新建下一个 once 并删除旧的。
+- 每次运行:读 data.json → 并行采集(4组 subagent 扇出;降级则编排器自采) → 串行交叉认证 → 更新 data.json(只改 result/live/risk/time/channel/schedule;live 为进行中局分,result 优先于 live,保留四日期与昨日战报,subtitle 维持) → git add/commit/push(origin+gitee) → 按「刷新时刻计算」新建下一个 once 并删除旧的。
 - 刷新时刻计算:赛前候选 T=K-1h(K=date+time,仅 T∈(now,now+30h] 入选);赛中候选整链只加 1 个 now+30min 轮询点;候选升序后 30 分钟聚类合并(≤30min 并入同簇取最晚,>30min 另起簇);取 ≥now+30min 最早簇为 T_next。无候选则不建(链暂歇,等 8h 主任务重新对齐)。
 - next once: name=刷新链-[YYYYMMDD]-[HHMM]、modelId 必须 hy3、cwds=仓库根、scheduledAt=ISO8601+08:00、prompt 完整照搬 FINAL 模板(含单链逻辑)。
 
@@ -15,6 +15,7 @@
 - days 四日期:昨日(带 result 战报)+ 今日 + 明日 + 后日。
 - 未结束场 risk:以 🔴高风险 / ⚠️中风险 / ✅低风险 开头,括号大白话标签;⚠️ 另起一句写证据可靠性;📊 另起一句写人头对战;整段 2~3 句。
 - 已结束写精简比分(含小分局分)。subtitle 固定「央视直播 · 乒乓球赛程 · 每日更新(可筛选 全部/国乒/日韩)」。
+- live(进行中局分):该场已开赛且 result 仍空时由刷新链写入,格式与 result 完全一致——「选手A 大比分-大比分 选手B(已完局局分,/分隔)」,例「蒯曼 2-1 早田希娜(11-9/9-11/11-7)」;抓不到局分只写大比分;result 一旦写出即清空 live。前端 parseResult 同款正则消费,渲染为「🔴 进行中 · 当前比分」红横幅+比分表;前端每 60s 轮询 data.json 自动刷新 live。
 
 ## 环境备注
 - 央视EPG(api.cntv.cn)常失效、WTT官网 JS 墙、咪咕乒乓页 404、电视猫频道页需具体 slug;主要依赖新闻聚合(新浪/腾讯/网易/搜狐/今日头条/央视网)交叉确认。
