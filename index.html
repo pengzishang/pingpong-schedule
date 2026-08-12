@@ -1091,6 +1091,14 @@
     function belongsToCN(nation) {
       return nation === '中国' || nation === '中国澳门';
     }
+    // 频道判定:外婆只看电视、只看央视。仅 CCTV 电视频道算「电视直播」,其余(咪咕/央视频/腾讯体育等 app 或流媒体)一律不算,不进表
+    function isCCTVChannel(ch) {
+      if (!ch) return false;
+      // 显式排除非电视平台(app / 咪咕 / 其他流媒体),即便名字里带「央视」(如「央视频」)也算 app
+      if (/咪咕|央视频|腾讯体育|优酷|爱奇艺|客户端|app|APP|网页|网端/i.test(ch)) return false;
+      // 央视电视频道:CCTV-5 / CCTV-5+ / CCTV-1 等
+      return /CCTV|央视/i.test(ch);
+    }
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
     function applyFilter(scope) {
@@ -1156,7 +1164,7 @@
       var replayGroups = {};
       ordered.forEach(function (x) {
         (x.day.matches || []).forEach(function (m) {
-          if (m.replay) {
+          if (m.replay && isCCTVChannel(m.channel)) {
             var td = replayTargetDate(x.day, m);
             (replayGroups[td] = replayGroups[td] || []).push({ day: x.day, m: m });
           }
@@ -1167,6 +1175,8 @@
       var recapInjected = false;
       ordered.forEach(function (x) {
         var day = x.day, diff = x.diff;
+        // 只保留央视电视频道播出的场次(外婆只看央视电视,咪咕/app/其他流媒体不进表)
+        var tvMatches = (day.matches || []).filter(function (m) { return isCCTVChannel(m.channel); });
         var rel = '', tagClass = 'tag--soon', dayClass = '';
         if (diff === 0) { rel = '今天'; tagClass = 'tag--today'; dayClass = ' day--today'; }
         else if (diff === 1) { rel = '明天'; }
@@ -1189,16 +1199,16 @@
                   '</div>' +
                   '<div class="day__tags">' +
                     (rel ? '<span class="tag ' + tagClass + '">' + esc(rel) + '</span>' : '') +
-                    '<span class="tag tag--muted">' + (day.matches.length ? day.matches.length + ' 场' : '待公布') + '</span>' +
+                    '<span class="tag tag--muted">' + (tvMatches.length ? tvMatches.length + ' 场' : '待公布') + '</span>' +
                   '</div>' +
                 '</div>';
 
         // 当日「今日重播」汇总区:未过时间的重播(待看)置顶,老人一开当天先看见;无则隐藏
         html += renderReplayZone(day.date, replayGroups[day.date], now, 'upcoming');
 
-        if (day.matches.length) {
+        if (tvMatches.length) {
           // 已完成(有 result)的比赛排到当日最后面;未完成的按时间升序在前
-          var matches = day.matches.slice().sort(function (a, b) {
+          var matches = tvMatches.slice().sort(function (a, b) {
             var ad = a.result ? 1 : 0, bd = b.result ? 1 : 0;
             if (ad !== bd) return ad - bd;
             return (a.time || '').localeCompare(b.time || '');
@@ -1284,6 +1294,7 @@
           var liveSchedule = (day.schedule || []).filter(function (s) {
             var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
             if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
+            if (!isCCTVChannel(s.channel)) return false;   // 只保留央视电视窗口,app/咪咕不进表
             var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
             return tt.some(function (k) { return txt.indexOf(k) !== -1; });
           });
