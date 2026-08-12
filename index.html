@@ -1099,6 +1099,15 @@
       // 央视电视频道:CCTV-5 / CCTV-5+ / CCTV-1 等
       return /CCTV|央视/i.test(ch);
     }
+    // 兜底:风险卡若明确提示「央视不直播 / 只上央视频/咪咕 / 请开手机APP」,即使 channel 写了 CCTV 也视为电视不可看,从外婆的表里拿掉
+    function riskSaysNoTV(risk) {
+      if (!risk) return false;
+      var txt = risk;
+      return /手机|APP|App|app|客户端|咪咕|央视频|不直播|电视上不播|电视不播|看APP|开手机|仅app|仅APP|只在.*播|只在.*看/i.test(txt);
+    }
+    function isTVMatch(m) {
+      return isCCTVChannel(m.channel) && !riskSaysNoTV(m.risk);
+    }
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
     function applyFilter(scope) {
@@ -1164,7 +1173,7 @@
       var replayGroups = {};
       ordered.forEach(function (x) {
         (x.day.matches || []).forEach(function (m) {
-          if (m.replay && isCCTVChannel(m.channel)) {
+          if (m.replay && isTVMatch(m)) {
             var td = replayTargetDate(x.day, m);
             (replayGroups[td] = replayGroups[td] || []).push({ day: x.day, m: m });
           }
@@ -1175,8 +1184,8 @@
       var recapInjected = false;
       ordered.forEach(function (x) {
         var day = x.day, diff = x.diff;
-        // 只保留央视电视频道播出的场次(外婆只看央视电视,咪咕/app/其他流媒体不进表)
-        var tvMatches = (day.matches || []).filter(function (m) { return isCCTVChannel(m.channel); });
+        // 只保留央视电视频道且风险卡未提示「电视不播/只上手机app」的场次(外婆只看央视电视,不看 app/咪咕)
+        var tvMatches = (day.matches || []).filter(isTVMatch);
         var rel = '', tagClass = 'tag--soon', dayClass = '';
         if (diff === 0) { rel = '今天'; tagClass = 'tag--today'; dayClass = ' day--today'; }
         else if (diff === 1) { rel = '明天'; }
