@@ -606,15 +606,22 @@
     setInterval(tick, 1000);
 
     // ---- 国旗映射(国籍 → 国旗 emoji) ----
+    // ⚠️ 地区键(中国香港/中国澳门/中国台北)必须排在「中国」之前,否则 flagFor 遍历会被「中国」短路
     var FLAGS = {
-      '中国香港': '🇭🇰', '香港': '🇭🇰', '中国澳门': '🇲🇴', '澳门': '🇲🇴', '中国台北': '🇨🇳', '中国': '🇨🇳',
+      '中国香港': '🇭🇰', '香港': '🇭🇰', '中国澳门': '🇲🇴', '澳门': '🇲🇴',
+      '中国台北': '🇨🇳', '中华台北': '🇨🇳', '中国': '🇨🇳',
       '日本': '🇯🇵', '韩国': '🇰🇷', '朝鲜': '🇰🇵',
       '法国': '🇫🇷', '德国': '🇩🇪', '英国': '🇬🇧', '瑞典': '🇸🇪',
       '俄罗斯': '🇷🇺', '葡萄牙': '🇵🇹', '丹麦': '🇩🇰',
-      '美国': '🇺🇸', '澳大利亚': '🇦🇺', '新加坡': '🇸🇬',
-      '印度': '🇮🇳', '埃及': '🇪🇬', '罗马尼亚': '🇷🇴', '波兰': '🇵🇱',
-      '乌克兰': '🇺🇦', '斯洛文尼亚': '🇸🇮', '奥地利': '🇦🇹', '巴西': '🇧🇷',
-      '西班牙': '🇪🇸', '斯洛伐克': '🇸🇰', '匈牙利': '🇭🇺', '尼日利亚': '🇳🇬'
+      '乌克兰': '🇺🇦', '斯洛文尼亚': '🇸🇮', '奥地利': '🇦🇹', '西班牙': '🇪🇸',
+      '斯洛伐克': '🇸🇰', '匈牙利': '🇭🇺', '克罗地亚': '🇭🇷', '意大利': '🇮🇹',
+      '荷兰': '🇳🇱', '比利时': '🇧🇪', '卢森堡': '🇱🇺', '捷克': '🇨🇿',
+      '白俄罗斯': '🇧🇾', '瑞士': '🇨🇭', '希腊': '🇬🇷', '波兰': '🇵🇱',
+      '罗马尼亚': '🇷🇴', '塞尔维亚': '🇷🇸', '土耳其': '🇹🇷',
+      '美国': '🇺🇸', '加拿大': '🇨🇦', '巴西': '🇧🇷', '波多黎各': '🇵🇷',
+      '印度': '🇮🇳', '新加坡': '🇸🇬', '泰国': '🇹🇭', '伊朗': '🇮🇷',
+      '澳大利亚': '🇦🇺', '埃及': '🇪🇬', '尼日利亚': '🇳🇬',
+      '哈萨克': '🇰🇿', '哈萨克斯坦': '🇰🇿'
     };
     function flagFor(nation) {
       if (!nation) return '';
@@ -622,6 +629,15 @@
         if (nation.indexOf(key) !== -1) return FLAGS[key];
       }
       return '';
+    }
+    // 取某一方旗帜:单打=国籍;双打可能跨国(info 形如「日本/波多黎各」或「中国 · 女双组合」)
+    // 优先从 info 拆出多国(跨国双打两人各一面旗),回退到 nation;去重避免重复
+    function flagsForSide(name, info, nation) {
+      var parts = [];
+      function pushFlag(s) { var f = flagFor(s); if (f && parts.indexOf(f) === -1) parts.push(f); }
+      if (info) info.split(/[\/／·・,，]/).forEach(function (seg) { pushFlag(seg.trim()); });
+      if (!parts.length && nation) pushFlag(nation);
+      return parts.join(' ');
     }
 
     // 加时间戳 + no-store,绕开 GitHub Pages 的 max-age=600 缓存,保证每次打开都拿最新数据
@@ -763,9 +779,9 @@
                    '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' +
                  '</div>' +
                  '<div class="replay__line2">' +
-                   '<span class="replay__flag">' + flagFor(m.nationHome) + '</span>' + esc(m.playerHome) +
+                   '<span class="replay__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + '</span>' + esc(m.playerHome) +
                    '<span class="replay__vs">VS</span>' +
-                   '<span class="replay__flag">' + flagFor(m.nationAway) + '</span>' + esc(m.playerAway) +
+                   '<span class="replay__flag">' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' + esc(m.playerAway) +
                  '</div>' +
                '</div>';
       }).join('');
@@ -1257,13 +1273,13 @@
             var awayInfo = ordinalizeInfo(m.playerAwayInfo);
             html += '<div class="match__players">' +
                       '<div class="player player--home">' +
-                        '<span class="player__flag">' + flagFor(m.nationHome) + '</span>' +
+                        '<span class="player__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + '</span>' +
                         '<span class="player__name">' + esc(m.playerHome) + '</span>' +
                         '<span class="player__meta">' + homeInfo + '</span>' +
                       '</div>' +
                       '<span class="player__vs">VS</span>' +
                       '<div class="player player--away">' +
-                        '<span class="player__flag">' + flagFor(m.nationAway) + '</span>' +
+                        '<span class="player__flag">' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
                         '<span class="player__name">' + esc(m.playerAway) + '</span>' +
                         '<span class="player__meta">' + awayInfo + '</span>' +
                       '</div>' +
@@ -1298,7 +1314,7 @@
               html += '<div class="match__replay">' +
                         '<span class="replay__time">' + rLabel + esc(m.replay.time) + '</span>' +
                         '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' +
-                        '<span class="replay__flag">' + flagFor(m.nationHome) + ' ' + flagFor(m.nationAway) + '</span>' +
+                        '<span class="replay__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + ' ' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
                         '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' + rNote +
                       '</div>';
             }
