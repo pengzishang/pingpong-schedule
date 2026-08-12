@@ -1108,6 +1108,11 @@
     function isTVMatch(m) {
       return isCCTVChannel(m.channel) && !riskSaysNoTV(m.risk);
     }
+    // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
+    // —— 直播当晚可能只在 app/咪咕,但白天重播照样上央视电视,外婆能在电视看重播,必须显示
+    function isTVReplay(m) {
+      return !!(m.replay && m.replay.channel && isCCTVChannel(m.replay.channel));
+    }
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
     function applyFilter(scope) {
@@ -1169,11 +1174,13 @@
                         .sort(function (a, b) { return b.diff - a.diff; });
       var ordered = upcoming.concat(past);
 
-      // 预聚合「今日重播」:按重播归属日分组,供各日期头部汇总区使用(跨日重播也能兜住)
+      // 预聚合「今日重播」:按重播归属日分组,供各日期汇总区使用
+      // 重播能否进表只看 replay.channel 是否在央视电视——直播当晚可能只在 app/咪咕,
+      // 但白天重播照样上央视电视,外婆能在电视看,故不能用直播的 isTVMatch 过滤
       var replayGroups = {};
       ordered.forEach(function (x) {
         (x.day.matches || []).forEach(function (m) {
-          if (m.replay && isTVMatch(m)) {
+          if (isTVReplay(m)) {
             var td = replayTargetDate(x.day, m);
             (replayGroups[td] = replayGroups[td] || []).push({ day: x.day, m: m });
           }
