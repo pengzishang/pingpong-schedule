@@ -630,12 +630,25 @@
       }
       return '';
     }
+    // 跨国组合兜底:某些场次的 info 只写「跨国组合」,未拆分两国,需根据已知配对补旗
+    var CROSS_PAIR_FLAGS = {
+      '库库洛娃/达斯': ['斯洛伐克', '印度']
+    };
+    function crossFlagsForPair(name) {
+      var key = (name || '').replace(/\s+/g, '');
+      var nations = CROSS_PAIR_FLAGS[key];
+      return Array.isArray(nations) ? nations : [];
+    }
     // 取某一方旗帜:单打=国籍;双打可能跨国(info 形如「日本/波多黎各」或「中国 · 女双组合」)
-    // 优先从 info 拆出多国(跨国双打两人各一面旗),回退到 nation;去重避免重复
+    // 优先从 info 拆出多国(跨国双打两人各一面旗),info 无国别且 nation 为「跨国组合」时,
+    // 再按已知跨国配对兜底;最后回退到 nation;去重避免重复
     function flagsForSide(name, info, nation) {
       var parts = [];
       function pushFlag(s) { var f = flagFor(s); if (f && parts.indexOf(f) === -1) parts.push(f); }
       if (info) info.split(/[\/／·・,，]/).forEach(function (seg) { pushFlag(seg.trim()); });
+      if (!parts.length && nation && nation.indexOf('跨国') !== -1) {
+        crossFlagsForPair(name).forEach(pushFlag);
+      }
       if (!parts.length && nation) pushFlag(nation);
       return parts.join(' ');
     }
