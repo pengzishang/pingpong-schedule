@@ -393,15 +393,18 @@
 
     .sched { padding: .35rem .85rem .85rem; }
     .sched__row {
-      display: flex; align-items: flex-start; gap: .75rem;
+      display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem;
       margin: .55rem 0; padding: .75rem .9rem;
       background: #f7f9fb; border: 1px solid var(--line); border-radius: .85rem;
+      min-width: 0;
     }
     .sched__time {
-      flex-shrink: 0;
+      flex: 0 0 auto;
       display: flex; flex-direction: column; align-items: flex-start;
       line-height: 1.15;
-      min-width: 3.2rem; text-align: left;
+      min-width: 3.2rem; max-width: 42%;
+      text-align: left;
+      word-break: break-word;
     }
     .sched__time-start {
       font-size: 1.15rem; font-weight: 800; color: var(--navy);
@@ -411,10 +414,14 @@
       font-size: .88rem; font-weight: 700; color: var(--ink-2);
       font-variant-numeric: tabular-nums;
     }
-    .sched__main { min-width: 0; }
+    .sched__main {
+      flex: 1 1 10rem;
+      min-width: 0;
+    }
     .sched__chan {
       display: inline-block; font-size: .82rem; font-weight: 700; color: #fff;
       background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
+      white-space: normal; word-break: break-word;
     }
     .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; word-break: break-word; }
     /* 待公布窗口拆成「对决」卡片:阶段 + 双方 + 状态,干净可读 */
@@ -424,14 +431,17 @@
       background: #fff;
       border: 1px solid var(--line);
       border-radius: .7rem;
+      min-width: 0;
     }
     .sched__duel-stage {
       font-size: .88rem; font-weight: 800; color: var(--navy);
       margin-bottom: .25rem; line-height: 1.2;
+      word-break: break-word;
     }
     .sched__duel-players {
       font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.45;
       word-break: break-word;
+      min-width: 0;
     }
     .sched__vs {
       display: inline-block;
