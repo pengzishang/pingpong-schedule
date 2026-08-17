@@ -1152,6 +1152,19 @@
     function isTVReplay(m) {
       return !!(m.replay && m.replay.channel && isCCTVChannel(m.replay.channel));
     }
+    // 某天是否「有节目」:有≥1场央视电视可看比赛,或有≥1个央视乒乓球直播窗口(待公布也算有节目)。
+    // 两者皆无的日子(赛程空档、无电视窗口)视为无节目,从日期序列里折叠跳过,直接跳到下一场有节目的日期。
+    function dayHasContent(day) {
+      if ((day.matches || []).filter(isTVMatch).length) return true;
+      var liveSched = (day.schedule || []).filter(function (s) {
+        var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
+        if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
+        if (!isCCTVChannel(s.channel)) return false;
+        var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
+        return tt.some(function (k) { return txt.indexOf(k) !== -1; });
+      });
+      return liveSched.length > 0;
+    }
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
     function applyFilter(scope) {
@@ -1211,7 +1224,10 @@
                             .sort(function (a, b) { return a.diff - b.diff; });
       var past = daysAll.filter(function (x) { return x.diff < 0; })
                         .sort(function (a, b) { return b.diff - a.diff; });
-      var ordered = upcoming.concat(past);
+      // 折叠无节目的空档日:只保留「有节目」的日期(有电视比赛或央视乒乓球窗口),直接跳到下一场有节目的日期
+      var upcomingContent = upcoming.filter(function (x) { return dayHasContent(x.day); });
+      var pastContent = past.filter(function (x) { return dayHasContent(x.day); });
+      var ordered = upcomingContent.concat(pastContent);
 
       // 预聚合「今日重播」:按重播归属日分组,供各日期汇总区使用
       // 重播能否进表只看 replay.channel 是否在央视电视——直播当晚可能只在 app/咪咕,
@@ -1241,7 +1257,7 @@
 
         // 进入回顾区时,只在首个过去日期前注入一次分隔标题
         if (diff < 0 && !recapInjected) {
-          var recapLabel = (past.length === 1 && past[0].diff === -1) ? '昨日战报' : '往期战报';
+          var recapLabel = (pastContent.length === 1 && pastContent[0].diff === -1) ? '昨日战报' : '往期战报';
           html += '<div class="recap-sep"><span>—— ' + recapLabel + ' ——</span></div>';
           recapInjected = true;
         }
