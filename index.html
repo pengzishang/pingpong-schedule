@@ -471,10 +471,15 @@
     }
 
     /* ---------- 空窗期:下一场 ---------- */
-    .day--next { border-top: 4px solid var(--navy); }
+    .day--next { border-top: 4px solid var(--navy); margin-top: .4rem; }
+    .day__next-title {
+      padding: .95rem 1.1rem .35rem;
+      font-size: 1.06rem; font-weight: 800; color: var(--navy);
+      text-align: center; letter-spacing: .02em;
+    }
     .day__next {
-      padding: 1.2rem 1.1rem; text-align: center;
-      font-size: 1.15rem; font-weight: 700; color: var(--ink);
+      padding: .2rem 1.1rem 1.25rem; text-align: center; line-height: 1.6;
+      font-size: 1.02rem; font-weight: 600; color: var(--ink);
     }
     .day__next strong { color: var(--navy); }
 
@@ -1414,15 +1419,17 @@
       });
 
       if (data.nextEvent) {
-        html += '<section class="day day--next">' +
+        var ne = data.nextEvent;
+        html += '<section class="day day--next" aria-label="下一站国乒赛事">' +
                   '<div class="day__head">' +
                     '<div class="day__when">' +
-                      '<span class="day__date">' + esc(data.nextEvent.date) + '</span>' +
-                      '<span class="day__week">' + esc(data.nextEvent.weekday) + '</span>' +
+                      '<span class="day__date">' + esc(ne.date) + '</span>' +
+                      '<span class="day__week">' + esc(ne.weekday || '') + '</span>' +
                     '</div>' +
-                    '<span class="tag tag--soon">距今天 ' + esc(data.nextEvent.daysAway) + ' 天</span>' +
+                    '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>' +
                   '</div>' +
-                  '<div class="day__next">下一场国乒比赛 · <strong>' + esc(data.nextEvent.note || '具体赛程待官方公布') + '</strong></div>' +
+                  '<div class="day__next-title">📅 下一站国乒赛事</div>' +
+                  '<div class="day__next">' + esc(ne.note || '具体赛程待官方公布') + '</div>' +
                 '</section>';
       }
 
