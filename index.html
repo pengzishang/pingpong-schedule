@@ -555,6 +555,27 @@
       font-size: 1.02rem; font-weight: 600; color: var(--ink);
     }
     .day__next strong { color: var(--navy); }
+    /* ---------- 顶部「近期无比赛」横幅(3 日内无比赛时显示) ---------- */
+    .gap-banner {
+      display: flex; align-items: center; gap: .65rem;
+      margin: 0 0 1rem;
+      padding: .95rem 1.1rem;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      border: 1px solid var(--red);
+      border-left: 6px solid var(--red);
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: var(--fs-name);
+      font-weight: 700; line-height: 1.5;
+      box-shadow: var(--shadow);
+    }
+    .gap-banner__icon { font-size: 1.7em; line-height: 1; flex: 0 0 auto; }
+    .gap-banner__text { word-break: break-word; }
+    .gap-banner__text strong {
+      color: #ffd166;
+      font-size: 1.18em; margin: 0 .15rem;
+      font-variant-numeric: tabular-nums;
+    }
     /* 下一站:长文本结构化分块(适老化:大字号、左对齐、分节标题) */
     .day__next--structured {
       padding: .5rem 1.1rem 1.35rem; text-align: left;
@@ -1432,7 +1453,8 @@
     }
 
     // 紧凑版:用于「今日无直播」「待公布」等小卡里的「下一场」一行(只点要点,不堆整段 note)
-    function nextEventCompact(ne) {
+    // omitCountdown=true 时去掉「距今天 X 天」(该倒数已上移到顶部「近期无比赛」横幅,避免重复)
+    function nextEventCompact(ne, omitCountdown) {
       if (!ne) return '';
       var p = parseNextEventNote(ne.note || '');
       var name = '';
@@ -1443,7 +1465,7 @@
       var parts = [];
       if (name) parts.push(name);
       if (ne.date) parts.push(ne.date + (ne.weekday ? '(' + ne.weekday + ')' : ''));
-      if (typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
+      if (!omitCountdown && typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
       if (p.tv) {
         var ch = p.tv.match(/CCTV[-\d+]+/);
         if (ch) parts.push(ch[0] + ' 预计直播');
@@ -1451,7 +1473,7 @@
       return parts.join(' · ');
     }
     // 去掉日期版本(用于已经把日期加粗展示的场景,避免重复)
-    function nextEventCompactNoDate(ne) {
+    function nextEventCompactNoDate(ne, omitCountdown) {
       if (!ne) return '';
       var p = parseNextEventNote(ne.note || '');
       var name = '';
@@ -1461,7 +1483,7 @@
       }
       var parts = [];
       if (name) parts.push(name);
-      if (typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
+      if (!omitCountdown && typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
       if (p.tv) {
         var ch = p.tv.match(/CCTV[-\d+]+/);
         if (ch) parts.push(ch[0] + ' 预计直播');
@@ -1534,6 +1556,23 @@
       var pastContent = past.filter(function (x) { return (x.day.matches || []).filter(isTVMatch).length > 0; });
       var ordered = upcomingContent.concat(pastContent);
 
+      // 「近期无比赛」横幅判定:若未来 3 日内(含第 3 天)都没有央视乒乓电视比赛(match),
+      // 则页面最上方提示「近期无比赛,离最近一场倒数 X 日」,并隐藏下方各处的「距今天 X 天」倒数(避免重复)。
+      // 外婆适老化:长空窗期不该让每处都重复倒计时,统一在最顶部说一次即可。
+      var GAP_DAYS = 3;
+      var nearestMatchDiff = null;
+      for (var gi = 0; gi < upcoming.length; gi++) {
+        if ((upcoming[gi].day.matches || []).filter(isTVMatch).length > 0) {
+          nearestMatchDiff = upcoming[gi].diff;
+          break;
+        }
+      }
+      var gapMode = (nearestMatchDiff === null) || (nearestMatchDiff > GAP_DAYS);
+      var countdownDays = null;
+      if (nearestMatchDiff !== null) countdownDays = nearestMatchDiff;
+      else if (data.nextEvent && typeof data.nextEvent.daysAway === 'number') countdownDays = data.nextEvent.daysAway;
+
+
       // 预聚合「今日重播」:按重播归属日分组,供各日期汇总区使用
       // 重播能否进表只看 replay.channel 是否在央视电视——直播当晚可能只在 app/咪咕,
       // 但白天重播照样上央视电视,外婆能在电视看,故不能用直播的 isTVMatch 过滤
@@ -1548,6 +1587,13 @@
       });
 
       var html = '';
+      // 顶部「近期无比赛」横幅:仅当 3 日内无比赛时显示(倒数已统一在此处,下方不再重复)
+      if (gapMode && countdownDays !== null) {
+        html += '<div class="gap-banner" role="status">' +
+                  '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
+                  '<span class="gap-banner__text">近期无比赛，离最近一场倒数 <strong>' + countdownDays + '</strong> 日</span>' +
+                '</div>';
+      }
       var recapInjected = false;
       ordered.forEach(function (x) {
         var day = x.day, diff = x.diff;
@@ -1733,7 +1779,7 @@
             // 下一场:优先用原文里的「下一场/下一站...」句(更简洁),无则兜底用全局 nextEvent
             var nextLine = parsed.next;
             if (!nextLine && data.nextEvent && data.nextEvent.date) {
-              nextLine = nextEventCompact(data.nextEvent);
+              nextLine = nextEventCompact(data.nextEvent, gapMode);
             }
             if (nextLine) {
               html += '<div class="pending__next-event">' +
@@ -1752,7 +1798,7 @@
             // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
             html += '<div class="day__pending">' +
                       '<span class="pending__badge">📋 待公布</span>' +
-                      '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent) || '国乒比赛') + '</span>' +
+                      '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode) || '国乒比赛') + '</span>' +
                     '</div>';
           }
         }
@@ -1771,7 +1817,7 @@
                       '<span class="day__date">' + esc(ne.date) + '</span>' +
                       '<span class="day__week">' + esc(ne.weekday || '') + '</span>' +
                     '</div>' +
-                    '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>' +
+                    (gapMode ? '' : '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>') +
                   '</div>' +
                   '<div class="day__next-title">📅 下一站国乒赛事</div>' +
                   renderNextCard(ne) +
