@@ -1530,7 +1530,8 @@
                         .sort(function (a, b) { return b.diff - a.diff; });
       // 折叠无节目的空档日:只保留「有节目」的日期(有电视比赛或央视乒乓球窗口),直接跳到下一场有节目的日期
       var upcomingContent = upcoming.filter(function (x) { return dayHasContent(x.day); });
-      var pastContent = past.filter(function (x) { return dayHasContent(x.day); });
+      // 过去天 = 战报回顾:只有真正有央视乒乓比赛(match)才展示,仅空窗说明(schedule)而无比赛的天不算回顾内容 → 隐藏(外婆不想看空栏目)
+      var pastContent = past.filter(function (x) { return (x.day.matches || []).filter(isTVMatch).length > 0; });
       var ordered = upcomingContent.concat(pastContent);
 
       // 预聚合「今日重播」:按重播归属日分组,供各日期汇总区使用
