@@ -555,7 +555,7 @@
       font-size: 1.02rem; font-weight: 600; color: var(--ink);
     }
     .day__next strong { color: var(--navy); }
-    /* ---------- 顶部「近期无比赛」横幅(3 日内无比赛时显示) ---------- */
+    /* ---------- 顶部空窗期横幅(3 日内无比赛时显示) ---------- */
     .gap-banner {
       display: flex; align-items: center; gap: .65rem;
       margin: 0 0 1rem;
@@ -1557,7 +1557,7 @@
       var ordered = upcomingContent.concat(pastContent);
 
       // 「近期无比赛」横幅判定:若未来 3 日内(含第 3 天)都没有央视乒乓电视比赛(match),
-      // 则页面最上方提示「近期无比赛,离最近一场倒数 X 日」,并隐藏下方各处的「距今天 X 天」倒数(避免重复)。
+      // 则页面最上方提示「离最近一场国乒比赛,还有 X 天」,并隐藏下方各处的「距今天 X 天」倒数(避免重复)。
       // 外婆适老化:长空窗期不该让每处都重复倒计时,统一在最顶部说一次即可。
       var GAP_DAYS = 3;
       var nearestMatchDiff = null;
@@ -1591,7 +1591,7 @@
       if (gapMode && countdownDays !== null) {
         html += '<div class="gap-banner" role="status">' +
                   '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
-                  '<span class="gap-banner__text">近期无比赛，离最近一场倒数 <strong>' + countdownDays + '</strong> 日</span>' +
+                  '<span class="gap-banner__text">离最近一场国乒比赛，还有 <strong>' + countdownDays + '</strong> 天</span>' +
                 '</div>';
       }
       var recapInjected = false;
