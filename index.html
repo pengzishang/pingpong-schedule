@@ -555,6 +555,31 @@
       font-size: 1.02rem; font-weight: 600; color: var(--ink);
     }
     .day__next strong { color: var(--navy); }
+    /* 下一站:长文本结构化分块(适老化:大字号、左对齐、分节标题) */
+    .day__next--structured {
+      padding: .5rem 1.1rem 1.35rem; text-align: left;
+      display: flex; flex-direction: column; gap: .85rem;
+    }
+    .next__block { display: flex; flex-direction: column; gap: .3rem; }
+    .next__head {
+      font-size: 1.02rem; font-weight: 800; color: var(--navy);
+      display: flex; align-items: center; gap: .4rem;
+      padding-bottom: .25rem; border-bottom: 2px solid rgba(14,42,71,.12);
+    }
+    .next__body {
+      font-size: 1.0rem; line-height: 1.68; color: var(--ink);
+      font-weight: 600; word-break: break-word;
+    }
+    .next__block--hero .next__body {
+      background: rgba(14,42,71,.05); border-left: 4px solid var(--navy);
+      border-radius: .5rem; padding: .7rem .9rem;
+    }
+    .next__block--sources .next__body {
+      font-size: .92rem; color: var(--ink-2); background: rgba(14,42,71,.04);
+      border-radius: .5rem; padding: .55rem .8rem;
+    }
+    .next__timeline { margin: .1rem 0 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: .4rem; }
+    .next__timeline li { font-size: 1.0rem; line-height: 1.6; color: var(--ink); font-weight: 600; }
 
     /* ---------- 重播:卡内一行 + 当日「今日重播」汇总区 ---------- */
     /* 适老化:重播是「没看成当晚、白天看重播」的刚需,视觉上用中国红淡底 + 深蓝标签,
@@ -1324,6 +1349,84 @@
 
       return out;
     }
+
+    // 「下一站国乒赛事」卡片里 nextEvent.note 也是一坨长文本,这里按语义拆成结构化块
+    function parseNextEventNote(note) {
+      var out = { meta: '', squad: '', seeds: '', schedule: '', tv: '', sources: '' };
+      if (!note) return out;
+      var s = String(note).trim();
+      if (!s) return out;
+
+      // 1. 抽取尾部「(…源确认 / …官方…)」括号作为信息来源
+      var srcM = s.match(/\(([^()]*?(?:源|官方|WTT|ITTF)[^()]*?)\)[。;；]?\s*$/);
+      if (srcM) {
+        out.sources = srcM[1].trim();
+        s = s.slice(0, srcM.index).trim();
+      }
+
+      // 2. 按 。/;/； 分句,按关键词归类
+      var clauses = s.split(/[。;；]/).map(function (c) { return c.trim(); }).filter(Boolean);
+      if (!clauses.length) return out;
+
+      // 首句 = 赛事名/场馆/日期/赛制,固定为元信息
+      out.meta = clauses[0];
+
+      clauses.slice(1).forEach(function (cl) {
+        var isTV    = /CCTV|直播|转播|播出|节目单|频道/.test(cl);
+        var isSched = /赛程|开打|1\/8|1\/4|半决赛|决赛|七局|小组赛|资格赛|→|对阵|签表/.test(cl);
+        var isSeeds = /种子|卫冕|复出|头号|夺冠|夺金|冲冠|排名|看点|焦点/.test(cl);
+        var isSquad = /国乒|轮休|阵容|报名|队员|选手|出战|参赛/.test(cl);
+
+        if (isTV) {
+          out.tv = (out.tv ? out.tv + '；' : '') + cl;
+        } else if (isSeeds) {
+          out.seeds = (out.seeds ? out.seeds + '；' : '') + cl;
+        } else if (isSched) {
+          out.schedule = (out.schedule ? out.schedule + '；' : '') + cl;
+        } else if (isSquad) {
+          out.squad = (out.squad ? out.squad + '；' : '') + cl;
+        } else {
+          out.meta = (out.meta ? out.meta + '。' : '') + cl;
+        }
+      });
+
+      return out;
+    }
+
+    // 把解析结果渲染成清晰分块(适老化:大字号、左对齐、分节标题)
+    function renderNextCard(ne) {
+      var p = parseNextEventNote(ne.note || '');
+      var blocks = [];
+      if (p.meta)     blocks.push({ key: 'meta',     label: '🏟️ 赛事信息',  text: p.meta });
+      if (p.squad)    blocks.push({ key: 'squad',    label: '🇨🇳 国乒阵容', text: p.squad });
+      if (p.seeds)    blocks.push({ key: 'seeds',    label: '⭐ 焦点与种子', text: p.seeds });
+      if (p.schedule) blocks.push({ key: 'schedule', label: '🗓️ 赛程时间线', text: p.schedule });
+      if (p.tv)       blocks.push({ key: 'tv',       label: '📺 直播安排',  text: p.tv });
+      if (p.sources)  blocks.push({ key: 'sources',  label: '🔎 信息来源',  text: p.sources });
+
+      if (!blocks.length) {
+        return '<div class="day__next">' + esc(ne.note || '具体赛程待官方公布') + '</div>';
+      }
+
+      var html = '<div class="day__next day__next--structured">';
+      blocks.forEach(function (b) {
+        var boxCls = b.key === 'meta' ? ' next__block--hero' : (b.key === 'sources' ? ' next__block--sources' : '');
+        html += '<div class="next__block' + boxCls + '">';
+        html +=   '<div class="next__head">' + b.label + '</div>';
+        if (b.key === 'schedule') {
+          var steps = b.text.split('→').map(function (x) { return x.trim(); }).filter(Boolean);
+          html += '<ol class="next__timeline">';
+          steps.forEach(function (st) { html += '<li>' + esc(st) + '</li>'; });
+          html += '</ol>';
+        } else {
+          html += '<div class="next__body">' + esc(b.text) + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
     function applyFilter(scope) {
@@ -1627,7 +1730,7 @@
                     '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>' +
                   '</div>' +
                   '<div class="day__next-title">📅 下一站国乒赛事</div>' +
-                  '<div class="day__next">' + esc(ne.note || '具体赛程待官方公布') + '</div>' +
+                  renderNextCard(ne) +
                 '</section>';
       }
 
