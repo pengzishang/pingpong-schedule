@@ -1,0 +1,701 @@
+    /* ============ 国乒赛事日历 · 移动端重设计 ============ */
+    /* 设计语言:体育转播编辑风 —— 深海蓝主色 + 中国红强调,高对比、大字号、零动效(适老化) */
+
+    :root {
+      --page:      #eef1f5;   /* 页面底色:冷调浅灰蓝 */
+      --card:      #ffffff;   /* 卡片底色 */
+      --ink:       #14202c;   /* 主文字:近黑,高对比 */
+      --ink-2:     #586474;   /* 次级文字 */
+      --navy:      #0e2a47;   /* 主色:深海蓝 */
+      --navy-2:    #1b3e63;   /* 主色 hover/分层 */
+      --red:       #d62828;   /* 强调:中国红(今日/高风险) */
+      --red-soft:  #fdecec;
+      --green:     #0a7a3a;   /* 已结束比分 */
+      --green-soft:#e7f6ed;
+      --amber:     #9a5a00;   /* 风险提示文字 */
+      --amber-soft:#fdf3e2;
+      --line:      #d9e0e8;   /* 分隔线/边框 */
+      --radius:    18px;
+      --filter-h:  4.3rem;   /* 粘性筛选条总高,日期头部吸顶精确贴其下沿 */
+      --shadow:    0 1px 2px rgba(14,32,43,.05), 0 10px 28px rgba(14,32,43,.07);
+
+      --fs-title: clamp(1.5rem, 4.2vw, 1.95rem);
+      --fs-clock: clamp(2.3rem, 9vw, 3.1rem);
+      --fs-date:  clamp(1.3rem, 5vw, 1.6rem);
+      --fs-time:  clamp(1.9rem, 7.5vw, 2.4rem);
+      --fs-name:  clamp(1.35rem, 5.2vw, 1.7rem);
+      --fs-info:  clamp(.85rem, 3vw, .98rem);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+    @media (min-width: 600px) { html { font-size: 19px; } }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.6;
+      padding: 0 0 calc(env(safe-area-inset-bottom) + 2rem);
+    }
+
+    .wrap { max-width: 480px; margin: 0 auto; padding: 0 1rem; }
+
+    /* ---------- 国籍筛选条(粘性,占顶部) ---------- */
+    .filter {
+      position: sticky; top: 0; z-index: 6;
+      height: var(--filter-h);
+      box-sizing: border-box;
+      display: flex; gap: .5rem; align-items: center;
+      padding: 0 .2rem;
+      background: var(--page);
+      border-bottom: 1px solid var(--line);
+    }
+    .filter__btn {
+      flex: 1; min-height: 48px;
+      font-family: inherit; font-size: 1.05rem; font-weight: 800;
+      color: var(--navy); background: #fff;
+      border: 2px solid var(--line); border-radius: 2rem;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .filter__btn.is-active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .filter__btn:active { opacity: .85; }
+
+    /* ---------- 顶部品牌带(深海蓝) ---------- */
+    .top {
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+      padding: 1.6rem 1rem 1.3rem;
+      border-bottom: 4px solid var(--red);
+    }
+    .top__brand {
+      font-size: var(--fs-title);
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .top__brand::after {
+      content: "";
+      display: block;
+      width: 46px; height: 3px;
+      background: var(--red);
+      margin: .5rem auto 0;
+      border-radius: 2px;
+    }
+    .top__clock {
+      margin-top: .8rem;
+      font-size: var(--fs-clock);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .04em;
+      line-height: 1.1;
+    }
+    .top__dated { margin-top: .25rem; font-size: 1rem; color: rgba(255,255,255,.78); }
+    .top__updated { margin-top: .5rem; font-size: .82rem; color: rgba(255,255,255,.62); }
+    .top__updated strong { color: #fff; font-weight: 700; }
+
+    /* ---------- 日期卡片 ---------- */
+    /* 注意:不能设 overflow:hidden,否则内部 .day__head 的 sticky 会被截断失效 */
+    .day {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin: 1.4rem 0;
+      box-shadow: var(--shadow);
+    }
+    .day--today { border-top: 4px solid var(--red); }
+    .day--past { border-top: 4px solid #c4cdd8; }
+    .day--past .day__head { background: #eef1f5; }
+    /* 卡片圆角兜底:首子(日期头)左上/右上、末子(待公布/比赛)左下/右下 */
+    .day__head { border-radius: var(--radius) var(--radius) 0 0; }
+    .day > :last-child { border-radius: 0 0 var(--radius) var(--radius); }
+
+    .day__head {
+      position: sticky; top: var(--filter-h);
+      z-index: 4;
+      display: flex; flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: .6rem;
+      padding: .95rem 1.1rem;
+      background: #f4f7fa;
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(14,32,43,.08);
+    }
+    .day__when { display: flex; flex-wrap: wrap; align-items: baseline; gap: .55rem; min-width: 0; }
+    .day__date { font-size: var(--fs-date); font-weight: 800; color: var(--navy); }
+    .day__week { font-size: 1.05rem; color: var(--ink-2); font-weight: 600; }
+
+    .day__tags { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; flex-shrink: 0; }
+    .tag {
+      font-size: .92rem; font-weight: 800;
+      padding: .25rem .7rem; border-radius: 2rem; white-space: nowrap;
+    }
+    .tag--today { background: var(--red); color: #fff; }
+    .tag--soon  { background: var(--navy); color: #fff; }
+    .tag--muted { background: #e4e9ef; color: var(--ink-2); }
+    .tag--past  { background: #c4cdd8; color: var(--ink-2); }
+
+    /* 战报回顾分隔标题:细线 + 居中字,和上面今日内容明显分界 */
+    .recap-sep {
+      display: flex; align-items: center; gap: .8rem;
+      margin: 2.2rem 0 .2rem;
+      color: var(--ink-2);
+      font-size: 1.05rem; font-weight: 800; letter-spacing: .1em;
+    }
+    .recap-sep::before, .recap-sep::after {
+      content: ""; flex: 1; height: 2px; border-radius: 2px;
+      background: linear-gradient(to right, transparent, var(--line) 45%, var(--line) 55%, transparent);
+    }
+    .recap-sep span { padding: 0 .25rem; white-space: nowrap; }
+
+    /* ---------- 比赛卡片 ---------- */
+    .match { padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line); }
+    .match:last-child { border-bottom: none; }
+
+    /* 当日「已完成」分隔:细线 + 居中「已结束」,与上方未开始比赛明显分界 */
+    .match-sep {
+      display: flex; align-items: center; gap: .6rem;
+      margin: .4rem 0 .15rem;
+      padding: 0 1.1rem;
+      color: var(--ink-2);
+      font-size: .95rem; font-weight: 800; letter-spacing: .12em;
+    }
+    .match-sep::before, .match-sep::after {
+      content: ""; flex: 1; height: 1px; border-radius: 2px;
+      background: var(--line);
+    }
+    .match-sep span { padding: 0 .5rem; white-space: nowrap; background: var(--card); }
+
+    .match__event {
+      display: block; width: fit-content; margin: 0 auto .8rem;
+      max-width: 100%;
+      font-size: 1rem; font-weight: 700; color: var(--navy);
+      background: #eaf1f8; border: 1px solid #cdddee;
+      padding: .3rem .9rem; border-radius: 2rem; text-align: center;
+      word-break: break-word;
+    }
+
+    .match__bar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem .7rem;
+      margin-bottom: .7rem;
+    }
+    .match__time {
+      font-size: var(--fs-time); font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .match__chan {
+      font-size: .95rem; font-weight: 700; color: #fff; background: var(--navy);
+      padding: .28rem .8rem; border-radius: 2rem; white-space: nowrap;
+    }
+
+    .match__players {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: .5rem;
+    }
+    .player { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+    .player__flag { font-size: 1.4rem; line-height: 1; }
+    .player__name { font-size: var(--fs-name); font-weight: 800; color: var(--ink); margin-top: .15rem; }
+    .player__meta { font-size: var(--fs-info); color: var(--ink-2); font-weight: 500; margin-top: .1rem; word-break: break-word; }
+    .player__vs { font-size: 1.05rem; font-weight: 800; color: var(--red); }
+
+    .match__result {
+      margin-top: .85rem; padding: .55rem .6rem;
+      font-size: 1rem; color: var(--ink);
+      background: var(--green-soft); border: 1px solid #a9dcc0; border-radius: .6rem;
+      text-align: center;
+    }
+    /* 比分表格:体育转播风,选手名 × 局分,总分列,赢家局分高亮 */
+    .score-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .score-table {
+      width: 100%; border-collapse: collapse; table-layout: fixed;
+      font-size: .98rem; line-height: 1.2;
+    }
+    .score-table th, .score-table td {
+      padding: .35rem .25rem; text-align: center; vertical-align: middle;
+      border: 1px solid rgba(10,122,58,.25);
+    }
+    .score-table thead th {
+      background: var(--navy); color: #fff; font-weight: 800; font-size: .85rem;
+    }
+    .score-table thead th:first-child { background: #1b3e63; }
+    .score-table tbody td { background: #fff; color: var(--ink); font-weight: 700; }
+    .score-table__player {
+      text-align: left; padding-left: .5rem; font-weight: 800;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .score-table__total {
+      background: rgba(10,122,58,.08) !important; color: var(--green); font-weight: 800;
+    }
+    .score-table__score.is-winner { color: var(--green); font-weight: 800; background: rgba(10,122,58,.06); }
+    /* 进行中:红色主题 + 顶部横幅,与已结束(绿)明显区分,适老化高对比 */
+    .match__result--live { background: var(--red-soft); border-color: #e6b3b3; }
+    .match__live {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem;
+      margin-bottom: .55rem; padding: .45rem .7rem;
+      background: var(--red); color: #fff;
+      font-size: 1.05rem; font-weight: 800; line-height: 1.2; text-align: center;
+      border-radius: .5rem;
+    }
+    .score-table--live th, .score-table--live td { border-color: rgba(214,40,40,.28); }
+    .score-table--live .score-table__total {
+      background: rgba(214,40,40,.10) !important; color: var(--red); font-weight: 800;
+    }
+    .score-table--live .score-table__score.is-winner {
+      color: var(--red); font-weight: 800; background: rgba(214,40,40,.07);
+    }
+    /* 比赛总结(已结束)/ 看点(未开始/进行中):统一便签卡,区分配色,零动效适老化 */
+    .match__note {
+      margin-top: .7rem;
+      border-radius: .7rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .note--summary { border-color: #bcd4e6; background: #eef5fb; }
+    .note--watch   { border-color: #d9c7e8; background: #f5eefb; }
+    .note__head {
+      display: flex; align-items: center; gap: .45rem;
+      padding: .5rem .8rem;
+      font-size: .95rem; font-weight: 800;
+      border-bottom: 1px solid rgba(14,32,43,.08);
+    }
+    .note--summary .note__head { background: rgba(14,42,71,.06); color: var(--navy); }
+    .note--watch   .note__head { background: rgba(106,40,156,.06); color: #6a289c; }
+    .note__body {
+      padding: .65rem .85rem .75rem;
+      font-size: 1rem; line-height: 1.62; color: var(--ink);
+    }
+    /* 风险提示:结构化卡片——标签式影响点 + 可视化时间轴 + 紧凑证据/数据,拒绝大段文字 */
+    .match__risk {
+      margin-top: .85rem;
+      border-radius: .7rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .risk--high { border-color: #e6b3b3; background: var(--red-soft); }
+    .risk--mid  { border-color: #f0d9ad; background: var(--amber-soft); }
+    .risk--low  { border-color: #a9dcc0; background: var(--green-soft); }
+
+    .risk__head {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem;
+      padding: .55rem .8rem;
+      border-bottom: 1px solid rgba(14,32,43,.08);
+    }
+    .risk--high .risk__head { background: rgba(214,40,40,.08); }
+    .risk--mid  .risk__head { background: rgba(154,90,0,.07); }
+    .risk--low  .risk__head { background: rgba(10,122,58,.07); }
+
+    .risk__badge {
+      font-size: .92rem; font-weight: 800; color: #fff;
+      padding: .22rem .65rem; border-radius: 2rem; white-space: nowrap;
+      line-height: 1.2;
+    }
+    .risk--high .risk__badge { background: var(--red); }
+    .risk--mid  .risk__badge { background: var(--amber); }
+    .risk--low  .risk__badge { background: var(--green); }
+
+    .risk__type { font-size: .9rem; font-weight: 700; color: var(--ink-2); }
+
+    /* 影响点:短句标签流,一行一个结论 */
+    .risk__impacts {
+      display: flex; flex-direction: column; gap: .35rem;
+      padding: .65rem .85rem .5rem;
+    }
+    .risk__impact {
+      display: flex; align-items: flex-start; gap: .4rem;
+      font-size: .98rem; line-height: 1.45; color: var(--ink);
+      font-weight: 600;
+    }
+    .risk__impact::before {
+      content: "•";
+      flex-shrink: 0;
+      color: var(--amber); font-weight: 800; font-size: 1.1rem; line-height: 1;
+      margin-top: .05rem;
+    }
+    .risk--high .risk__impact::before { color: var(--red); }
+    .risk--low  .risk__impact::before { color: var(--green); }
+
+    /* 时间冲突可视化:横向时间轴,冲突段标红,直播段标绿 */
+    .risk__timeline {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
+      padding: .45rem .85rem .55rem;
+    }
+    .risk__slot {
+      flex: 1 1 auto; min-width: 4.2rem; max-width: 100%;
+      padding: .35rem .5rem;
+      background: #fff; border: 1px solid var(--line); border-radius: .55rem;
+      font-size: .82rem; font-weight: 700; color: var(--ink); text-align: center;
+      line-height: 1.25;
+    }
+    .risk__slot--block { background: #f0f2f5; color: var(--ink-2); border-color: #d9dee5; }
+    .risk__slot--live { background: var(--green-soft); color: var(--green); border-color: #a9dcc0; }
+    .risk__slot--cut { background: var(--red-soft); color: var(--red); border-color: #e6b3b3; }
+    .risk__slot__time {
+      display: block; font-size: .78rem; font-weight: 800; color: var(--navy);
+      margin-bottom: .05rem;
+    }
+
+    /* 数据:紧凑小字 + 双栏数据卡 */
+    .risk__stat {
+      padding: .55rem .85rem .65rem;
+      font-size: .92rem; line-height: 1.5;
+      border-top: 1px dashed rgba(14,32,43,.12);
+      color: var(--navy); font-weight: 600;
+      background: rgba(14,42,71,.045);
+    }
+    .risk__stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .5rem;
+      margin-top: .35rem;
+    }
+    .risk__stat-card {
+      background: #fff; border: 1px solid rgba(14,42,71,.12); border-radius: .55rem;
+      padding: .45rem .5rem; text-align: center;
+    }
+    .risk__stat-card__label {
+      font-size: .72rem; font-weight: 700; color: var(--ink-2);
+      margin-bottom: .1rem;
+    }
+    .risk__stat-card__val {
+      font-size: .95rem; font-weight: 800; color: var(--navy);
+      line-height: 1.2;
+    }
+
+    /* ---------- 待公布:精简,直接说下一场时间,不堆解释 ---------- */
+    .day__pending {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .7rem;
+      padding: .9rem 1.1rem 1rem;
+    }
+    .pending__badge {
+      display: inline-flex; align-items: center;
+      font-size: .85rem; font-weight: 800; color: var(--navy);
+      background: #eaf1f8; border: 1px solid #cdddee;
+      padding: .2rem .65rem; border-radius: 2rem;
+    }
+    .pending__next {
+      font-size: 1rem; font-weight: 600; color: var(--ink);
+      word-break: break-word;
+    }
+    .pending__next strong { color: var(--navy); font-weight: 800; }
+
+    /* 空窗期/无直播天:结构化排版——摘要 + 乒乓节目 + 其他体育 + 下一场,外婆一目了然 */
+    .day__pending--none {
+      display: flex; flex-direction: column; gap: .65rem;
+      padding: .95rem 1.1rem 1.1rem;
+      background: #fbfcfd; border: 1px solid var(--line); border-radius: .85rem;
+    }
+    .day__pending--none .pending__badge {
+      align-self: flex-start;
+      color: #b06a00; background: #fff4e3; border-color: #f3d9b0;
+    }
+    .pending__lead {
+      margin: 0;
+      font-size: 1.02rem; line-height: 1.55; color: var(--ink);
+      padding: .15rem 0 .25rem .65rem;
+      border-left: 3px solid #f3d9b0;
+    }
+    .pending__section { display: flex; flex-direction: column; gap: .35rem; }
+    .pending__section-head {
+      font-size: .92rem; font-weight: 800; color: var(--navy);
+      letter-spacing: .02em;
+    }
+    .pending__section--other .pending__section-head { color: #888; }
+    .pending__list {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; flex-direction: column; gap: .35rem;
+    }
+    .pending__row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: .5rem;
+      padding: .55rem .75rem;
+      font-size: 1rem; line-height: 1.4;
+    }
+    /* 左侧元信息列:时间 + 台标上下两行堆叠(窄屏也只占窄窄一列,把空间让给节目名)*/
+    .pending__meta {
+      flex: 0 0 auto;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: .2rem;
+    }
+    .pending__time {
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums;
+      font-size: 1rem;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    .pending__chan {
+      font-weight: 700; color: var(--ink);
+      background: #eaf1f8; padding: .1rem .45rem;
+      border-radius: .3rem; text-align: center;
+      font-size: .78rem; white-space: nowrap;
+      line-height: 1.3;
+    }
+    .pending__section--other .pending__chan {
+      background: #f3f3f3; color: #666;
+    }
+    /* 节目名独占右侧:flex:1 + min-width:0 是 flex 项允许文本收缩换行的关键 */
+    .pending__prog {
+      flex: 1 1 auto; min-width: 0;
+      color: var(--ink-2);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .pending__next-event {
+      display: flex; flex-direction: column; gap: .15rem;
+      margin-top: .15rem; padding: .65rem .85rem;
+      background: linear-gradient(135deg, #fff8e8 0%, #fff2d3 100%);
+      border: 1px solid #f0d68a; border-radius: .55rem;
+    }
+    .pending__next-label {
+      font-size: .85rem; font-weight: 800; color: #b06a00;
+      letter-spacing: .02em;
+    }
+    .pending__next-text {
+      font-size: 1rem; font-weight: 600; color: var(--ink); line-height: 1.5;
+      word-break: break-word;
+    }
+    /* 解析失败时的回退样式,保留旧版观感 */
+    .pending__fallback .pending__note {
+      font-size: .95rem; line-height: 1.65; color: var(--ink-2);
+      word-break: break-word; white-space: normal;
+    }
+
+    .sched { padding: .35rem .85rem .85rem; }
+    .sched__row {
+      display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem;
+      margin: .55rem 0; padding: .75rem .9rem;
+      background: #f7f9fb; border: 1px solid var(--line); border-radius: .85rem;
+      min-width: 0;
+    }
+    .sched__time {
+      flex: 0 0 auto;
+      display: flex; flex-direction: column; align-items: flex-start;
+      line-height: 1.15;
+      min-width: 3.2rem; max-width: 42%;
+      text-align: left;
+      word-break: break-word;
+    }
+    .sched__time-start {
+      font-size: 1.15rem; font-weight: 800; color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+    .sched__time-end {
+      font-size: .88rem; font-weight: 700; color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+    }
+    .sched__main {
+      flex: 1 1 10rem;
+      min-width: 0;
+    }
+    .sched__chan {
+      display: inline-block; font-size: .82rem; font-weight: 700; color: #fff;
+      background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
+      white-space: normal; word-break: break-word;
+    }
+    .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; word-break: break-word; }
+    /* 待公布窗口拆成「对决」卡片:阶段 + 双方 + 状态,干净可读 */
+    .sched__list { display: flex; flex-direction: column; gap: .55rem; }
+    .sched__duel {
+      padding: .55rem .7rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: .7rem;
+      min-width: 0;
+    }
+    .sched__duel-stage {
+      font-size: .88rem; font-weight: 800; color: var(--navy);
+      margin-bottom: .25rem; line-height: 1.2;
+      word-break: break-word;
+    }
+    .sched__duel-players {
+      font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.45;
+      word-break: break-word;
+      min-width: 0;
+    }
+    .sched__vs {
+      display: inline-block;
+      margin: 0 .35rem;
+      padding: .1rem .42rem;
+      font-size: .78rem; font-weight: 800; color: #fff;
+      background: var(--red); border-radius: 2rem;
+      vertical-align: middle; line-height: 1;
+    }
+    .sched__duel-status { margin-top: .35rem; }
+    .sched__status {
+      display: inline-block;
+      font-size: .74rem; font-weight: 800;
+      padding: .12rem .45rem; border-radius: 2rem;
+      line-height: 1.2;
+    }
+    .sched__status.is-locked { background: var(--green-soft); color: var(--green); border: 1px solid #a9dcc0; }
+    .sched__status.is-pending { background: #e4e9ef; color: var(--ink-2); border: 1px solid var(--line); }
+    .sched__note {
+      font-size: .9rem; color: var(--ink-2); line-height: 1.5;
+      padding: .35rem .5rem;
+      background: #f0f2f5; border-radius: .5rem;
+    }
+    .sched__empty {
+      padding: 1rem 1.1rem 1.2rem;
+      font-size: 1rem; color: var(--ink-2); text-align: center;
+    }
+
+    /* ---------- 空窗期:下一场 ---------- */
+    .day--next { border-top: 4px solid var(--navy); margin-top: .4rem; }
+    .day__next-title {
+      padding: .95rem 1.1rem .35rem;
+      font-size: 1.06rem; font-weight: 800; color: var(--navy);
+      text-align: center; letter-spacing: .02em;
+    }
+    .day__next {
+      padding: .2rem 1.1rem 1.25rem; text-align: center; line-height: 1.6;
+      font-size: 1.02rem; font-weight: 600; color: var(--ink);
+    }
+    .day__next strong { color: var(--navy); }
+    /* ---------- 顶部空窗期横幅(3 日内无比赛时显示) ---------- */
+    .gap-banner {
+      display: flex; align-items: center; gap: .65rem;
+      margin: 0 0 1rem;
+      padding: .95rem 1.1rem;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      border: 1px solid var(--red);
+      border-left: 6px solid var(--red);
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: var(--fs-name);
+      font-weight: 700; line-height: 1.5;
+      box-shadow: var(--shadow);
+    }
+    .gap-banner__icon { font-size: 1.7em; line-height: 1; flex: 0 0 auto; }
+    .gap-banner__text { word-break: break-word; }
+    .gap-banner__text strong {
+      color: #ffd166;
+      font-size: 1.18em; margin: 0 .15rem;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 下一站:长文本结构化分块(适老化:大字号、左对齐、分节标题) */
+    .day__next--structured {
+      padding: .5rem 1.1rem 1.35rem; text-align: left;
+      display: flex; flex-direction: column; gap: .85rem;
+    }
+    .next__block { display: flex; flex-direction: column; gap: .3rem; }
+    .next__head {
+      font-size: 1.02rem; font-weight: 800; color: var(--navy);
+      display: flex; align-items: center; gap: .4rem;
+      padding-bottom: .25rem; border-bottom: 2px solid rgba(14,42,71,.12);
+    }
+    .next__body {
+      font-size: 1.0rem; line-height: 1.68; color: var(--ink);
+      font-weight: 600; word-break: break-word;
+    }
+    .next__block--hero .next__body {
+      background: rgba(14,42,71,.05); border-left: 4px solid var(--navy);
+      border-radius: .5rem; padding: .7rem .9rem;
+    }
+    .next__block--sources .next__body {
+      font-size: .92rem; color: var(--ink-2); background: rgba(14,42,71,.04);
+      border-radius: .5rem; padding: .55rem .8rem;
+    }
+    .next__timeline { margin: .1rem 0 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: .4rem; }
+    .next__timeline li { font-size: 1.0rem; line-height: 1.6; color: var(--ink); font-weight: 600; }
+
+    /* ---------- 重播:卡内一行 + 当日「今日重播」汇总区 ---------- */
+    /* 适老化:重播是「没看成当晚、白天看重播」的刚需,视觉上用中国红淡底 + 深蓝标签,
+       与风险卡(红/琥珀/绿)区分,但又不喧宾夺主;零动效、大字号 */
+    .match__replay {
+      margin-top: .6rem;
+      padding: .5rem .7rem;
+      background: rgba(14,42,71,.05);
+      border: 1px dashed #bcd4e6;
+      border-radius: .6rem;
+      font-size: .98rem; font-weight: 700; color: var(--navy);
+      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
+    }
+    .match__replay .replay__note { font-weight: 600; color: var(--ink-2); font-size: .9rem; }
+    .day__replays {
+      padding: .6rem 1.1rem .85rem;
+      background: linear-gradient(to right, rgba(214,40,40,.06), rgba(214,40,40,0) 60%);
+      border-bottom: 1px solid var(--line);
+    }
+    .replays__head {
+      font-size: .95rem; font-weight: 800; color: var(--red);
+      margin-bottom: .45rem;
+    }
+    /* 当日底部「已重播」归档区:灰底静音符,与顶部「今日重播」(红/待看)明显区分 */
+    .day__replays--done {
+      background: linear-gradient(to right, rgba(88,100,116,.05), rgba(88,100,116,0) 60%);
+      border-bottom: none;
+      border-top: 1px solid var(--line);
+    }
+    .replays__head--done { color: var(--ink-2); }
+    .replay__item {
+      padding: .45rem .65rem;
+      background: #fff; border: 1px solid var(--line); border-radius: .6rem;
+      margin-bottom: .45rem;
+      font-size: .95rem;
+    }
+    .replay__item:last-child { margin-bottom: 0; }
+    .replay__line1 {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
+    }
+    .replay__line2 {
+      margin-top: .35rem;
+      display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .25rem;
+      font-weight: 600; color: var(--ink);
+    }
+    .replay__line2 .replay__flag { font-size: 1.05rem; line-height: 1; margin-right: .15rem; }
+    .replay__vs { color: var(--ink-2); font-weight: 700; margin: 0 .25rem; }
+    .replay__time { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
+    .replay__chan { font-size: .8rem; font-weight: 700; color: #fff; background: var(--navy); padding: .16rem .55rem; border-radius: 2rem; }
+    .replay__match { color: var(--ink); font-weight: 600; }
+    .replay__flag { font-size: 1rem; line-height: 1; letter-spacing: .04rem; }
+    .replay__live { color: var(--ink-2); font-weight: 600; font-size: .85rem; }
+
+    /* ---------- 页脚 ---------- */
+    footer { margin-top: 2rem; text-align: center; }
+    .links { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
+    .links a {
+      padding: .7rem 1.4rem; font-size: 1rem; font-weight: 700;
+      color: #fff; background: var(--navy); text-decoration: none;
+      border-radius: 2rem; min-height: 48px; line-height: 1;
+      display: inline-flex; align-items: center;
+    }
+    .links a:active { opacity: .88; }
+    .links a.secondary { background: var(--ink-2); }
+
+    /* 加载失败 */
+    .error {
+      margin: 1.4rem 0; padding: 1.2rem 1rem;
+      background: var(--red-soft); color: var(--red);
+      border: 2px solid #e6b3b3; border-radius: var(--radius);
+      font-size: 1.05rem; text-align: center;
+    }
+
+    /* ---------- 直播中标识(适老化:静态高亮,无闪烁动效) ---------- */
+    /* 比赛卡:红色左边框 + 淡红底,一眼区别于未开始/已结束 */
+    .match--live {
+      border-left: 6px solid var(--red);
+      background: linear-gradient(to right, rgba(214,40,40,.06), #fff 40%);
+    }
+    /* 直播中胶囊徽章:放在时间行/时段行,红底白字 + 小白点 */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .9rem; font-weight: 800; color: #fff;
+      background: var(--red); padding: .2rem .65rem; border-radius: 2rem;
+      white-space: nowrap; line-height: 1.3;
+    }
+    .live-badge::before {
+      content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+      background: #fff; flex-shrink: 0;
+    }
+    /* 转播时段卡:直播中高亮 */
+    .sched__row--live {
+      border-color: var(--red);
+      background: rgba(214,40,40,.05);
+    }
