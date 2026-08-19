@@ -1727,7 +1727,7 @@
               html += '</div>';
             }
             renderItemList('pending__section--pp', '🏓 乒乓节目(录像/典藏)', parsed.pingpong);
-            renderItemList('pending__section--other', '📡 其他体育', parsed.other);
+            // 外婆只对国乒感兴趣,「其他体育」(羽毛球/中超等)不展示
 
             // 下一场:优先用原文里的「下一场/下一站...」句(更简洁),无则兜底用全局 nextEvent
             var nextLine = parsed.next;
@@ -1742,7 +1742,8 @@
             }
 
             // 解析失败/解析结果为空:回退到原文(防止空卡)
-            if (!parsed.lead && !parsed.pingpong.length && !parsed.other.length && !parsed.next) {
+            // 其他体育不展示,故"是否为空"只看 lead/乒乓/下一场(其他体育有内容也不算有内容)
+            if (!parsed.lead && !parsed.pingpong.length && !parsed.next) {
               html += '<div class="pending__fallback"><span class="pending__note">' + esc(rawNote) + '</span></div>';
             }
             html += '</div>';
