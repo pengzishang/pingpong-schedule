@@ -1335,11 +1335,15 @@
       // 3. 按时段排序
       items.sort(function (a, b) { return a.time.localeCompare(b.time); });
 
-      // 4. 分类(乒乓 vs 其他体育)
-      var pp = /乒乓|WTT|世乒|冠军赛|大满贯|世界杯|锦标赛|奥运|男单|女单|男双|女双|混双|瑞典|横滨|实况|录像|典藏|决赛|单打|双打|团体/;
+      // 4. 分类(乒乓 vs 其他体育):负向(其他运动)优先,正向(乒乓)其次,都不命中默认归"其他"
+      //    关键:不能用「决赛」「录像」「锦标赛」等通用词当乒乓信号——
+      //    否则「羽毛球世锦赛1/4决赛 直播」会因含「决赛」/「锦标赛」误判进乒乓节目
+      var noping = /羽毛球|中超|足球|篮球|排球|网球|游泳|田径|跳水|赛车|F1|拳击|摔跤|体操|艺术体操|围棋|象棋|电竞|斯诺克|台球|高尔夫|马拉松|举重|射击|射箭|击剑|皮划艇|赛艇|帆船|自行车|马术|空手道|跆拳道|柔道|冰球|花样滑冰|短道速滑|速滑|冬奥|滑雪|冰壶|蹦床|攀岩|冲浪|棒球|橄榄球|板球|手球|水球|铁人三项/;
+      var pp     = /乒乓|WTT|世乒|冠军赛|大满贯|奥运|男单|女单|男双|女双|混双|瑞典|横滨|团体/;
       items.forEach(function (it) {
-        if (pp.test(it.program)) out.pingpong.push(it);
-        else out.other.push(it);
+        if (noping.test(it.program)) { out.other.push(it); return; }
+        if (pp.test(it.program)) { out.pingpong.push(it); return; }
+        out.other.push(it); // 既无负向也无乒乓信号 → 默认归"其他"(不假设乒乓)
       });
 
       // 5. 摘要 = 第一个 CCTV 之前的文字
