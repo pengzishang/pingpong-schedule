@@ -391,6 +391,20 @@
     }
     .pending__next strong { color: var(--navy); font-weight: 800; }
 
+    /* 空窗期/无直播天:明确告知「今日无直播」并附当日央视乒乓情况说明 */
+    .day__pending--none {
+      display: flex; flex-direction: column; align-items: flex-start; gap: .5rem;
+      padding: .95rem 1.1rem 1.1rem;
+      background: #fbfcfd; border: 1px solid var(--line); border-radius: .85rem;
+    }
+    .day__pending--none .pending__badge {
+      color: #b06a00; background: #fff4e3; border-color: #f3d9b0;
+    }
+    .pending__note {
+      font-size: .95rem; line-height: 1.65; color: var(--ink-2);
+      word-break: break-word; white-space: normal;
+    }
+
     .sched { padding: .35rem .85rem .85rem; }
     .sched__row {
       display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem;
@@ -1161,14 +1175,10 @@
     // 两者皆无的日子(赛程空档、无电视窗口)视为无节目,从日期序列里折叠跳过,直接跳到下一场有节目的日期。
     function dayHasContent(day) {
       if ((day.matches || []).filter(isTVMatch).length) return true;
-      var liveSched = (day.schedule || []).filter(function (s) {
-        var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
-        if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
-        if (!isCCTVChannel(s.channel)) return false;
-        var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
-        return tt.some(function (k) { return txt.indexOf(k) !== -1; });
-      });
-      return liveSched.length > 0;
+      // 有赛程说明(含空窗期/录像说明)即视为有内容——这是外婆关心的「今日央视乒乓情况」,
+      // 不应被折叠;只有既无比赛、又无任何说明的天才是真空档,才会被跳过。
+      if ((day.schedule || []).length) return true;
+      return false;
     }
     // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
     var FILTER = 'cn';
@@ -1375,24 +1385,15 @@
             return tt.some(function (k) { return txt.indexOf(k) !== -1; });
           });
 
-          // 待公布:精简,直接说下一场时间,不堆解释
-          var nextTime = '', nextEv = '';
           if (liveSchedule.length) {
+            // 待公布:精简,直接说下一场时间,不堆解释
             var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
-            nextTime = (firstS.time || '').split('-')[0] || '';
-            nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
-          } else if (data.nextEvent && data.nextEvent.date) {
-            nextTime = data.nextEvent.date;
-            nextEv = data.nextEvent.note || '国乒比赛';
-          }
-          html += '<div class="day__pending">' +
-                    '<span class="pending__badge">📋 待公布</span>' +
-                    (nextTime
-                      ? '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>'
-                      : '<span class="pending__next">具体赛程待官方公布</span>') +
-                  '</div>';
-
-          if (liveSchedule.length) {
+            var nextTime = (firstS.time || '').split('-')[0] || '';
+            var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
+            html += '<div class="day__pending">' +
+                      '<span class="pending__badge">📋 待公布</span>' +
+                      '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
+                    '</div>';
             html += '<div class="sched">';
             liveSchedule.forEach(function (s) {
               var sLive = isLiveSchedule(day.date, s.time, now);
@@ -1409,6 +1410,20 @@
                       '</div>';
             });
             html += '</div>';
+          } else if ((day.schedule || []).length) {
+            // 空窗期/无直播天:当日有赛程说明(央视乒乓录像/奥运典藏等),告知外婆今日无直播但有录像可看
+            var note = (day.schedule || []).map(function (s) { return (s.content || s.tournament || '').trim(); })
+                                    .filter(Boolean).join(' ');
+            html += '<div class="day__pending day__pending--none">' +
+                      '<span class="pending__badge">📺 今日无直播</span>' +
+                      (note ? '<span class="pending__note">' + esc(note) + '</span>' : '') +
+                    '</div>';
+          } else if (data.nextEvent && data.nextEvent.date) {
+            // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
+            html += '<div class="day__pending">' +
+                      '<span class="pending__badge">📋 待公布</span>' +
+                      '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(data.nextEvent.note || '国乒比赛') + '</span>' +
+                    '</div>';
           }
         }
 
