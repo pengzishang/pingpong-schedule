@@ -418,32 +418,46 @@
       display: flex; flex-direction: column; gap: .35rem;
     }
     .pending__row {
-      display: grid;
-      grid-template-columns: 3.6rem 4.6rem 1fr;
-      gap: .55rem; align-items: center;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
       background: #fff;
       border: 1px solid var(--line);
       border-radius: .5rem;
-      padding: .5rem .7rem;
+      padding: .55rem .75rem;
       font-size: 1rem; line-height: 1.4;
+    }
+    /* 左侧元信息列:时间 + 台标上下两行堆叠(窄屏也只占窄窄一列,把空间让给节目名)*/
+    .pending__meta {
+      flex: 0 0 auto;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: .2rem;
     }
     .pending__time {
       font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
       font-weight: 800; color: var(--navy);
       font-variant-numeric: tabular-nums;
       font-size: 1rem;
+      white-space: nowrap;
+      line-height: 1.2;
     }
     .pending__chan {
       font-weight: 700; color: var(--ink);
-      background: #eaf1f8; padding: .15rem .5rem;
-      border-radius: .35rem; text-align: center;
-      font-size: .85rem; white-space: nowrap;
-      justify-self: start;
+      background: #eaf1f8; padding: .1rem .45rem;
+      border-radius: .3rem; text-align: center;
+      font-size: .78rem; white-space: nowrap;
+      line-height: 1.3;
     }
     .pending__section--other .pending__chan {
       background: #f3f3f3; color: #666;
     }
-    .pending__prog { color: var(--ink-2); word-break: break-word; }
+    /* 节目名独占右侧:flex:1 + min-width:0 是 flex 项允许文本收缩换行的关键 */
+    .pending__prog {
+      flex: 1 1 auto; min-width: 0;
+      color: var(--ink-2);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
     .pending__next-event {
       display: flex; flex-direction: column; gap: .15rem;
       margin-top: .15rem; padding: .65rem .85rem;
@@ -1765,9 +1779,11 @@
               html +=   '<ul class="pending__list">';
               list.forEach(function (it) {
                 html += '<li class="pending__row">' +
-                          '<span class="pending__time">' + esc(it.time) + '</span>' +
-                          '<span class="pending__chan">' + esc(it.channel || 'CCTV') + '</span>' +
-                          '<span class="pending__prog">' + esc(it.program) + '</span>' +
+                          '<div class="pending__meta">' +
+                            '<span class="pending__time">' + esc(it.time) + '</span>' +
+                            '<span class="pending__chan">' + esc(it.channel || 'CCTV') + '</span>' +
+                          '</div>' +
+                          '<div class="pending__prog">' + esc(it.program) + '</div>' +
                         '</li>';
               });
               html +=   '</ul>';
