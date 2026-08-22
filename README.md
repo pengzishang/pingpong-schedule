@@ -110,6 +110,10 @@ pingpong-schedule/
 
    只放**有视频直播**的日子,纯录像/录播不进。
 
+   > **判定规则**:把 `channel` 命中 `咪咕|央视频|腾讯体育|优酷|爱奇艺|客户端|app|网页|网端` 的场次挑出来写进 video.json(这些正是 `data.json` 里被央视判定排除、不进电视的场次);`channel` 为 `CCTV`/央视的只进 `data.json`,**不要**写进 video.json。
+   >
+   > **字段名注意**:video.json 源文件 day 用 `matches` 字段(如上表);前端合并后内部才叫 `videoMatches`。采集端**只需按源格式 `matches` 输出**即可,不要直接写 `videoMatches`。
+
 3. **推送时带上它**:`git add data.json video.json && commit && push`。**勿用会删新文件的强制推送**——本仓库已先提交一份带"示例/待覆盖"标注的占位 `video.json`,采到真数据后直接覆盖即可。
 
 ### 前端行为
