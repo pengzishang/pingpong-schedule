@@ -1,0 +1,55 @@
+{
+  "_placeholder": true,
+  "_note": "【示例占位数据】本文件由另一台机器在采集咪咕/央视频赛程后整体写入并推送;采到真实数据后会直接覆盖此文件,前端不读 _placeholder / _note 等未知字段。字段契约见 README「视频平台直播(video.json)」一节。platform 用「咪咕视频」「央视频」等真实平台名;只放有视频直播的日子,纯录像/录播不进。",
+  "days": [
+    {
+      "date": "2026-08-22",
+      "matches": [
+        {
+          "time": "19:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT欧洲大满贯瑞典站",
+          "stage": "女单1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "孙颖莎",
+          "playerHomeInfo": "世界第1",
+          "nationAway": "日本",
+          "playerAway": "张本美和",
+          "playerAwayInfo": "世界第2",
+          "note": "示例数据 · 待真实采集覆盖"
+        },
+        {
+          "time": "20:15",
+          "platform": "央视频",
+          "tournament": "WTT欧洲大满贯瑞典站",
+          "stage": "男单1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "王楚钦",
+          "playerHomeInfo": "世界第1",
+          "nationAway": "巴西",
+          "playerAway": "卡尔德拉诺",
+          "playerAwayInfo": "世界第5",
+          "note": "示例数据 · 待真实采集覆盖"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-23",
+      "matches": [
+        {
+          "time": "18:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT欧洲大满贯瑞典站",
+          "stage": "女单半决赛",
+          "nationHome": "日本",
+          "playerHome": "张本美和",
+          "playerHomeInfo": "世界第2",
+          "nationAway": "韩国",
+          "playerAway": "申裕斌",
+          "playerAwayInfo": "世界第3",
+          "note": "示例数据(日韩对决 · 国乒 tab 下不显示) · 待真实采集覆盖"
+        }
+      ]
+    }
+  ]
+}

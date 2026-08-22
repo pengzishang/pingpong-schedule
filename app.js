@@ -64,9 +64,48 @@
     }
 
     // 加时间戳 + no-store,绕开 GitHub Pages 的 max-age=600 缓存,保证每次打开都拿最新数据
+    // 主数据 data.json 由另一台机器整文件重写;视频平台(咪咕/央视频)直播单独存 video.json,
+    // 同样由另一台机器额外写入,本机不抓。两者解耦:video.json 缺失/损坏只让视频块不显示,不致命。
     function loadData() {
-      return fetch('data.json?t=' + Date.now(), { cache: 'no-store' })
-        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); });
+      var url = 'data.json?t=' + Date.now();
+      var vUrl = 'video.json?t=' + Date.now();
+      return fetch(url, { cache: 'no-store' })
+        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+        .then(function (data) {
+          return fetch(vUrl, { cache: 'no-store' }).then(function (vr) {
+            if (!vr.ok) return data;            // 404/缺失:视频块不显示,不影响央视主页面
+            return vr.json().then(function (vdata) { mergeVideo(data, vdata); return data; })
+                     .catch(function () { return data; });
+          }).catch(function () { return data; });
+        });
+    }
+    // 把 video.json 的直播按 date 合并进 data.days:
+    //  - 已存在的 day 直接挂 videoMatches;
+    //  - data.json 没有但视频有的日期,补建一个空 day(让空窗但视频有比赛的日子也能显示)。
+    function mergeVideo(data, vdata) {
+      if (!data || !data.days || !vdata || !Array.isArray(vdata.days)) return;
+      var byDate = {};
+      data.days.forEach(function (d) { byDate[d.date] = d; });
+      var WD = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      vdata.days.forEach(function (v) {
+        if (!v || !v.date) return;
+        var matches = Array.isArray(v.matches) ? v.matches : [];
+        if (!matches.length) return;
+        if (byDate[v.date]) {
+          byDate[v.date].videoMatches = matches;
+        } else {
+          var dt = new Date(v.date + 'T00:00:00');
+          data.days.push({
+            date: v.date,
+            weekday: WD[dt.getDay()],
+            matches: [],
+            pending: true,
+            schedule: [],
+            videoMatches: matches
+          });
+          byDate[v.date] = data.days[data.days.length - 1];
+        }
+      });
     }
     loadData().then(render).catch(function (err) {
       document.getElementById('updatedAt').textContent = '加载失败';
@@ -556,6 +595,9 @@
     // 两者皆无的日子(赛程空档、无电视窗口)视为无节目,从日期序列里折叠跳过,直接跳到下一场有节目的日期。
     function dayHasContent(day) {
       if ((day.matches || []).filter(isTVMatch).length) return true;
+      // 有视频平台直播(咪咕/央视频)也算「有节目」——空窗期外婆在手机上仍有比赛可看,
+      // 不应被折叠跳过;只有电视无直播、视频也无直播、且无任何说明的天才是真空档。
+      if ((day.videoMatches || []).length) return true;
       // 有赛程说明(含空窗期/录像说明)即视为有内容——这是外婆关心的「今日央视乒乓情况」,
       // 不应被折叠;只有既无比赛、又无任何说明的天才是真空档,才会被跳过。
       if ((day.schedule || []).length) return true;
@@ -784,10 +826,18 @@
           (scope === 'jpkr' && el.dataset.jpkr);
         el.style.display = show ? '' : 'none';
       });
+      // 视频平台场次跟随「全部/国乒/日韩」筛选(与比赛卡一致)
+      document.querySelectorAll('.vmatch').forEach(function (el) {
+        var show = scope === 'all' ||
+          (scope === 'cn' && el.dataset.cn) ||
+          (scope === 'jpkr' && el.dataset.jpkr);
+        el.style.display = show ? '' : 'none';
+      });
       document.querySelectorAll('.day').forEach(function (sec) {
         var anyVisible = false;
         sec.querySelectorAll('.match').forEach(function (m) { if (m.style.display !== 'none') anyVisible = true; });
         sec.querySelectorAll('.replay__item').forEach(function (r) { if (r.style.display !== 'none') anyVisible = true; });
+        sec.querySelectorAll('.vmatch').forEach(function (r) { if (r.style.display !== 'none') anyVisible = true; });
         var hasStatic = sec.querySelector('.day__pending');
         sec.style.display = (anyVisible || hasStatic) ? '' : 'none';
         // 某天筛选后无可见重播,则隐藏对应重播区(upcoming/past 两个区分别处理,不留空标题)
@@ -807,6 +857,57 @@
       // 切换 tab 时回到页面最顶上,避免停在原滚动位置
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     });
+
+    // 视频平台直播块(咪咕/央视频):仅当天无央视电视直播时兜底显示(见 render 调用点)。
+    // 明确标注「电视上看不到,需用手机/平板/电脑看」,与外婆的央视电视卡视觉区分(紫色强调)。
+    // 字段与 day.matches 对齐(time/platform/tournament/stage/nation*/player*/player*Info/note),
+    // 因此可直接复用 flagsForSide / ordinalizeInfo / belongsToCN / isLiveMatch 等既有逻辑。
+    function renderVideoBlock(day, now) {
+      var vms = (day.videoMatches || []).slice().filter(function (m) { return !!m; });
+      if (!vms.length) return '';
+      vms.sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); });
+      var rows = vms.map(function (m) {
+        var live = isLiveMatch(day, m, now);
+        var hasCN = belongsToCN(m.nationHome) || belongsToCN(m.nationAway);
+        var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
+        var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
+        var scopeAttr = (hasCN ? ' data-cn="1"' : '') + ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
+        var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
+                         (m.tournament && m.stage ? ' · ' : '') +
+                         (m.stage ? esc(m.stage) : '');
+        var homeInfo = ordinalizeInfo(m.playerHomeInfo);
+        var awayInfo = ordinalizeInfo(m.playerAwayInfo);
+        return '<article class="vmatch' + (live ? ' vmatch--live' : '') + '"' + scopeAttr + '>' +
+          (eventLabel ? '<div class="vmatch__event">' + eventLabel + '</div>' : '') +
+          '<div class="vmatch__bar">' +
+            '<span class="vmatch__time">' + esc(m.time) + '</span>' +
+            '<span class="vmatch__chan">' + esc(m.platform || '视频平台') + '</span>' +
+            (live ? '<span class="live-badge">直播中</span>' : '') +
+          '</div>' +
+          '<div class="match__players">' +
+            '<div class="player player--home">' +
+              '<span class="player__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + '</span>' +
+              '<span class="player__name">' + esc(m.playerHome) + '</span>' +
+              '<span class="player__meta">' + homeInfo + '</span>' +
+            '</div>' +
+            '<span class="player__vs">VS</span>' +
+            '<div class="player player--away">' +
+              '<span class="player__flag">' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
+              '<span class="player__name">' + esc(m.playerAway) + '</span>' +
+              '<span class="player__meta">' + awayInfo + '</span>' +
+            '</div>' +
+          '</div>' +
+          (m.note ? '<div class="vmatch__note">' + esc(m.note) + '</div>' : '') +
+        '</article>';
+      }).join('');
+      return '<div class="day__video" role="region" aria-label="视频平台直播(咪咕/央视频)">' +
+               '<div class="day__video-head">' +
+                 '<span class="day__video-title">📱 视频平台直播</span>' +
+               '</div>' +
+               '<p class="day__video-warn">⚠️ 电视上看不到，需用手机 / 平板 / 电脑看</p>' +
+               rows +
+             '</div>';
+    }
 
     function render(data, fromPoll) {
       document.title = data.title + ' · 每日更新';
@@ -988,6 +1089,11 @@
             html += '</article>';
           });
         } else {
+          // ⬇️ 无央视电视直播时,若视频平台(咪咕/央视频)有直播,兜底显示——外婆可手机/平板看。
+          // 仅兜底:有央视电视直播的日子(走上方 if 分支)不显示视频块,避免和外婆的电视搞混。
+          var videoHtml = renderVideoBlock(day, now);
+          if (videoHtml) html += videoHtml;
+
           // 只保留「乒乓球」直播窗口:剔除录像/录播,以及篮球/网球/田径/斯诺克/体育新闻等非乒乓球栏目
           var liveSchedule = (day.schedule || []).filter(function (s) {
             var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();

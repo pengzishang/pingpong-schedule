@@ -699,3 +699,64 @@
       border-color: var(--red);
       background: rgba(214,40,40,.05);
     }
+
+    /* ---------- 视频平台直播(咪咕/央视频)兜底块 ---------- */
+    /* 仅当天无央视电视直播时显示;紫色强调「非电视」,与央视蓝明显区分(注意配色不与现有 navy/red 撞);
+       适老化:大字号、高对比、零动效、窄屏沿用时间竖排铁律(复用 .match__players 网格) */
+    .day__video {
+      display: flex; flex-direction: column; gap: .6rem;
+      margin: .9rem 1.1rem 1rem;
+      padding: .9rem 1rem 1rem;
+      background: #fbf7fe;                       /* 淡紫底,呼应「非电视」语义 */
+      border: 1px solid #d9c7e8;
+      border-left: 4px solid #6a289c;            /* 紫色左边框,一眼区别于央视蓝卡 */
+      border-radius: .85rem;
+    }
+    .day__video-head { display: flex; align-items: center; gap: .5rem; }
+    .day__video-title {
+      font-size: 1.18rem; font-weight: 800; color: #6a289c;
+      letter-spacing: .01em;
+    }
+    /* 「电视上看不到」提示:琥珀橙底,比色块更抓眼,提醒外婆别去电视找 */
+    .day__video-warn {
+      margin: 0; padding: .5rem .7rem;
+      font-size: .98rem; font-weight: 700; line-height: 1.5; color: #9a5a00;
+      background: #fdf3e2; border: 1px solid #f0d68a; border-radius: .55rem;
+    }
+    .vmatch {
+      padding: 1rem .7rem .55rem;
+      background: #fff;
+      border: 1px solid #e3d4f0;
+      border-radius: .7rem;
+    }
+    .vmatch--live {
+      border-left: 6px solid var(--red);
+      background: linear-gradient(to right, rgba(214,40,40,.06), #fff 40%);
+    }
+    .vmatch__event {
+      display: block; width: fit-content; margin: 0 auto .7rem;
+      max-width: 100%;
+      font-size: .98rem; font-weight: 700; color: #6a289c;
+      background: #f0e7f8; border: 1px solid #d9c7e8;
+      padding: .28rem .85rem; border-radius: 2rem; text-align: center;
+      word-break: break-word;
+    }
+    .vmatch__bar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem .7rem;
+      margin-bottom: .6rem;
+    }
+    .vmatch__time {
+      font-size: var(--fs-time); font-weight: 800; color: #6a289c;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    /* 平台 chip 用紫色,和央视蓝 chip 区分:外婆一看颜色就知道这是「手机上看的」 */
+    .vmatch__chan {
+      font-size: .9rem; font-weight: 700; color: #fff; background: #6a289c;
+      padding: .26rem .75rem; border-radius: 2rem; white-space: nowrap;
+    }
+    .vmatch__note {
+      margin-top: .6rem; padding: .5rem .65rem;
+      font-size: .92rem; color: var(--ink-2); line-height: 1.5;
+      background: #f7f2fc; border: 1px dashed #d9c7e8; border-radius: .55rem;
+      word-break: break-word;
+    }
