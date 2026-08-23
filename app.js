@@ -853,7 +853,12 @@
       // 首句 = 赛事名/场馆/日期/赛制,固定为元信息
       out.meta = clauses[0];
 
+      // 只保留当前 nextEvent(即将来临的这场)信息;遇到「其后一站」等后续赛事标记即截断,
+      // 避免后续站(如阿斯塔纳)的退赛/名单变动误混入当前站卡(造成"陈幸同退了本场却还在名单"的误读)
+      var stop = false;
       clauses.slice(1).forEach(function (cl) {
+        if (stop) return;
+        if (/其后一站|下一站为\s*WTT/.test(cl)) { stop = true; return; }
         var isTV    = /CCTV|直播|转播|播出|节目单|频道/.test(cl);
         var isSched = /赛程|开打|1\/8|1\/4|半决赛|决赛|七局|小组赛|资格赛|→|对阵|签表/.test(cl);
         var isSeeds = /种子|卫冕|复出|头号|夺冠|夺金|冲冠|排名|看点|焦点/.test(cl);
