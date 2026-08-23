@@ -65,13 +65,24 @@ pingpong-schedule/
 
 ## 🔄 数据自动更新流程
 
-每天 0:00 / 8:00 / 16:00,自动化任务自动执行:
+每 8 小时,自动化任务自动执行:
 
 1. 从 ≥6 个独立来源采集赛程数据
 2. 对每个比赛场次做多源交叉认证
 3. 生成 Markdown 早报存档到本地
 4. 生成/更新本仓库的 `data.json`,提交并推送到 GitHub
 5. GitHub Pages 自动构建并部署,网页实时同步
+
+### 🔒 双机同步铁律（与采集说明.md 完全一致）
+
+本仓库由两台机器协作维护,推送前**必须**遵守以下顺序,否则会出现 non-fast-forward 拒推、互相覆盖数据:
+
+- **采前先拉**:开始采集 / 读取 `data.json` 前,先 `git fetch origin && git rebase origin/main`(工作区干净时 rebase 安全),确保基于远端最新数据出发。
+- **写完即推**:更新 `data.json` 并通过 JSON 校验后,立即提交推送(此步早于早报存档等收尾动作),网页 `updatedAt` 即刻刷新。
+- **推前再拉**:推送命令固定为 `git add … && git commit … && git fetch origin && git rebase origin/main && git push origin main`——**先 commit 固化改动,再 fetch+rebase 重放到远端最新之上,最后 push**。带未提交改动直接 rebase 会拒跑。
+- **禁止强推**:任何情况下不得 `--force` / `--force-with-lease`,冲突保留刚生成的数据文件为最终版再继续。
+
+> 完整铁律与命令见 `采集说明.md` 第六 / 七 / 九章。
 
 ## 🔁 刷新调度策略(赛前 + 赛中统一调度)
 
