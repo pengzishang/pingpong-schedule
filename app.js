@@ -978,7 +978,8 @@
         sec.querySelectorAll('.replay__item').forEach(function (r) { if (r.style.display !== 'none') anyVisible = true; });
         sec.querySelectorAll('.vmatch').forEach(function (r) { if (r.style.display !== 'none') anyVisible = true; });
         var hasStatic = sec.querySelector('.day__pending');
-        sec.style.display = (anyVisible || hasStatic) ? '' : 'none';
+        var hasNext = sec.querySelector('.day__next');   // 下一站卡:无比赛/无说明,不可被国籍筛选隐藏
+        sec.style.display = (anyVisible || hasStatic || hasNext) ? '' : 'none';
         // 某天筛选后无可见重播,则隐藏对应重播区(upcoming/past 两个区分别处理,不留空标题)
         sec.querySelectorAll('.day__replays').forEach(function (rep) {
           var anyRep = false;
