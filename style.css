@@ -461,6 +461,41 @@
       font-size: 1rem; font-weight: 600; color: var(--ink); line-height: 1.5;
       word-break: break-word;
     }
+    /* 下一场国乒出战/缺席名单(适老化:大字号、高对比、wrap 换行) */
+    .pending__roster {
+      margin-top: .5rem; padding: .55rem .7rem;
+      border-radius: .45rem;
+    }
+    .pending__roster--squad {
+      background: rgba(214,40,40,.045);
+      border-left: 3px solid var(--red);
+    }
+    .pending__roster--absent {
+      background: rgba(120,120,135,.055);
+      border-left: 3px solid #8a8f98;
+    }
+    .pending__roster-head {
+      font-size: .92rem; font-weight: 800; color: #4a4f57;
+      margin-bottom: .4rem; letter-spacing: .01em;
+    }
+    .pending__roster-list {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; flex-wrap: wrap; gap: .3rem .75rem;
+    }
+    .pending__roster-item {
+      display: inline-flex; align-items: baseline; gap: .3rem;
+      font-size: .98rem; line-height: 1.6;
+    }
+    .pending__roster-item .roster-name {
+      font-weight: 700; color: var(--ink);
+    }
+    .pending__roster-item .roster-rank {
+      font-size: .82rem; font-weight: 700; color: var(--red);
+      white-space: nowrap;
+    }
+    .pending__roster-item .roster-reason {
+      font-size: .82rem; color: #6b7280; white-space: nowrap;
+    }
     /* 解析失败时的回退样式,保留旧版观感 */
     .pending__fallback .pending__note {
       font-size: .95rem; line-height: 1.65; color: var(--ink-2);

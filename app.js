@@ -609,9 +609,11 @@
     //   pingpong[] — 乒乓节目(录像/典藏):{channel, time, program}
     //   other[]    — 其他体育节目:{channel, time, program}
     //   next       — 「下一场/下一站...」一句(若原文有)
+    //   nextSquad[]  — 下一站国乒出战名单:{name, rank, raw}
+    //   nextAbsent[] — 缺席主力:{name, reason}
     // 客户端解析、容错优先:任意项缺失时降级显示,绝不可让卡片消失。
     function parseNoteToItems(note) {
-      var out = { lead: '', pingpong: [], other: [], next: '' };
+      var out = { lead: '', pingpong: [], other: [], next: '', nextSquad: [], nextAbsent: [] };
       if (!note) return out;
       var s = String(note).trim();
       if (!s) return out;
@@ -622,6 +624,11 @@
         out.next = nm[1].replace(/[。;,]+$/, '').trim();
         s = s.replace(nm[1], '').trim();
       }
+
+      // 1b. 从「下一站...」句再拆出战名单与缺席主力(格式约定见采集说明.md §4.6)
+      var roster = parseNextRoster(out.next);
+      out.nextSquad = roster.squad;
+      out.nextAbsent = roster.absent;
 
       // 2. 按 。/;/； 分句
       var clauses = s.split(/[。;；]/).map(function (c) { return c.trim(); }).filter(Boolean);
@@ -691,6 +698,52 @@
       out.lead = out.lead.replace(/[,:;。\s()（）]+$/, '').trim();
 
       return out;
+    }
+
+    // 「下一站...」句里拆出出战名单与缺席主力。
+    // 格式约定(采集说明.md §4.6):
+    //   出战:王楚钦(世界第1)/林诗栋(世界第2)/温瑞博/向鹏/周启豪,女单蒯曼(2号种子)/...
+    //   缺席:孙颖莎(轮休备战亚运)、王曼昱(轮休备战亚运)
+    // 括号内原文(名次/种子/备注)原样保留为 rankLabel 展示,不解析数字——避免把
+    // 「2号种子」误当「世界第2」这类错误信息;缺标签/缺原因不影响入列。
+    function parseNextRoster(nextLine) {
+      var squad = [], absent = [];
+      if (!nextLine) return { squad: squad, absent: absent };
+
+      // 出战段:到「缺席」或段尾为止(去掉句尾标点)
+      var sm = nextLine.match(/出战[:：]([\s\S]*?)(?=缺席[:：]|$)/);
+      if (sm) {
+        var sPart = sm[1].replace(/[。;；,，]+$/, '').trim();
+        // 按 / 或 、 或逗号拆人名(可能含「女单蒯曼」这种前缀,拆后去前缀)
+        sPart.split(/[\/、,，]/).forEach(function (raw) {
+          var name = raw.trim().replace(/^(男单|女单|男双|女双|混双|男团|女团)/, '').trim();
+          if (!name) return;
+          var rankLabel = '';
+          var m = name.match(/^([^\(（]+?)\s*[\(（]([^\)）]+)[\)）]\s*$/);
+          if (m) {
+            name = m[1].trim();
+            rankLabel = m[2].trim();
+          }
+          squad.push({ name: name, rankLabel: rankLabel });
+        });
+      }
+
+      // 缺席段:到段尾(去掉句尾标点)
+      var am = nextLine.match(/缺席[:：]([\s\S]*?)$/);
+      if (am) {
+        am[1].replace(/[。;；,，]+$/, '').trim().split(/[、,，]/).forEach(function (raw) {
+          var name = raw.trim();
+          if (!name) return;
+          var reason = '';
+          var m = name.match(/^([^\(（]+?)\s*[\(（]([^\)）]+)[\)）]\s*$/);
+          if (m) {
+            name = m[1].trim();
+            reason = m[2].trim();
+          }
+          absent.push({ name: name, reason: reason });
+        });
+      }
+      return { squad: squad, absent: absent };
     }
 
     // 「下一站国乒赛事」卡片里 nextEvent.note 也是一坨长文本,这里按语义拆成结构化块
@@ -1166,10 +1219,45 @@
               nextLine = nextEventCompact(data.nextEvent, gapMode);
             }
             if (nextLine) {
+              // 摘要 = 「出战:」之前的赛事概要(出战/缺席明细已拆到下方列表,避免重复)
+              var summary = nextLine;
+              var cutIdx = summary.search(/出战[:：]/);
+              if (cutIdx > -1) {
+                summary = summary.substring(0, cutIdx).replace(/[、,，\s]+$/, '').trim();
+              }
               html += '<div class="pending__next-event">' +
                         '<span class="pending__next-label">📅 下一场国乒直播</span>' +
-                        '<span class="pending__next-text">' + esc(nextLine) + '</span>' +
-                      '</div>';
+                        '<span class="pending__next-text">' + esc(summary) + '</span>';
+
+              // 出战名单(仅当从原文解析出时展示;兜底无名单则不渲染,保持旧版单行)
+              if (parsed.nextSquad && parsed.nextSquad.length) {
+                html += '<div class="pending__roster pending__roster--squad">' +
+                          '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
+                          '<ul class="pending__roster-list">';
+                parsed.nextSquad.forEach(function (p) {
+                  html += '<li class="pending__roster-item">' +
+                            '<span class="roster-name">' + esc(p.name) + '</span>' +
+                            (p.rankLabel ? '<span class="roster-rank">' + esc(p.rankLabel) + '</span>' : '') +
+                          '</li>';
+                });
+                html += '</ul></div>';
+              }
+
+              // 缺席主力
+              if (parsed.nextAbsent && parsed.nextAbsent.length) {
+                html += '<div class="pending__roster pending__roster--absent">' +
+                          '<div class="pending__roster-head">😴 缺席主力</div>' +
+                          '<ul class="pending__roster-list">';
+                parsed.nextAbsent.forEach(function (p) {
+                  html += '<li class="pending__roster-item">' +
+                            '<span class="roster-name">' + esc(p.name) + '</span>' +
+                            (p.reason ? '<span class="roster-reason">' + esc(p.reason) + '</span>' : '') +
+                          '</li>';
+                });
+                html += '</ul></div>';
+              }
+
+              html += '</div>';
             }
 
             // 解析失败/解析结果为空:回退到原文(防止空卡)
