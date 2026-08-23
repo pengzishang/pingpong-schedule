@@ -86,9 +86,10 @@
     }
 
     // ---- 加载状态机:LOADING(骨架) → PARTIAL(首屏已出) → DONE / ERROR ----
-    // localStorage 缓存快照:加载成功后存 {ts,data}(含已合并的视频块),复访≤24h 直接瞬显再后台刷新。
+    // localStorage 缓存快照:加载成功后存 {ts,data}(含已合并的视频块),复访≤8h 直接瞬显再后台刷新。
     var CACHE_KEY = 'pp_cache_v1';
-    var CACHE_MAX_AGE = 24 * 3600 * 1000;
+    // 与刷新链(每 8h 跑一次)对齐:快照有效期 8h,超过则不复访瞬显,等权威数据覆盖
+    var CACHE_MAX_AGE = 8 * 3600 * 1000;
     function readCache() {
       try {
         var raw = localStorage.getItem(CACHE_KEY);
