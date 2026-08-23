@@ -66,17 +66,94 @@
     // 加时间戳 + no-store,绕开 GitHub Pages 的 max-age=600 缓存,保证每次打开都拿最新数据
     // 主数据 data.json 由另一台机器整文件重写;视频平台(咪咕/央视频)直播单独存 video.json,
     // 同样由另一台机器额外写入,本机不抓。两者解耦:video.json 缺失/损坏只让视频块不显示,不致命。
+    // ★ 优化:data.json 与 video.json 并行请求(Promise.all),省去一次串行 RTT;video 失败不致命。
+    function fetchJSON(url) {
+      return fetch(url, { cache: 'no-store' })
+        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); });
+    }
     function loadData() {
       var url = 'data.json?t=' + Date.now();
       var vUrl = 'video.json?t=' + Date.now();
-      return fetch(url, { cache: 'no-store' })
-        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+      return Promise.all([
+        fetchJSON(url),
+        fetchJSON(vUrl).catch(function () { return null; })   // 视频缺失/损坏:忽略,只影响视频块
+      ]).then(function (arr) {
+        var data = arr[0];
+        if (!data) throw new Error('数据加载失败');
+        if (arr[1]) mergeVideo(data, arr[1]);
+        return data;
+      });
+    }
+
+    // ---- 加载状态机:LOADING(骨架) → PARTIAL(首屏已出) → DONE / ERROR ----
+    // localStorage 缓存快照:加载成功后存 {ts,data}(含已合并的视频块),复访≤24h 直接瞬显再后台刷新。
+    var CACHE_KEY = 'pp_cache_v1';
+    var CACHE_MAX_AGE = 24 * 3600 * 1000;
+    function readCache() {
+      try {
+        var raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        var obj = JSON.parse(raw);
+        if (!obj || !obj.data || !obj.ts) return null;
+        if (Date.now() - obj.ts > CACHE_MAX_AGE) return null;   // 过旧不瞬显,避免显示昨天赛程
+        return obj.data;
+      } catch (e) { return null; }
+    }
+    function writeCache(data) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: data })); } catch (e) {}
+    }
+    function clearCache() {
+      try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
+    }
+    function showError(err) {
+      var days = document.getElementById('days');
+      if (!days) return;
+      days.innerHTML = '<div class="error">' +
+        '数据加载失败(' + esc(err && err.message ? err.message : '未知错误') + ')<br>' +
+        '请稍后刷新,或稍后再来访问。' +
+        '<button type="button" class="error__retry" id="retryBtn">点此重试</button>' +
+        '</div>';
+      var btn = document.getElementById('retryBtn');
+      if (btn) btn.addEventListener('click', function () { boot(); });
+    }
+    var _slowTimer = null;
+    function armSlowTimer() {
+      clearTimeout(_slowTimer);
+      _slowTimer = setTimeout(function () {
+        var d = document.getElementById('days');
+        if (d && d.querySelector('.skeleton')) d.classList.add('is-slow');  // 仍显示骨架→提示加载较慢
+      }, 10000);
+    }
+    function disarmSlowTimer() { clearTimeout(_slowTimer); _slowTimer = null; }
+
+    // 启动:先尝试缓存快照瞬显(同步可用,不画骨架),随后后台静默刷新覆盖;无快照则显示骨架等网络。
+    function boot() {
+      var cached = readCache();
+      if (cached) {
+        renderFull(cached, { fromCache: true });   // 复访秒开:直接出上次内容,标「本地缓存」
+      } else {
+        // 无缓存:保留 index.html 中的静态骨架(LOADING 态),等待网络
+      }
+      armSlowTimer();
+      loadData()
         .then(function (data) {
-          return fetch(vUrl, { cache: 'no-store' }).then(function (vr) {
-            if (!vr.ok) return data;            // 404/缺失:视频块不显示,不影响央视主页面
-            return vr.json().then(function (vdata) { mergeVideo(data, vdata); return data; })
-                     .catch(function () { return data; });
-          }).catch(function () { return data; });
+          disarmSlowTimer();
+          writeCache(data);
+          if (cached) {
+            renderFull(data, { fromCache: false });  // 后台刷新覆盖,去掉缓存标注
+          } else {
+            renderStaged(data);                       // 首屏先出,下方滚动懒挂载
+          }
+        })
+        .catch(function (err) {
+          disarmSlowTimer();
+          if (cached) {
+            var u = document.getElementById('updatedAt');
+            if (u) u.textContent = u.textContent + '（最新刷新失败，显示本地缓存）';
+          } else {
+            clearCache();
+            showError(err);
+          }
         });
     }
     // 把 video.json 的直播按 date 合并进 data.days:
@@ -107,14 +184,10 @@
         }
       });
     }
-    loadData().then(render).catch(function (err) {
-      document.getElementById('updatedAt').textContent = '加载失败';
-      document.getElementById('days').innerHTML =
-        '<div class="error">数据加载失败(' + err.message + ')<br>请稍后刷新,或稍后再来访问。</div>';
-    });
+    boot();   // 启动加载(含缓存瞬显 + 渐进式渲染 + 状态机)
     // 赛中比分每 60s 轮询一次,直播中的比赛分数自动更新(配合刷新链写入的 live 字段)
     setInterval(function () {
-      loadData().then(function (d) { render(d, true); }).catch(function () {});
+      loadData().then(function (d) { renderFull(d, { fromPoll: true }); writeCache(d); }).catch(function () {});
     }, 60000);
 
     // ---- 直播中自动判定:根据当前时间,标记正在进行的比赛 ----
@@ -974,15 +1047,15 @@
              '</div>';
     }
 
-    function render(data, fromPoll) {
-      document.title = data.title + ' · 每日更新';
-      document.getElementById('updatedAt').textContent = data.updatedAt;
+    // ===== 渲染拆分:prepareCtx(派生数据) + renderDaySection(单日) + buildAbove/Below(分段) =====
+    // 同步壳层(表头/时钟/筛选条/页脚)在 app.js 启动即出,不画骨架;只有异步数据区(#days 全部内容)在
+    // 「无缓存且网络未回」时才显示骨架。renderFull=整页(缓存瞬显/后台刷新/轮询);renderStaged=渐进式。
 
+    // 预计算所有派生数据(两段渲染共用,避免重复计算)
+    function prepareCtx(data) {
       var now = new Date();
       var today = new Date();
       today.setHours(0, 0, 0, 0);
-
-      // 拆分:今天及以后排前面(升序),昨天及更早移到末尾(降序,最近的在前)做战报回顾
       var daysAll = (data.days || []).map(function (day) {
         var d = new Date(day.date + 'T00:00:00');
         d.setHours(0, 0, 0, 0);
@@ -992,32 +1065,20 @@
                             .sort(function (a, b) { return a.diff - b.diff; });
       var past = daysAll.filter(function (x) { return x.diff < 0; })
                         .sort(function (a, b) { return b.diff - a.diff; });
-      // 折叠无节目的空档日:只保留「有节目」的日期(有电视比赛或央视乒乓球窗口),直接跳到下一场有节目的日期
       var upcomingContent = upcoming.filter(function (x) { return dayHasContent(x.day); });
-      // 过去天 = 战报回顾:只有真正有央视乒乓比赛(match)才展示,仅空窗说明(schedule)而无比赛的天不算回顾内容 → 隐藏(外婆不想看空栏目)
       var pastContent = past.filter(function (x) { return (x.day.matches || []).filter(isTVMatch).length > 0; });
       var ordered = upcomingContent.concat(pastContent);
-
-      // 「近期无比赛」横幅判定:若未来 3 日内(含第 3 天)都没有央视乒乓电视比赛(match),
-      // 则页面最上方提示「离最近一场国乒比赛,还有 X 天」,并隐藏下方各处的「距今天 X 天」倒数(避免重复)。
-      // 外婆适老化:长空窗期不该让每处都重复倒计时,统一在最顶部说一次即可。
       var GAP_DAYS = 3;
       var nearestMatchDiff = null;
       for (var gi = 0; gi < upcoming.length; gi++) {
         if ((upcoming[gi].day.matches || []).filter(isTVMatch).length > 0) {
-          nearestMatchDiff = upcoming[gi].diff;
-          break;
+          nearestMatchDiff = upcoming[gi].diff; break;
         }
       }
       var gapMode = (nearestMatchDiff === null) || (nearestMatchDiff > GAP_DAYS);
       var countdownDays = null;
       if (nearestMatchDiff !== null) countdownDays = nearestMatchDiff;
       else if (data.nextEvent && typeof data.nextEvent.daysAway === 'number') countdownDays = data.nextEvent.daysAway;
-
-
-      // 预聚合「今日重播」:按重播归属日分组,供各日期汇总区使用
-      // 重播能否进表只看 replay.channel 是否在央视电视——直播当晚可能只在 app/咪咕,
-      // 但白天重播照样上央视电视,外婆能在电视看,故不能用直播的 isTVMatch 过滤
       var replayGroups = {};
       ordered.forEach(function (x) {
         (x.day.matches || []).forEach(function (m) {
@@ -1027,284 +1088,297 @@
           }
         });
       });
+      return {
+        now: now, upcoming: upcoming, past: past,
+        upcomingContent: upcomingContent, pastContent: pastContent, ordered: ordered,
+        gapMode: gapMode, countdownDays: countdownDays, replayGroups: replayGroups
+      };
+    }
+
+    // 空窗期长文本条目列表(原 render 内 renderItemList,抽成纯函数返回字符串)
+    function renderItemListHtml(sectionCls, headLabel, list) {
+      if (!list.length) return '';
+      var h = '<div class="pending__section ' + sectionCls + '">' +
+                '<div class="pending__section-head">' + esc(headLabel) + '</div>' +
+                '<ul class="pending__list">';
+      list.forEach(function (it) {
+        h += '<li class="pending__row">' +
+               '<div class="pending__meta">' +
+                 '<span class="pending__time">' + esc(it.time) + '</span>' +
+                 '<span class="pending__chan">' + esc(it.channel || 'CCTV') + '</span>' +
+               '</div>' +
+               '<div class="pending__prog">' + esc(it.program) + '</div>' +
+             '</li>';
+      });
+      h += '</ul></div>';
+      return h;
+    }
+    // 出战名单按性别分组(原 render 内 rosterGroup,抽成纯函数)
+    function rosterGroupHtml(squad, gender, label) {
+      var group = squad.filter(function (p) { return p.gender === gender; });
+      if (!group.length) return '';
+      var h = '<div class="pending__roster-line">' +
+                '<span class="roster-line-label">' + esc(label) + '</span>' +
+                '<ul class="pending__roster-list">';
+      group.forEach(function (p) {
+        h += '<li class="pending__roster-item">' +
+              '<span class="roster-name">' + esc(p.name) + '</span>' +
+              (p.rankLabel ? '<span class="roster-rank">' + esc(p.rankLabel) + '</span>' : '') +
+             '</li>';
+      });
+      h += '</ul></div>';
+      return h;
+    }
+
+    // 单日 section 渲染(原 render 的 ordered.forEach 体,抽成纯函数,供 above/below 复用)
+    function renderDaySection(x, ctx, data) {
+      var day = x.day, diff = x.diff, now = ctx.now, gapMode = ctx.gapMode;
+      var tvMatches = (day.matches || []).filter(isTVMatch);
+      var rel = '', tagClass = 'tag--soon', dayClass = '';
+      if (diff === 0) { rel = '今天'; tagClass = 'tag--today'; dayClass = ' day--today'; }
+      else if (diff === 1) { rel = '明天'; }
+      else if (diff === 2) { rel = '后天'; }
+      else if (diff === -1) { rel = '昨日战报'; tagClass = 'tag--past'; dayClass = ' day--past'; }
+      else if (diff < -1) { rel = '已结束'; tagClass = 'tag--past'; dayClass = ' day--past'; }
 
       var html = '';
-      // 顶部「近期无比赛」横幅:仅当 3 日内无比赛时显示(倒数已统一在此处,下方不再重复)
-      if (gapMode && countdownDays !== null) {
-        html += '<div class="gap-banner" role="status">' +
-                  '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
-                  '<span class="gap-banner__text">离最近一场国乒比赛，还有 <strong>' + countdownDays + '</strong> 天</span>' +
-                '</div>';
-      }
-      var recapInjected = false;
-      ordered.forEach(function (x) {
-        var day = x.day, diff = x.diff;
-        // 只保留央视电视频道且风险卡未提示「电视不播/只上手机app」的场次(外婆只看央视电视,不看 app/咪咕)
-        var tvMatches = (day.matches || []).filter(isTVMatch);
-        var rel = '', tagClass = 'tag--soon', dayClass = '';
-        if (diff === 0) { rel = '今天'; tagClass = 'tag--today'; dayClass = ' day--today'; }
-        else if (diff === 1) { rel = '明天'; }
-        else if (diff === 2) { rel = '后天'; }
-        else if (diff === -1) { rel = '昨日战报'; tagClass = 'tag--past'; dayClass = ' day--past'; }
-        else if (diff < -1) { rel = '已结束'; tagClass = 'tag--past'; dayClass = ' day--past'; }
+      html = '<section class="day' + dayClass + '">';
+      html += '<div class="day__head">' +
+                '<div class="day__when">' +
+                  '<span class="day__date">' + esc(day.date) + '</span>' +
+                  '<span class="day__week">' + esc(day.weekday) + '</span>' +
+                '</div>' +
+                '<div class="day__tags">' +
+                  (rel ? '<span class="tag ' + tagClass + '">' + esc(rel) + '</span>' : '') +
+                  '<span class="tag tag--muted">' + (tvMatches.length ? tvMatches.length + ' 场' : '待公布') + '</span>' +
+                '</div>' +
+              '</div>';
 
-        // 进入回顾区时,只在首个过去日期前注入一次分隔标题
-        if (diff < 0 && !recapInjected) {
-          var recapLabel = (pastContent.length === 1 && pastContent[0].diff === -1) ? '昨日战报' : '往期战报';
-          html += '<div class="recap-sep"><span>—— ' + recapLabel + ' ——</span></div>';
-          recapInjected = true;
-        }
+      html += renderReplayZone(day.date, ctx.replayGroups[day.date], now, 'upcoming');
 
-        html += '<section class="day' + dayClass + '">';
-        html += '<div class="day__head">' +
-                  '<div class="day__when">' +
-                    '<span class="day__date">' + esc(day.date) + '</span>' +
-                    '<span class="day__week">' + esc(day.weekday) + '</span>' +
-                  '</div>' +
-                  '<div class="day__tags">' +
-                    (rel ? '<span class="tag ' + tagClass + '">' + esc(rel) + '</span>' : '') +
-                    '<span class="tag tag--muted">' + (tvMatches.length ? tvMatches.length + ' 场' : '待公布') + '</span>' +
-                  '</div>' +
-                '</div>';
-
-        // 当日「今日重播」汇总区:未过时间的重播(待看)置顶,老人一开当天先看见;无则隐藏
-        html += renderReplayZone(day.date, replayGroups[day.date], now, 'upcoming');
-
-        if (tvMatches.length) {
-          // 已完成(有 result)的比赛排到当日最后面;未完成的按时间升序在前
-          var matches = tvMatches.slice().sort(function (a, b) {
-            var ad = a.result ? 1 : 0, bd = b.result ? 1 : 0;
-            if (ad !== bd) return ad - bd;
-            return (a.time || '').localeCompare(b.time || '');
-          });
-          // 首个「已结束」比赛之前插一条分隔,让「当日最后面」一眼可见
-          var firstDone = -1;
-          for (var mi = 0; mi < matches.length; mi++) { if (matches[mi].result) { firstDone = mi; break; } }
-          var sepNeeded = firstDone > 0;
-          matches.forEach(function (m, mi) {
-            if (mi === firstDone && sepNeeded) {
-              html += '<div class="match-sep"><span>已结束</span></div>';
-            }
-            var live = isLiveMatch(day, m, now);
-            var hasCN = belongsToCN(m.nationHome) || belongsToCN(m.nationAway);
-            var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
-            var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
-            var scopeAttr = (hasCN ? ' data-cn="1"' : '') +
-                            ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
-            html += '<article class="match' + (live ? ' match--live' : '') + '"' + scopeAttr + '">';
-            var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
-                             (m.tournament && m.stage ? ' · ' : '') +
-                             (m.stage ? esc(m.stage) : '');
-            if (eventLabel) html += '<div class="match__event">' + eventLabel + '</div>';
-            html += '<div class="match__bar">' +
-                      '<span class="match__time">' + esc(m.time) + '</span>' +
-                      '<span class="match__chan">' + esc(m.channel) + '</span>' +
-                      (live ? '<span class="live-badge">直播中</span>' : '') +
-                    '</div>';
-            var homeInfo = ordinalizeInfo(m.playerHomeInfo);
-            var awayInfo = ordinalizeInfo(m.playerAwayInfo);
-            html += '<div class="match__players">' +
-                      '<div class="player player--home">' +
-                        '<span class="player__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + '</span>' +
-                        '<span class="player__name">' + esc(m.playerHome) + '</span>' +
-                        '<span class="player__meta">' + homeInfo + '</span>' +
-                      '</div>' +
-                      '<span class="player__vs">VS</span>' +
-                      '<div class="player player--away">' +
-                        '<span class="player__flag">' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
-                        '<span class="player__name">' + esc(m.playerAway) + '</span>' +
-                        '<span class="player__meta">' + awayInfo + '</span>' +
-                      '</div>' +
-                    '</div>';
-            if (m.result) {
-              html += renderResult(m);
-              if (m.summary) {
-                html += '<div class="match__note note--summary">' +
-                          '<div class="note__head">📝 比赛总结</div>' +
-                          '<div class="note__body">' + esc(cleanSummary(m.summary)) + '</div>' +
-                        '</div>';
-              }
-            } else if (m.live) {
-              // 进行中:红色横幅 + 当前比分表;转播风险仍提示(电视看不全等)
-              html += renderLive(m);
-              if (m.risk) html += renderRisk(m.risk);
-            } else {
-              if (m.risk) html += renderRisk(m.risk);
-              if (m.watchpoint) {
-                html += '<div class="match__note note--watch">' +
-                          '<div class="note__head">👀 看点</div>' +
-                          '<div class="note__body">' + esc(m.watchpoint) + '</div>' +
-                        '</div>';
-              }
-            }
-            // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」;已过时间改「已重播」
-            if (m.replay) {
-              var rTd = replayTargetDate(day, m);
-              var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
-              var rPassed = isReplayPassed(day, m, now);
-              var rLabel = rPassed ? '📼 已重播 ' : '📺 重播 ';
-              html += '<div class="match__replay">' +
-                        '<span class="replay__time">' + rLabel + esc(m.replay.time) + '</span>' +
-                        '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' +
-                        '<span class="replay__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + ' ' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
-                        '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' + rNote +
+      if (tvMatches.length) {
+        // 已完成(有 result)的比赛排到当日最后面;未完成的按时间升序在前
+        var matches = tvMatches.slice().sort(function (a, b) {
+          var ad = a.result ? 1 : 0, bd = b.result ? 1 : 0;
+          if (ad !== bd) return ad - bd;
+          return (a.time || '').localeCompare(b.time || '');
+        });
+        // 首个「已结束」比赛之前插一条分隔,让「当日最后面」一眼可见
+        var firstDone = -1;
+        for (var mi = 0; mi < matches.length; mi++) { if (matches[mi].result) { firstDone = mi; break; } }
+        var sepNeeded = firstDone > 0;
+        matches.forEach(function (m, mi) {
+          if (mi === firstDone && sepNeeded) {
+            html += '<div class="match-sep"><span>已结束</span></div>';
+          }
+          var live = isLiveMatch(day, m, now);
+          var hasCN = belongsToCN(m.nationHome) || belongsToCN(m.nationAway);
+          var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
+          var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
+          var scopeAttr = (hasCN ? ' data-cn="1"' : '') +
+                          ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
+          html += '<article class="match' + (live ? ' match--live' : '') + '"' + scopeAttr + '">';
+          var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
+                           (m.tournament && m.stage ? ' · ' : '') +
+                           (m.stage ? esc(m.stage) : '');
+          if (eventLabel) html += '<div class="match__event">' + eventLabel + '</div>';
+          html += '<div class="match__bar">' +
+                    '<span class="match__time">' + esc(m.time) + '</span>' +
+                    '<span class="match__chan">' + esc(m.channel) + '</span>' +
+                    (live ? '<span class="live-badge">直播中</span>' : '') +
+                  '</div>';
+          var homeInfo = ordinalizeInfo(m.playerHomeInfo);
+          var awayInfo = ordinalizeInfo(m.playerAwayInfo);
+          html += '<div class="match__players">' +
+                    '<div class="player player--home">' +
+                      '<span class="player__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + '</span>' +
+                      '<span class="player__name">' + esc(m.playerHome) + '</span>' +
+                      '<span class="player__meta">' + homeInfo + '</span>' +
+                    '</div>' +
+                    '<span class="player__vs">VS</span>' +
+                    '<div class="player player--away">' +
+                      '<span class="player__flag">' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
+                      '<span class="player__name">' + esc(m.playerAway) + '</span>' +
+                      '<span class="player__meta">' + awayInfo + '</span>' +
+                    '</div>' +
+                  '</div>';
+          if (m.result) {
+            html += renderResult(m);
+            if (m.summary) {
+              html += '<div class="match__note note--summary">' +
+                        '<div class="note__head">📝 比赛总结</div>' +
+                        '<div class="note__body">' + esc(cleanSummary(m.summary)) + '</div>' +
                       '</div>';
             }
-
-            html += '</article>';
-          });
-        } else {
-          // ⬇️ 无央视电视直播时,若视频平台(咪咕/央视频)有直播,兜底显示——外婆可手机/平板看。
-          // 仅兜底:有央视电视直播的日子(走上方 if 分支)不显示视频块,避免和外婆的电视搞混。
-          var videoHtml = renderVideoBlock(day, now);
-          if (videoHtml) html += videoHtml;
-
-          // 只保留「乒乓球」直播窗口:剔除录像/录播,以及篮球/网球/田径/斯诺克/体育新闻等非乒乓球栏目
-          var liveSchedule = (day.schedule || []).filter(function (s) {
-            var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
-            if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
-            if (!isCCTVChannel(s.channel)) return false;   // 只保留央视电视窗口,app/咪咕不进表
-            var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
-            return tt.some(function (k) { return txt.indexOf(k) !== -1; });
-          });
-
-          if (liveSchedule.length) {
-            // 待公布:精简,直接说下一场时间,不堆解释
-            var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
-            var nextTime = (firstS.time || '').split('-')[0] || '';
-            var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
-            html += '<div class="day__pending">' +
-                      '<span class="pending__badge">📋 待公布</span>' +
-                      '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
-                    '</div>';
-            html += '<div class="sched">';
-            liveSchedule.forEach(function (s) {
-              var sLive = isLiveSchedule(day.date, s.time, now);
-              var tp = (s.time || '').split('-');
-              var timeHtml = '<span class="sched__time-start">' + esc(tp[0] || '') + '</span>' +
-                             (tp[1] ? '<span class="sched__time-end">' + esc(tp[1]) + '</span>' : '');
-              html += '<div class="sched__row' + (sLive ? ' sched__row--live' : '') + '">' +
-                        '<span class="sched__time">' + timeHtml + '</span>' +
-                        '<div class="sched__main">' +
-                          '<span class="sched__chan">' + esc(s.channel) + '</span>' +
-                          (sLive ? ' <span class="live-badge">直播中</span>' : '') +
-                          renderScheduleContent(s) +
-                        '</div>' +
+          } else if (m.live) {
+            // 进行中:红色横幅 + 当前比分表;转播风险仍提示(电视看不全等)
+            html += renderLive(m);
+            if (m.risk) html += renderRisk(m.risk);
+          } else {
+            if (m.risk) html += renderRisk(m.risk);
+            if (m.watchpoint) {
+              html += '<div class="match__note note--watch">' +
+                        '<div class="note__head">👀 看点</div>' +
+                        '<div class="note__body">' + esc(m.watchpoint) + '</div>' +
                       '</div>';
-            });
-            html += '</div>';
-          } else if ((day.schedule || []).length) {
-            // 空窗期/无直播天:当日有赛程说明。把一坨长文本解析成结构化清单(摘要 + 乒乓节目 + 其他体育 + 下一场),
-            // 比平铺一段文字对外婆友好得多。解析失败时回退到原始文本展示,绝不丢内容。
-            var rawNote = (day.schedule || []).map(function (s) { return (s.content || s.tournament || '').trim(); })
-                                    .filter(Boolean).join(' ');
-            var parsed = parseNoteToItems(rawNote);
-            html += '<div class="day__pending day__pending--none">';
-            html +=   '<span class="pending__badge">📺 今日无直播</span>';
-            if (parsed.lead) {
-              html += '<p class="pending__lead">' + esc(parsed.lead) + '</p>';
             }
-
-            function renderItemList(sectionCls, headLabel, list) {
-              if (!list.length) return;
-              html += '<div class="pending__section ' + sectionCls + '">';
-              html +=   '<div class="pending__section-head">' + esc(headLabel) + '</div>';
-              html +=   '<ul class="pending__list">';
-              list.forEach(function (it) {
-                html += '<li class="pending__row">' +
-                          '<div class="pending__meta">' +
-                            '<span class="pending__time">' + esc(it.time) + '</span>' +
-                            '<span class="pending__chan">' + esc(it.channel || 'CCTV') + '</span>' +
-                          '</div>' +
-                          '<div class="pending__prog">' + esc(it.program) + '</div>' +
-                        '</li>';
-              });
-              html +=   '</ul>';
-              html += '</div>';
-            }
-            renderItemList('pending__section--pp', '🏓 乒乓节目(录像/典藏)', parsed.pingpong);
-            // 外婆只对国乒感兴趣,「其他体育」(羽毛球/中超等)不展示
-
-            // 下一场:优先用原文里的「下一场/下一站...」句(更简洁),无则兜底用全局 nextEvent
-            var nextLine = parsed.next;
-            if (!nextLine && data.nextEvent && data.nextEvent.date) {
-              nextLine = nextEventCompact(data.nextEvent, gapMode);
-            }
-            if (nextLine) {
-              // 摘要 = 「出战:」之前的赛事概要(出战/缺席明细已拆到下方列表,避免重复)
-              var summary = nextLine;
-              var cutIdx = summary.search(/出战[:：]/);
-              if (cutIdx > -1) {
-                summary = summary.substring(0, cutIdx).replace(/[、,，\s]+$/, '').trim();
-              }
-              html += '<div class="pending__next-event">' +
-                        '<span class="pending__next-label">📅 下一场国乒直播</span>' +
-                        '<span class="pending__next-text">' + esc(summary) + '</span>';
-
-              // 出战名单(仅当从原文解析出时展示;兜底无名单则不渲染,保持旧版单行)
-              // 男队/女队分行展示(解析时按「男单/女单...」前缀标记 gender,同段继承)
-              if (parsed.nextSquad && parsed.nextSquad.length) {
-                function rosterGroup(gender, label) {
-                  var group = parsed.nextSquad.filter(function (p) { return p.gender === gender; });
-                  if (!group.length) return '';
-                  var h = '<div class="pending__roster-line">' +
-                            '<span class="roster-line-label">' + esc(label) + '</span>' +
-                            '<ul class="pending__roster-list">';
-                  group.forEach(function (p) {
-                    h += '<li class="pending__roster-item">' +
-                          '<span class="roster-name">' + esc(p.name) + '</span>' +
-                          (p.rankLabel ? '<span class="roster-rank">' + esc(p.rankLabel) + '</span>' : '') +
-                         '</li>';
-                  });
-                  h += '</ul></div>';
-                  return h;
-                }
-                html += '<div class="pending__roster pending__roster--squad">' +
-                          '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
-                          rosterGroup('男', '男队') +
-                          rosterGroup('女', '女队') +
-                        '</div>';
-              }
-
-              // 缺席主力
-              if (parsed.nextAbsent && parsed.nextAbsent.length) {
-                html += '<div class="pending__roster pending__roster--absent">' +
-                          '<div class="pending__roster-head">😴 缺席主力</div>' +
-                          '<ul class="pending__roster-list">';
-                parsed.nextAbsent.forEach(function (p) {
-                  html += '<li class="pending__roster-item">' +
-                            '<span class="roster-name">' + esc(p.name) + '</span>' +
-                            (p.reason ? '<span class="roster-reason">' + esc(p.reason) + '</span>' : '') +
-                          '</li>';
-                });
-                html += '</ul></div>';
-              }
-
-              html += '</div>';
-            }
-
-            // 解析失败/解析结果为空:回退到原文(防止空卡)
-            // 其他体育不展示,故"是否为空"只看 lead/乒乓/下一场(其他体育有内容也不算有内容)
-            if (!parsed.lead && !parsed.pingpong.length && !parsed.next) {
-              html += '<div class="pending__fallback"><span class="pending__note">' + esc(rawNote) + '</span></div>';
-            }
-            html += '</div>';
-          } else if (data.nextEvent && data.nextEvent.date) {
-            // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
-            html += '<div class="day__pending">' +
-                      '<span class="pending__badge">📋 待公布</span>' +
-                      '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode) || '国乒比赛') + '</span>' +
+          }
+          // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」;已过时间改「已重播」
+          if (m.replay) {
+            var rTd = replayTargetDate(day, m);
+            var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
+            var rPassed = isReplayPassed(day, m, now);
+            var rLabel = rPassed ? '📼 已重播 ' : '📺 重播 ';
+            html += '<div class="match__replay">' +
+                      '<span class="replay__time">' + rLabel + esc(m.replay.time) + '</span>' +
+                      '<span class="replay__chan">' + esc(m.replay.channel) + '</span>' +
+                      '<span class="replay__flag">' + flagsForSide(m.playerHome, m.playerHomeInfo, m.nationHome) + ' ' + flagsForSide(m.playerAway, m.playerAwayInfo, m.nationAway) + '</span>' +
+                      '<span class="replay__live">昨夜 ' + esc(m.time) + ' 直播</span>' + rNote +
                     '</div>';
           }
+          html += '</article>';
+        });
+      } else {
+        // ⬇️ 无央视电视直播时,若视频平台(咪咕/央视频)有直播,兜底显示——外婆可手机/平板看。
+        // 仅兜底:有央视电视直播的日子(走上方 if 分支)不显示视频块,避免和外婆的电视搞混。
+        var videoHtml = renderVideoBlock(day, now);
+        if (videoHtml) html += videoHtml;
+
+        // 只保留「乒乓球」直播窗口:剔除录像/录播,以及篮球/网球/田径/斯诺克/体育新闻等非乒乓球栏目
+        var liveSchedule = (day.schedule || []).filter(function (s) {
+          var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
+          if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
+          if (!isCCTVChannel(s.channel)) return false;   // 只保留央视电视窗口,app/咪咕不进表
+          var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
+          return tt.some(function (k) { return txt.indexOf(k) !== -1; });
+        });
+
+        if (liveSchedule.length) {
+          // 待公布:精简,直接说下一场时间,不堆解释
+          var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
+          var nextTime = (firstS.time || '').split('-')[0] || '';
+          var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
+          html += '<div class="day__pending">' +
+                    '<span class="pending__badge">📋 待公布</span>' +
+                    '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
+                  '</div>';
+          html += '<div class="sched">';
+          liveSchedule.forEach(function (s) {
+            var sLive = isLiveSchedule(day.date, s.time, now);
+            var tp = (s.time || '').split('-');
+            var timeHtml = '<span class="sched__time-start">' + esc(tp[0] || '') + '</span>' +
+                           (tp[1] ? '<span class="sched__time-end">' + esc(tp[1]) + '</span>' : '');
+            html += '<div class="sched__row' + (sLive ? ' sched__row--live' : '') + '">' +
+                      '<span class="sched__time">' + timeHtml + '</span>' +
+                      '<div class="sched__main">' +
+                        '<span class="sched__chan">' + esc(s.channel) + '</span>' +
+                        (sLive ? ' <span class="live-badge">直播中</span>' : '') +
+                        renderScheduleContent(s) +
+                      '</div>' +
+                    '</div>';
+          });
+          html += '</div>';
+        } else if ((day.schedule || []).length) {
+          // 空窗期/无直播天:当日有赛程说明。把一坨长文本解析成结构化清单(摘要 + 乒乓节目 + 其他体育 + 下一场),
+          // 比平铺一段文字对外婆友好得多。解析失败时回退到原始文本展示,绝不丢内容。
+          var rawNote = (day.schedule || []).map(function (s) { return (s.content || s.tournament || '').trim(); })
+                                  .filter(Boolean).join(' ');
+          var parsed = parseNoteToItems(rawNote);
+          html += '<div class="day__pending day__pending--none">';
+          html +=   '<span class="pending__badge">📺 今日无直播</span>';
+          if (parsed.lead) {
+            html += '<p class="pending__lead">' + esc(parsed.lead) + '</p>';
+          }
+          html += renderItemListHtml('pending__section--pp', '🏓 乒乓节目(录像/典藏)', parsed.pingpong);
+          // 外婆只对国乒感兴趣,「其他体育」(羽毛球/中超等)不展示
+
+          // 下一场:优先用原文里的「下一场/下一站...」句(更简洁),无则兜底用全局 nextEvent
+          var nextLine = parsed.next;
+          if (!nextLine && data.nextEvent && data.nextEvent.date) {
+            nextLine = nextEventCompact(data.nextEvent, gapMode);
+          }
+          if (nextLine) {
+            // 摘要 = 「出战:」之前的赛事概要(出战/缺席明细已拆到下方列表,避免重复)
+            var summary = nextLine;
+            var cutIdx = summary.search(/出战[:：]/);
+            if (cutIdx > -1) {
+              summary = summary.substring(0, cutIdx).replace(/[、,，\s]+$/, '').trim();
+            }
+            html += '<div class="pending__next-event">' +
+                      '<span class="pending__next-label">📅 下一场国乒直播</span>' +
+                      '<span class="pending__next-text">' + esc(summary) + '</span>';
+
+            // 出战名单(仅当从原文解析出时展示;兜底无名单则不渲染,保持旧版单行)
+            // 男队/女队分行展示(解析时按「男单/女单...」前缀标记 gender,同段继承)
+            if (parsed.nextSquad && parsed.nextSquad.length) {
+              html += '<div class="pending__roster pending__roster--squad">' +
+                        '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
+                        rosterGroupHtml(parsed.nextSquad, '男', '男队') +
+                        rosterGroupHtml(parsed.nextSquad, '女', '女队') +
+                      '</div>';
+            }
+
+            // 缺席主力
+            if (parsed.nextAbsent && parsed.nextAbsent.length) {
+              html += '<div class="pending__roster pending__roster--absent">' +
+                        '<div class="pending__roster-head">😴 缺席主力</div>' +
+                        '<ul class="pending__roster-list">';
+              parsed.nextAbsent.forEach(function (p) {
+                html += '<li class="pending__roster-item">' +
+                          '<span class="roster-name">' + esc(p.name) + '</span>' +
+                          (p.reason ? '<span class="roster-reason">' + esc(p.reason) + '</span>' : '') +
+                        '</li>';
+              });
+              html += '</ul></div>';
+            }
+
+            html += '</div>';
+          }
+
+          // 解析失败/解析结果为空:回退到原文(防止空卡)
+          // 其他体育不展示,故"是否为空"只看 lead/乒乓/下一场(其他体育有内容也不算有内容)
+          if (!parsed.lead && !parsed.pingpong.length && !parsed.next) {
+            html += '<div class="pending__fallback"><span class="pending__note">' + esc(rawNote) + '</span></div>';
+          }
+          html += '</div>';
+        } else if (data.nextEvent && data.nextEvent.date) {
+          // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
+          html += '<div class="day__pending">' +
+                    '<span class="pending__badge">📋 待公布</span>' +
+                    '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode) || '国乒比赛') + '</span>' +
+                  '</div>';
         }
+      }
 
-        // 当日底部「今日已重播」归档区:已过时间的重播(已播)放当日下方,不占顶部待看位
-        html += renderReplayZone(day.date, replayGroups[day.date], now, 'past');
+      // 当日底部「今日已重播」归档区:已过时间的重播(已播)放当日下方,不占顶部待看位
+      html += renderReplayZone(day.date, ctx.replayGroups[day.date], now, 'past');
 
-        html += '</section>';
-      });
+      html += '</section>';
+      return html;
+    }
 
-      if (data.nextEvent) {
+    // 首屏关键区:横幅 + 未来(upcoming)天。fetch 完成立即渲染,渲染完即移除骨架(用户第一眼就有内容)。
+    function buildAbove(ctx, data) {
+      var html = '';
+      if (ctx.gapMode && ctx.countdownDays !== null) {
+        html += '<div class="gap-banner" role="status">' +
+                  '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
+                  '<span class="gap-banner__text">离最近一场国乒比赛，还有 <strong>' + ctx.countdownDays + '</strong> 天</span>' +
+                '</div>';
+      }
+      ctx.upcomingContent.forEach(function (x) { html += renderDaySection(x, ctx, data); });
+      return html;
+    }
+    // 下方区块:往期战报 + 下一站卡。首屏下方用「轻量占位条」占位,滚动临近视口 400px 时才挂载真实 DOM。
+    function buildBelow(ctx, data) {
+      var html = '';
+      var pastContent = ctx.pastContent;
+      if (pastContent.length) {
+        var recapLabel = (pastContent.length === 1 && pastContent[0].diff === -1) ? '昨日战报' : '往期战报';
+        html += '<div class="recap-sep"><span>—— ' + recapLabel + ' ——</span></div>';
+        pastContent.forEach(function (x) { html += renderDaySection(x, ctx, data); });
+      }
+      if (data.nextEvent && data.nextEvent.date) {
         var ne = data.nextEvent;
         html += '<section class="day day--next" aria-label="下一站国乒赛事">' +
                   '<div class="day__head">' +
@@ -1312,15 +1386,68 @@
                       '<span class="day__date">' + esc(ne.date) + '</span>' +
                       '<span class="day__week">' + esc(ne.weekday || '') + '</span>' +
                     '</div>' +
-                    (gapMode ? '' : '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>') +
+                    (ctx.gapMode ? '' : '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>') +
                   '</div>' +
                   '<div class="day__next-title">📅 下一站国乒赛事</div>' +
                   renderNextCard(ne) +
                 '</section>';
       }
+      return html;
+    }
 
-      var keepY = (fromPoll === true) ? window.scrollY : 0;
-      document.getElementById('days').innerHTML = html;
+    // 整页一次性渲染:缓存瞬显 / 后台刷新覆盖 / 60s 轮询。
+    // opts.fromCache = 标「本地缓存,正在刷新」;opts.fromPoll = 保留当前滚动位置。
+    function renderFull(data, opts) {
+      opts = opts || {};
+      var ctx = prepareCtx(data);
+      var html = buildAbove(ctx, data) + buildBelow(ctx, data);
+      var u = document.getElementById('updatedAt');
+      if (opts.fromCache) {
+        document.title = data.title + ' · 本地缓存';
+        if (u) u.textContent = data.updatedAt + '（本地缓存，正在刷新…）';
+      } else {
+        document.title = data.title + ' · 每日更新';
+        if (u) u.textContent = data.updatedAt;
+      }
+      var holder = document.getElementById('days');
+      var keepY = (opts.fromPoll === true) ? window.scrollY : 0;
+      holder.innerHTML = html;
+      holder.classList.remove('is-slow');
       if (keepY) window.scrollTo(0, keepY);
       applyFilter(FILTER);
+    }
+
+    // 渐进式:首屏先出 above(横幅 + 今天/明天/后天),下方 below(往期战报 + 下一站卡)用「轻量占位条」占位,
+    // 滚动临近视口 400px 时才挂载真实 DOM(IntersectionObserver),省首屏构建开销;
+    // 若 below 本就在首屏内则立即命中,不退化。
+    function renderStaged(data) {
+      var ctx = prepareCtx(data);
+      document.title = data.title + ' · 每日更新';
+      var u = document.getElementById('updatedAt');
+      if (u) u.textContent = data.updatedAt;
+      var above = buildAbove(ctx, data);
+      var below = buildBelow(ctx, data);
+      var holder = document.getElementById('days');
+      holder.innerHTML = above + '<div class="lazy-placeholder" id="belowPlaceholder" aria-hidden="true"></div>';
+      holder.classList.remove('is-slow');
+      applyFilter(FILTER);
+      mountBelowWhenVisible(holder, below);
+    }
+    // 滚动临近视口时把 below 的真实 HTML 挂上去(替换占位条),挂完即重跑筛选
+    function mountBelowWhenVisible(holder, belowHtml) {
+      var ph = holder.querySelector('#belowPlaceholder');
+      if (!ph) { holder.insertAdjacentHTML('beforeend', belowHtml); applyFilter(FILTER); return; }
+      if (!('IntersectionObserver' in window)) {
+        ph.outerHTML = belowHtml; applyFilter(FILTER); return;   // 老浏览器兜底:直接挂载
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            ph.outerHTML = belowHtml;
+            applyFilter(FILTER);
+            io.disconnect();
+          }
+        });
+      }, { root: null, rootMargin: '0px 0px 400px 0px', threshold: 0 });
+      io.observe(ph);
     }

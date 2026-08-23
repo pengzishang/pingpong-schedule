@@ -815,3 +815,79 @@
       background: #f7f2fc; border: 1px dashed #d9c7e8; border-radius: .55rem;
       word-break: break-word;
     }
+
+    /* ============ 骨架屏 / 加载态 ============ */
+    /* 骨架仅在「无本地缓存且网络未回」时可见;对齐真实卡片尺寸防 CLS 跳动 */
+    .skeleton { padding: 1rem 0 2rem; }
+    .sk-bar, .sk-chip, .sk-line {
+      background: linear-gradient(100deg, #e9edf2 30%, #f4f7fa 50%, #e9edf2 70%);
+      background-size: 200% 100%;
+      animation: sk-shimmer 1.4s ease-in-out infinite;
+      border-radius: 10px;
+    }
+    @keyframes sk-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton__banner { height: 3rem; border-radius: var(--radius); margin-bottom: 1.1rem; }
+
+    .skeleton__day {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.1rem 1rem 1.2rem;
+      margin-bottom: 1.1rem;
+    }
+    .skeleton__head { display: flex; gap: .6rem; align-items: center; margin-bottom: 1rem; }
+    .sk-chip { width: 5rem; height: 1.5rem; border-radius: 2rem; }
+    .sk-chip--sm { width: 3.2rem; height: 1.2rem; }
+    .skeleton__match { padding: .5rem 0; border-top: 1px solid var(--line); }
+    .skeleton__match:first-of-type { border-top: none; }
+    .sk-line { height: 1.1rem; margin: .55rem 0; }
+    .sk-line--title { height: 1.6rem; width: 70%; }
+    .sk-line--short { width: 45%; }
+
+    /* 中央大转圈 + 大字文案(适老化:清晰、不花哨) */
+    .skeleton__loader {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1rem; padding: 2.2rem 1rem 1rem;
+    }
+    .loader__spinner {
+      width: 56px; height: 56px;
+      border: 6px solid #dbe3ec;
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: sk-spin .9s linear infinite;
+    }
+    @keyframes sk-spin { to { transform: rotate(360deg); } }
+    .loader__text {
+      font-size: 1.3rem; font-weight: 800; color: var(--navy);
+      text-align: center; letter-spacing: .02em;
+    }
+
+    /* 加载较慢提示:默认隐藏,10s 仍显示骨架时由 #days.is-slow 触发 */
+    .skeleton__slow {
+      display: none;
+      margin: 1.4rem auto 0; max-width: 22rem;
+      padding: .8rem 1rem; text-align: center;
+      font-size: 1rem; color: var(--amber); background: var(--amber-soft);
+      border: 1px solid #f0d9b0; border-radius: 1rem;
+    }
+    #days.is-slow .skeleton__slow { display: block; }
+
+    /* 下方区块轻量占位条(渐进式:首屏先出,下方滚动临近才挂真实 DOM) */
+    .lazy-placeholder {
+      height: 4.5rem; margin: 1.1rem 0;
+      border: 2px dashed var(--line); border-radius: var(--radius);
+      background: repeating-linear-gradient(45deg, #f3f6f9, #f3f6f9 12px, #eef2f6 12px, #eef2f6 24px);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-2); font-size: .95rem;
+    }
+    .lazy-placeholder::after { content: "更多赛程，下滑加载…"; }
+
+    /* 降低动态效果偏好:关闭 shimmer/旋转,改用静态浅灰,避免不适 */
+    @media (prefers-reduced-motion: reduce) {
+      .sk-bar, .sk-chip, .sk-line { animation: none; background: #e9edf2; }
+      .loader__spinner { animation: none; }
+    }

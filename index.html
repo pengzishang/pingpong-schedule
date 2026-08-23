@@ -24,7 +24,43 @@
       <button type="button" class="filter__btn is-active" data-scope="cn">国乒</button>
       <button type="button" class="filter__btn" data-scope="jpkr">日韩</button>
     </div>
-    <div id="days"></div>
+    <!-- 静态骨架屏:仅在「无本地缓存且网络未回」时可见(app.js 下载前即首屏绘制)。
+         对齐真实 .day/.match 尺寸防 CLS 跳动;缓存命中或网络返回后被真实内容整体替换。 -->
+    <div id="days">
+      <div class="skeleton" aria-busy="true" aria-live="polite">
+        <div class="skeleton__banner sk-bar"></div>
+        <div class="skeleton__day">
+          <div class="skeleton__head">
+            <div class="sk-chip"></div>
+            <div class="sk-chip sk-chip--sm"></div>
+          </div>
+          <div class="skeleton__match">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+          <div class="skeleton__match">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line"></div>
+          </div>
+        </div>
+        <div class="skeleton__day">
+          <div class="skeleton__head">
+            <div class="sk-chip"></div>
+          </div>
+          <div class="skeleton__match">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+        </div>
+        <div class="skeleton__loader" role="status" aria-label="正在加载">
+          <div class="loader__spinner" aria-hidden="true"></div>
+          <div class="loader__text">正在加载国乒赛程…</div>
+        </div>
+        <div class="skeleton__slow">加载较慢，请稍候… 若长时间无响应，可刷新页面重试。</div>
+      </div>
+    </div>
     <footer>
       <div class="links">
         <a href="https://sports.cctv.com/" target="_blank" rel="noopener">央视体育官网</a>
