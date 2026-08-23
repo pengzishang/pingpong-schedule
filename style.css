@@ -478,6 +478,26 @@
       font-size: .92rem; font-weight: 800; color: #4a4f57;
       margin-bottom: .4rem; letter-spacing: .01em;
     }
+    /* 男队/女队分行:行标签固定,名单 flex-wrap 换行 */
+    .pending__roster-line {
+      display: flex; align-items: flex-start; gap: .5rem;
+      margin-top: .25rem;
+    }
+    .pending__roster-line + .pending__roster-line {
+      margin-top: .45rem;
+      padding-top: .45rem;
+      border-top: 1px dashed rgba(120,120,135,.22);
+    }
+    .roster-line-label {
+      flex: 0 0 auto;
+      font-size: .92rem; font-weight: 800; color: #3a3f46;
+      line-height: 1.6;
+      min-width: 2.4em;
+    }
+    .pending__roster-line .pending__roster-list {
+      flex: 1 1 auto; min-width: 0;
+      display: flex; flex-wrap: wrap; gap: .3rem .75rem;
+    }
     .pending__roster-list {
       list-style: none; margin: 0; padding: 0;
       display: flex; flex-wrap: wrap; gap: .3rem .75rem;

@@ -702,10 +702,12 @@
 
     // 「下一站...」句里拆出出战名单与缺席主力。
     // 格式约定(采集说明.md §4.6):
-    //   出战:王楚钦(世界第1)/林诗栋(世界第2)/温瑞博/向鹏/周启豪,女单蒯曼(2号种子)/...
+    //   出战:男单王楚钦(世界第1)/林诗栋(世界第2)/温瑞博/向鹏/周启豪,女单蒯曼(2号种子)/...
     //   缺席:孙颖莎(轮休备战亚运)、王曼昱(轮休备战亚运)
     // 括号内原文(名次/种子/备注)原样保留为 rankLabel 展示,不解析数字——避免把
     // 「2号种子」误当「世界第2」这类错误信息;缺标签/缺原因不影响入列。
+    // 性别识别:「男单/男双/男团」标记男队、「女单/女双/女团」标记女队,
+    // 同段内无前缀的名字继承前一个性别(如「女单蒯曼/陈幸同」中陈幸同=女队)。
     function parseNextRoster(nextLine) {
       var squad = [], absent = [];
       if (!nextLine) return { squad: squad, absent: absent };
@@ -714,9 +716,19 @@
       var sm = nextLine.match(/出战[:：]([\s\S]*?)(?=缺席[:：]|$)/);
       if (sm) {
         var sPart = sm[1].replace(/[。;；,，]+$/, '').trim();
+        var curGender = ''; // 继承用:男/女
         // 按 / 或 、 或逗号拆人名(可能含「女单蒯曼」这种前缀,拆后去前缀)
         sPart.split(/[\/、,，]/).forEach(function (raw) {
-          var name = raw.trim().replace(/^(男单|女单|男双|女双|混双|男团|女团)/, '').trim();
+          var name = raw.trim();
+          if (!name) return;
+          var g = name.match(/^(男单|男双|男团|女单|女双|女团|混双)/);
+          var gender = curGender;
+          if (g) {
+            // 混双不设性别(选手本身属于男/女队),继承当前组;男单/女单等明确分组
+            if (/^女/.test(g[1])) { gender = '女'; curGender = '女'; }
+            else if (/^男/.test(g[1])) { gender = '男'; curGender = '男'; }
+            name = name.replace(/^(男单|男双|男团|女单|女双|女团|混双)/, '').trim();
+          }
           if (!name) return;
           var rankLabel = '';
           var m = name.match(/^([^\(（]+?)\s*[\(（]([^\)）]+)[\)）]\s*$/);
@@ -724,7 +736,7 @@
             name = m[1].trim();
             rankLabel = m[2].trim();
           }
-          squad.push({ name: name, rankLabel: rankLabel });
+          squad.push({ name: name, rankLabel: rankLabel, gender: gender });
         });
       }
 
@@ -1230,17 +1242,28 @@
                         '<span class="pending__next-text">' + esc(summary) + '</span>';
 
               // 出战名单(仅当从原文解析出时展示;兜底无名单则不渲染,保持旧版单行)
+              // 男队/女队分行展示(解析时按「男单/女单...」前缀标记 gender,同段继承)
               if (parsed.nextSquad && parsed.nextSquad.length) {
+                function rosterGroup(gender, label) {
+                  var group = parsed.nextSquad.filter(function (p) { return p.gender === gender; });
+                  if (!group.length) return '';
+                  var h = '<div class="pending__roster-line">' +
+                            '<span class="roster-line-label">' + esc(label) + '</span>' +
+                            '<ul class="pending__roster-list">';
+                  group.forEach(function (p) {
+                    h += '<li class="pending__roster-item">' +
+                          '<span class="roster-name">' + esc(p.name) + '</span>' +
+                          (p.rankLabel ? '<span class="roster-rank">' + esc(p.rankLabel) + '</span>' : '') +
+                         '</li>';
+                  });
+                  h += '</ul></div>';
+                  return h;
+                }
                 html += '<div class="pending__roster pending__roster--squad">' +
                           '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
-                          '<ul class="pending__roster-list">';
-                parsed.nextSquad.forEach(function (p) {
-                  html += '<li class="pending__roster-item">' +
-                            '<span class="roster-name">' + esc(p.name) + '</span>' +
-                            (p.rankLabel ? '<span class="roster-rank">' + esc(p.rankLabel) + '</span>' : '') +
-                          '</li>';
-                });
-                html += '</ul></div>';
+                          rosterGroup('男', '男队') +
+                          rosterGroup('女', '女队') +
+                        '</div>';
               }
 
               // 缺席主力
