@@ -704,6 +704,10 @@
       out.nextSquad = roster.squad;
       out.nextAbsent = roster.absent;
 
+      // 分类信号(提前定义,分句循环里就要用)
+      var noping = /羽毛球|中超|足球|篮球|排球|网球|游泳|田径|跳水|赛车|F1|拳击|摔跤|体操|艺术体操|围棋|象棋|电竞|斯诺克|台球|高尔夫|马拉松|举重|射击|射箭|击剑|皮划艇|赛艇|帆船|自行车|马术|空手道|跆拳道|柔道|冰球|花样滑冰|短道速滑|速滑|冬奥|滑雪|冰壶|蹦床|攀岩|冲浪|棒球|橄榄球|板球|手球|水球|铁人三项/;
+      var pp     = /乒乓|WTT|世乒|冠军赛|大满贯|奥运|男单|女单|男双|女双|混双|瑞典|横滨|团体/;
+
       // 2. 按 。/;/； 分句
       var clauses = s.split(/[。;；]/).map(function (c) { return c.trim(); }).filter(Boolean);
 
@@ -711,14 +715,18 @@
       var lastChannel = '';
 
       clauses.forEach(function (clause) {
+        // 整句是否讲乒乓:用于上下文分类(如「乒乓仅央视5 12:58 比赛4」中「比赛4」应归为乒乓)
+        var isPingContext = pp.test(clause);
         // 单次正则按文档顺序匹配 CCTV 槽或裸时间 → 裸时间才能正确继承最近的 CCTV 频道
         var slots = [];
-        var re = /(CCTV-\d+\+?)\s+(\d{1,2}:\d{2})|\b(\d{1,2}:\d{2})\b/g;
+        // 支持 CCTV-5/CCTV-5+/CCTV-16 与中文写法央视5/央视5+/央视16,并归一化为 CCTV-x
+        var re = /(CCTV-\d+\+?|央视\d+\+?)\s+(\d{1,2}:\d{2})|\b(\d{1,2}:\d{2})\b/g;
         var mm;
         while ((mm = re.exec(clause)) !== null) {
           if (mm[1]) {
-            slots.push({ channel: mm[1], time: mm[2], start: mm.index, endIdx: mm.index + mm[0].length });
-            lastChannel = mm[1];
+            var chan = mm[1].replace(/^央视/, 'CCTV-');
+            slots.push({ channel: chan, time: mm[2], start: mm.index, endIdx: mm.index + mm[0].length });
+            lastChannel = chan;
           } else {
             slots.push({ channel: lastChannel, time: mm[3], start: mm.index, endIdx: mm.index + mm[0].length });
           }
@@ -733,7 +741,7 @@
           var desc = clause.substring(descStart, descEnd).trim();
           desc = desc.replace(/^[、,，与和\/\s为播转是()（）]+/, '').trim();
           desc = desc.replace(/[、,，与和\/\(\)（）。]+$/, '').trim();
-          clauseItems.push({ channel: slots[i].channel, time: slots[i].time, program: desc });
+          clauseItems.push({ channel: slots[i].channel, time: slots[i].time, program: desc, _ctx: isPingContext });
         }
 
         // 填空白 desc(同节目跨频道写法如「CCTV-5 14:00 与 19:30、CCTV-5+ 17:00 为羽毛球...」,
@@ -752,24 +760,37 @@
         clauseItems.forEach(function (it) { if (it.program) items.push(it); });
       });
 
-      // 3. 按时段排序
-      items.sort(function (a, b) { return a.time.localeCompare(b.time); });
-
-      // 4. 分类(乒乓 vs 其他体育):负向(其他运动)优先,正向(乒乓)其次,都不命中默认归"其他"
+      // 3. 分类(乒乓 vs 其他体育):先看整句上下文,再看节目描述
       //    关键:不能用「决赛」「录像」「锦标赛」等通用词当乒乓信号——
-      //    否则「羽毛球世锦赛1/4决赛 直播」会因含「决赛」/「锦标赛」误判进乒乓节目
-      var noping = /羽毛球|中超|足球|篮球|排球|网球|游泳|田径|跳水|赛车|F1|拳击|摔跤|体操|艺术体操|围棋|象棋|电竞|斯诺克|台球|高尔夫|马拉松|举重|射击|射箭|击剑|皮划艇|赛艇|帆船|自行车|马术|空手道|跆拳道|柔道|冰球|花样滑冰|短道速滑|速滑|冬奥|滑雪|冰壶|蹦床|攀岩|冲浪|棒球|橄榄球|板球|手球|水球|铁人三项/;
-      var pp     = /乒乓|WTT|世乒|冠军赛|大满贯|奥运|男单|女单|男双|女双|混双|瑞典|横滨|团体/;
+      //    否则「羽毛球世锦赛1/4决赛 直播」会因含「决赛」/「锦标赛」误判进乒乓节目。
+      //    但像「乒乓仅央视5 12:58 比赛4」这种整句讲乒乓的,其下节目(比赛4)应归为乒乓。
       items.forEach(function (it) {
-        if (noping.test(it.program)) { out.other.push(it); return; }
-        if (pp.test(it.program)) { out.pingpong.push(it); return; }
-        out.other.push(it); // 既无负向也无乒乓信号 → 默认归"其他"(不假设乒乓)
+        if (it._ctx) {
+          // 整句讲乒乓:节目默认进乒乓,只有明确标出其他运动才进其他
+          if (noping.test(it.program)) { out.other.push({ channel: it.channel, time: it.time, program: it.program }); return; }
+          out.pingpong.push({ channel: it.channel, time: it.time, program: it.program });
+        } else {
+          // 整句未提乒乓:只有节目描述里明确出现乒乓信号才进乒乓,否则默认其他
+          if (pp.test(it.program)) { out.pingpong.push({ channel: it.channel, time: it.time, program: it.program }); return; }
+          out.other.push({ channel: it.channel, time: it.time, program: it.program });
+        }
       });
+      out.pingpong.sort(function (a, b) { return a.time.localeCompare(b.time); });
+      out.other.sort(function (a, b) { return a.time.localeCompare(b.time); });
 
-      // 5. 摘要 = 第一个 CCTV 之前的文字
-      var firstCctv = s.search(/CCTV/);
-      out.lead = (firstCctv > 0 ? s.substring(0, firstCctv) : s).trim();
-      out.lead = out.lead.replace(/[,:;。\s()（）]+$/, '').trim();
+      // 5. 摘要 = 第一个 CCTV/央视 出现所在的结论句(到下一个句号/分号/破折号为止),
+      //    让「空窗期延续。8/27(周四)央视三频道确认无任何乒乓球直播(央视一周录播表核验)」
+      //    能完整作为摘要,而不是截断成"8/27(周四"。
+      var firstCctv = s.search(/CCTV|央视/);
+      if (firstCctv > 0) {
+        var leadEnd = s.substring(firstCctv).search(/[。；;]|——/);
+        if (leadEnd === -1) leadEnd = s.length - firstCctv;
+        out.lead = s.substring(0, firstCctv + leadEnd).trim();
+      } else {
+        out.lead = s.trim();
+      }
+      out.lead = out.lead.replace(/[,:;。\s]+$/, '');
+      if (/[（(]$/.test(out.lead)) out.lead = out.lead.replace(/[（(]+$/, '');
 
       return out;
     }
