@@ -803,23 +803,43 @@
     // 「2号种子」误当「世界第2」这类错误信息;缺标签/缺原因不影响入列。
     // 性别识别:「男单/男双/男团」标记男队、「女单/女双/女团」标记女队,
     // 同段内无前缀的名字继承前一个性别(如「女单蒯曼/陈幸同」中陈幸同=女队)。
+    // 2026-08-28 修:splitOutsideParens 替代 split — 防止「(卫冕冠军/世界第1)」括号内
+    // 的 / 被错误拆分;absent split 增加 ; — 处理「梁靖崑(...);韩国队全员...」连写。
+    function splitOutsideParens(s, sepChars) {
+      var parts = []; var cur = ''; var depth = 0;
+      for (var i = 0; i < s.length; i++) {
+        var ch = s[i];
+        if (ch === '(' || ch === '（') depth++;
+        else if (ch === ')' || ch === '）') { if (depth > 0) depth--; }
+        else if (depth === 0 && sepChars.indexOf(ch) >= 0) {
+          if (cur.trim()) parts.push(cur.trim());
+          cur = '';
+          continue;
+        }
+        cur += ch;
+      }
+      if (cur.trim()) parts.push(cur.trim());
+      return parts;
+    }
+
     function parseNextRoster(nextLine) {
       var squad = [], absent = [];
       if (!nextLine) return { squad: squad, absent: absent };
 
-      // 出战段:到「缺席」或段尾为止(去掉句尾标点)
-      var sm = nextLine.match(/出战[:：]([\s\S]*?)(?=缺席[:：]|$)/);
+      // 出战段:兼容多种前缀 — 出战: / 国乒\d*人: / 报名: / 参赛: / 阵容:
+      // 真实生产数据用「国乒10人:男单...」而非「出战:」,原 regex 仅认「出战」长期失效。
+      // lookahead 强制前面要有 [,;。]+空白,避免「(备战亚运)」括号内「亚运」误命中。
+      var sm = nextLine.match(/(?:出战|国乒\d*人|报名|参赛|阵容)[:：]([\s\S]*?)(?=[,;。]\s*(?:缺席|退赛|不出战|直播渠道|赛程|赛后|最近战报|头号种子|亚运名单|背景)|$)/);
       if (sm) {
         var sPart = sm[1].replace(/[。;；,，]+$/, '').trim();
         var curGender = ''; // 继承用:男/女
-        // 按 / 或 、 或逗号拆人名(可能含「女单蒯曼」这种前缀,拆后去前缀)
-        sPart.split(/[\/、,，]/).forEach(function (raw) {
+        // 括号外的 / 、 , , 才劈(避坑「王楚钦(卫冕冠军/世界第1)」括号内的 /)
+        splitOutsideParens(sPart, '/、,，').forEach(function (raw) {
           var name = raw.trim();
           if (!name) return;
           var g = name.match(/^(男单|男双|男团|女单|女双|女团|混双)/);
           var gender = curGender;
           if (g) {
-            // 混双不设性别(选手本身属于男/女队),继承当前组;男单/女单等明确分组
             if (/^女/.test(g[1])) { gender = '女'; curGender = '女'; }
             else if (/^男/.test(g[1])) { gender = '男'; curGender = '男'; }
             name = name.replace(/^(男单|男双|男团|女单|女双|女团|混双)/, '').trim();
@@ -835,10 +855,11 @@
         });
       }
 
-      // 缺席段:到段尾(去掉句尾标点)
-      var am = nextLine.match(/缺席[:：]([\s\S]*?)$/);
+      // 缺席段:兼容 缺席: / 退赛: / 不出战:。lookahead 必须前面有 [,;。] 标点 + 空白,
+      // 防止「(轮休备战亚运)」括号内「亚运」误命中,导致 absent 段被截到第一个括号内。
+      var am = nextLine.match(/(?:缺席|退赛|不出战)[:：]([\s\S]*?)(?=[,;。]\s*(?:出战|国乒|报名|参赛|直播渠道|赛程|赛后|最近战报|头号种子|亚运名单|背景)|$)/);
       if (am) {
-        am[1].replace(/[。;；,，]+$/, '').trim().split(/[、,，]/).forEach(function (raw) {
+        splitOutsideParens(am[1].replace(/[。;；,，]+$/, '').trim(), '、,，;；').forEach(function (raw) {
           var name = raw.trim();
           if (!name) return;
           var reason = '';
@@ -853,9 +874,12 @@
       return { squad: squad, absent: absent };
     }
 
-    // 「下一站国乒赛事」卡片里 nextEvent.note 也是一坨长文本,这里按语义拆成结构化块
+    // 「下一站国乒赛事」卡片里 nextEvent.note 也是一坨长文本,这里按语义拆成结构化块。
+    // 2026-08-28 升级:在原 macro 6 类(meta/squad/seeds/schedule/tv/sources)基础上,
+    // 复用既有 parseNextRoster 把「出战/缺席」拆成结构化数组(分男女),并正则抽「头号种子」。
+    // 解析失败走原文 fallback(roster=null → renderNextCard 走旧 blocks 路径)。
     function parseNextEventNote(note) {
-      var out = { meta: '', squad: '', seeds: '', schedule: '', tv: '', sources: '' };
+      var out = { meta: '', squad: '', seeds: '', schedule: '', tv: '', sources: '', roster: null, headSeed: null };
       if (!note) return out;
       var s = String(note).trim();
       if (!s) return out;
@@ -898,12 +922,149 @@
         }
       });
 
+      // 复用既有 parseNextRoster 把「出战/缺席」拆成结构化数组(分男女)。
+      // 直接传整 note 字符串 s,parseNextRoster 自身 regex 找「出战:」前缀。
+      // 注意:rankLabel 保留(「6号种子」「卫冕冠军」「WTT 提名」),gender 字段
+      // 标记 男/女/未识别, renderNextCard 按性别拆双列。失败兜底 roster=null。
+      try {
+        out.roster = parseNextRoster(s);
+        if (!out.roster) out.roster = null;
+      } catch (e) { out.roster = null; }
+
+      // 抽头号种子(国籍 + 姓名 + 年龄)。句式:
+      //   「女单头号种子为日本张本美和(18岁)」 → name=张本美和, age=18岁
+      //   「男单头号种子 王楚钦」            → name=王楚钦,   age=''
+      // 关键:不能用 [一-龥]{2,4} 一上来就贪婪捕「为日本张」,改为:
+      //   优先匹配「(...国籍?)?姓名 + (数字岁)」(有年龄时),再用 fallback 抓姓名。
+      try {
+        var hs = null;
+        var withAge = s.match(/(?:(?:男|女|混合)单)?头号种子[\s\S]{0,30}?((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})[（\(](\d+\s*岁)[）\)]/);
+        if (withAge) {
+          hs = { label: withAge[0], name: withAge[1], age: withAge[2] };
+        } else {
+          var noAge = s.match(/(?:(?:男|女|混合)单)?头号种子[^;。,，\d]{0,12}?((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})/);
+          if (noAge) hs = { label: noAge[0], name: noAge[1], age: '' };
+        }
+        // 清理:若姓名含「为」「是」「有」等连接词开头,剥掉(防贪婪误捕)
+        if (hs && /^[是为有之]/.test(hs.name)) {
+          var m2 = hs.label.match(/((?:日本|韩国|中国)?[一-龥]{2,4})/g);
+          if (m2 && m2.length > 1) hs.name = m2[m2.length - 1];
+        }
+        out.headSeed = hs;
+      } catch (e) { out.headSeed = null; }
+
       return out;
     }
 
-    // 把解析结果渲染成清晰分块(适老化:大字号、左对齐、分节标题)
+    // 把解析结果渲染成清晰分块(适老化:大字号、左对齐、分节标题)。
+    // 2026-08-28 升级:roster 可用时,出战名按男女拆两列卡,缺席按名单拆 3 张小卡,
+    // 头号种子抽单条 callout,大幅消除长文本;roster 缺失走原文 blocks 路径兜底。
     function renderNextCard(ne) {
       var p = parseNextEventNote(ne.note || '');
+
+      // 新路径:roster 有内容时走卡组化布局
+      if (p.roster && (p.roster.squad.length || p.roster.absent.length)) {
+        var html2 = '<div class="day__next day__next--structured day__next--chip">';
+
+        if (p.meta) {
+          html2 += '<div class="next__block next__block--hero">' +
+                   '<div class="next__head">赛事信息</div>' +
+                   '<div class="next__body">' + esc(p.meta) + '</div>' +
+                   '</div>';
+        }
+
+        // 出战名单:男左女右两列卡
+        if (p.roster.squad.length) {
+          var males = p.roster.squad.filter(function (s) { return s.gender === '男'; });
+          var females = p.roster.squad.filter(function (s) { return s.gender === '女'; });
+          var others = p.roster.squad.filter(function (s) { return !s.gender; });
+          html2 += '<div class="next__block">' +
+                   '<div class="next__head">出战名单</div>' +
+                   '<div class="squad-grid">';
+          if (males.length) {
+            html2 += '<div class="squad-card squad-card--male">' +
+                     '<div class="squad-card__h">男单 · ' + males.length + ' 人</div>' +
+                     '<div class="squad-card__list">';
+            males.forEach(function (m) {
+              html2 += '<div class="squad-name">' + esc(m.name) +
+                       (m.rankLabel ? '<span class="squad-rank">' + esc(m.rankLabel) + '</span>' : '') +
+                       '</div>';
+            });
+            html2 += '</div></div>';
+          }
+          if (females.length) {
+            html2 += '<div class="squad-card squad-card--female">' +
+                     '<div class="squad-card__h">女单 · ' + females.length + ' 人</div>' +
+                     '<div class="squad-card__list">';
+            females.forEach(function (f) {
+              html2 += '<div class="squad-name">' + esc(f.name) +
+                       (f.rankLabel ? '<span class="squad-rank">' + esc(f.rankLabel) + '</span>' : '') +
+                       '</div>';
+            });
+            html2 += '</div></div>';
+          }
+          if (others.length && !males.length && !females.length) {
+            html2 += '<div class="squad-card squad-card--neutral">' +
+                     '<div class="squad-card__h">出战 · ' + others.length + ' 人</div>' +
+                     '<div class="squad-card__list">';
+            others.forEach(function (o) {
+              html2 += '<div class="squad-name">' + esc(o.name) +
+                       (o.rankLabel ? '<span class="squad-rank">' + esc(o.rankLabel) + '</span>' : '') +
+                       '</div>';
+            });
+            html2 += '</div></div>';
+          }
+          html2 += '</div></div>';
+        }
+
+        // 缺席:一张张小卡,姓名 + 原因(轮休/备战/...)
+        if (p.roster.absent.length) {
+          html2 += '<div class="next__block">' +
+                   '<div class="next__head">缺席 · ' + p.roster.absent.length + ' 人</div>' +
+                   '<div class="absent-list">';
+          p.roster.absent.forEach(function (a) {
+            html2 += '<div class="absent-card">' +
+                     '<span class="absent-card__name">' + esc(a.name) + '</span>' +
+                     (a.reason ? '<span class="absent-card__reason">' + esc(a.reason) + '</span>' : '') +
+                     '</div>';
+          });
+          html2 += '</div></div>';
+        }
+
+        // 头号种子:单条 callout,抓眼琥珀底
+        if (p.headSeed && p.headSeed.name) {
+          html2 += '<div class="next__block">' +
+                   '<div class="next__head">头号种子</div>' +
+                   '<div class="next__callout"><strong>' + esc(p.headSeed.name) + '</strong>' +
+                   (p.headSeed.age ? ' <span class="next__callout-meta">(' + esc(p.headSeed.age) + ')</span>' : '') +
+                   (p.headSeed.label && /单/.test(p.headSeed.label) ? '' : ' · 女单 1 号种子') +
+                   '</div></div>';
+        }
+
+        // 时间线 / 直播 / 来源保留(原 schedule/tv/sources)
+        var tailBlocks = [];
+        if (p.schedule) tailBlocks.push({ key: 'schedule', label: '赛程时间线', text: p.schedule });
+        if (p.tv)       tailBlocks.push({ key: 'tv',       label: '直播安排',   text: p.tv });
+        if (p.sources)  tailBlocks.push({ key: 'sources',  label: '信息来源',   text: p.sources });
+        tailBlocks.forEach(function (b) {
+          html2 += '<div class="next__block">';
+          html2 += '<div class="next__head">' + b.label + '</div>';
+          if (b.key === 'schedule' && b.text.indexOf('→') >= 0) {
+            var steps = b.text.split('→').map(function (x) { return x.trim(); }).filter(Boolean);
+            html2 += '<ol class="next__timeline">';
+            steps.forEach(function (st) { html2 += '<li>' + esc(st) + '</li>'; });
+            html2 += '</ol>';
+          } else {
+            html2 += '<div class="next__body">' + esc(b.text) + '</div>';
+          }
+          html2 += '</div>';
+        });
+
+        html2 += '</div>';
+        return html2;
+      }
+
+      // 旧路径:roster 缺失,走原 blocks 渲染(向后兼容)
       var blocks = [];
       if (p.meta)     blocks.push({ key: 'meta',     label: '🏟️ 赛事信息',  text: p.meta });
       if (p.squad)    blocks.push({ key: 'squad',    label: '🇨🇳 国乒阵容', text: p.squad });
@@ -1024,6 +1185,90 @@
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     });
 
+    // 视频块单场 note 解析:把 ~200 字长文拆成 lead(对阵位置) + chips(5盘3胜/对位/影院) + 渠道提示 + 后续预告。
+    // 解析失败兜底:返回单 chips 字段缺失的对象,renderMatchNoteHtml 看空就走原文 esc,不破不立。
+    // 解析模式设计原则:对采集端而言输入仍是一坨 note 长文本,**契约零改动**;
+    // 对外婆 UI 而言:红 risk chip「电视看不到」由 .day__video-warn 顶置,这里只补块内局部 chip。
+    function parseMatchNote(note) {
+      var out = { lead: '', chips: [], platformHint: '', followUp: '' };
+      if (!note) return out;
+      var s = String(note).trim();
+      if (!s) return out;
+
+      // 1. lead:「中国选手 X 代表 Y 出战,日本选手 Z 代表 W 在阵」一句(直到首个 ,。;。)
+      var leadM = s.match(/^[\s\S]*?(?:出战|在阵|参赛)[,，]?\s*/);
+      if (leadM) {
+        var tail = leadM[0];
+        // 截到下个标点
+        var cut = tail.search(/[,，;；。]/);
+        if (cut > 0) tail = tail.slice(0, cut);
+        out.lead = tail.replace(/[,，;。]+$/, '').trim();
+      }
+      // 兜底:lead 过长就截前 60 字
+      if (out.lead.length > 70) out.lead = out.lead.slice(0, 70).replace(/[,，;。]+$/, '').trim();
+
+      // 2. chips 集合:5盘3胜 / 未必直接对位 / 影院同步+票价 / 电视不转播
+      function pushChip(key, label, tone) {
+        if (label && !out.chips.find(function (c) { return c.key === key; })) {
+          out.chips.push({ key: key, label: label, tone: tone || 'gray' });
+        }
+      }
+      if (/5\s*盘\s*3\s*胜/.test(s)) pushChip('T5', '5盘3胜', 'red');
+      if (/(未必|不\s*[一]?定)\s*(直接|一定)?\s*对位|未必.*对位/.test(s)) pushChip('NOPP', '未必直接对位', 'gray');
+      var cinemaM = s.match(/影院[^\.;。]*?(?:直播|大屏)[^\.;。]{0,30}?/);
+      if (cinemaM) {
+        var cl = '影院同步';
+        var priceM = s.match(/(\d+\s*[-~]\s*\d+\s*元|票价[^\.;。]*?\d+\s*元)/);
+        if (priceM) cl += ' ' + priceM[0].replace(/票价/, '').trim();
+        pushChip('CINEMA', cl, 'amber');
+      }
+      if (/(?:电视|央视)[^\.;。]*?(?:不\s*转播|看不到|不\s*播)/.test(s)) pushChip('CCTV_NO', '电视不转播', 'red');
+
+      // 3. platformHint:「手机/平板/电脑打开 XX」一句
+      var platM = s.match(/(手机\/平板\/电脑[^\.;。]*)/);
+      if (platM) {
+        out.platformHint = platM[1].replace(/[,，;。]+$/, '').trim();
+      }
+
+      // 4. followUp:「若 ... 」收尾一段(简短),最长 50 字
+      var fuM = s.match(/(若[\s\S]{0,80}?(?:直[播]|直播|优酷)[^\.;。]*?)(?:[。;；,]|$)/);
+      if (fuM) {
+        out.followUp = fuM[1].trim();
+        if (out.followUp.length > 60) {
+          out.followUp = out.followUp.slice(0, 60).replace(/[,，;。]+$/, '') + '…';
+        }
+      }
+
+      return out;
+    }
+
+    // 把 parseMatchNote 结果渲染为 chip + 卡片化 HTML
+    function renderMatchNoteHtml(parsed) {
+      if (!parsed) return '';
+      var html = '';
+      // chips
+      if (parsed.chips && parsed.chips.length) {
+        html += '<div class="vmatch__chips">';
+        parsed.chips.forEach(function (c) {
+          html += '<span class="vchip vchip--' + c.tone + '">' + esc(c.label) + '</span>';
+        });
+        html += '</div>';
+      }
+      // lead(简短 1-2 行)
+      if (parsed.lead) {
+        html += '<div class="vmatch__lead">' + esc(parsed.lead) + '</div>';
+      }
+      // platformHint(独立行,再次强调用手机/平板/电脑打开)
+      if (parsed.platformHint) {
+        html += '<div class="vmatch__hint">' + esc(parsed.platformHint) + '</div>';
+      }
+      // followUp(若晋级/若胜/若进一步 — 单行琥珀 callout)
+      if (parsed.followUp) {
+        html += '<div class="vmatch__follow"><span class="vchip vchip--amber">后续</span><span class="vmatch__follow-text">' + esc(parsed.followUp) + '</span></div>';
+      }
+      return html;
+    }
+
     // 视频平台直播块(咪咕/央视频):仅当天无央视电视直播时兜底显示(见 render 调用点)。
     // 明确标注「电视上看不到,需用手机/平板/电脑看」,与外婆的央视电视卡视觉区分(紫色强调)。
     // 字段与 day.matches 对齐(time/platform/tournament/stage/nation*/player*/player*Info/note),
@@ -1043,6 +1288,12 @@
                          (m.stage ? esc(m.stage) : '');
         var homeInfo = ordinalizeInfo(m.playerHomeInfo);
         var awayInfo = ordinalizeInfo(m.playerAwayInfo);
+        var noteParsed = parseMatchNote(m.note);
+        var noteHtml = renderMatchNoteHtml(noteParsed);
+        // 解析失败(完全无 chips/lead/hint/follow)时回退原文,绝不丢信息
+        if (!noteHtml && m.note) {
+          noteHtml = '<div class="vmatch__note">' + esc(m.note) + '</div>';
+        }
         return '<article class="vmatch' + (live ? ' vmatch--live' : '') + '"' + scopeAttr + '>' +
           (eventLabel ? '<div class="vmatch__event">' + eventLabel + '</div>' : '') +
           '<div class="vmatch__bar">' +
@@ -1063,7 +1314,7 @@
               '<span class="player__meta">' + awayInfo + '</span>' +
             '</div>' +
           '</div>' +
-          (m.note ? '<div class="vmatch__note">' + esc(m.note) + '</div>' : '') +
+          noteHtml +
         '</article>';
       }).join('');
       return '<div class="day__video" role="region" aria-label="视频平台直播(咪咕/央视频)">' +
