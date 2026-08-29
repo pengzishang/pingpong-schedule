@@ -931,29 +931,130 @@
         if (!out.roster) out.roster = null;
       } catch (e) { out.roster = null; }
 
-      // 抽头号种子(国籍 + 姓名 + 年龄)。句式:
-      //   「女单头号种子为日本张本美和(18岁)」 → name=张本美和, age=18岁
-      //   「男单头号种子 王楚钦」            → name=王楚钦,   age=''
-      // 关键:不能用 [一-龥]{2,4} 一上来就贪婪捕「为日本张」,改为:
-      //   优先匹配「(...国籍?)?姓名 + (数字岁)」(有年龄时),再用 fallback 抓姓名。
+      // 抽头号种子 / 卫冕冠军(国籍 + 姓名 + 年龄)。句式:
+      //   「女单头号种子为日本张本美和(18岁)」 → name=日本张本美和, age=18岁(渲染剥国籍、配国旗)
+      //   「卫冕冠军孙颖莎」                   → name=孙颖莎,      age=''
+      //   「卫冕冠军·女单1号种子」(无真实姓名) → name='' → 渲染「待官方公布」
+      // 关键改动(2026-08-29,子上反馈「头号种子又看不到了」):
+      //   ① 种子词扩展:头号种子 / 一号种子 / 1号种子 / 卫冕冠军 / 卫冕女单 / 卫冕男单 / 卫冕
+      //   ② 只在种子词**之后**的窗口找姓名(旧版把种子词本身也捕进来了)
+      //   ③ 跳过「冠军/种子/女单/号种子…」等分类停用词,避免把分类词当人名
+      //   ④ 窗口截到第一个句读(。;；),防止把下一句里的「日本队」「主力」误当种子
       try {
         var hs = null;
-        var withAge = s.match(/(?:(?:男|女|混合)单)?头号种子[\s\S]{0,30}?((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})[（\(](\d+\s*岁)[）\)]/);
-        if (withAge) {
-          hs = { label: withAge[0], name: withAge[1], age: withAge[2] };
-        } else {
-          var noAge = s.match(/(?:(?:男|女|混合)单)?头号种子[^;。,，\d]{0,12}?((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})/);
-          if (noAge) hs = { label: noAge[0], name: noAge[1], age: '' };
-        }
-        // 清理:若姓名含「为」「是」「有」等连接词开头,剥掉(防贪婪误捕)
-        if (hs && /^[是为有之]/.test(hs.name)) {
-          var m2 = hs.label.match(/((?:日本|韩国|中国)?[一-龥]{2,4})/g);
-          if (m2 && m2.length > 1) hs.name = m2[m2.length - 1];
+        // 优先级:「头号种子/一号种子/1号种子」>「卫冕冠军/卫冕女单/卫冕男单/卫冕」。
+        // 否则阵容里「女单孙颖莎(卫冕冠军)」的 rankLabel 会抢先命中,把后面的队员名当种子。
+        var seedWord = s.match(/(头号种子|一号种子|1\s*号种子)/) ||
+                       s.match(/(卫冕冠军|卫冕女单|卫冕男单|卫冕)/);
+        if (seedWord) {
+          var seg = s.slice(seedWord.index + seedWord[0].length);
+          var segEnd = seg.search(/[。;；]/);
+          if (segEnd > -1) seg = seg.slice(0, segEnd);
+          if (seg.length > 30) seg = seg.slice(0, 30);
+          // 分类停用词(含子串匹配):这些是标签不是人名
+          var STOP_RE = /冠军|种子|单打|双打|混双|男单|女单|男双|女双|团体|选手|队|头号|一号|1号|卫冕|决赛|号/;
+          // ① 优先:姓名 + (年龄)
+          var withAge = seg.match(/((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})[（\(](\d+\s*岁)[）\)]/);
+          if (withAge) {
+            hs = { label: seg.slice(0, withAge.index + withAge[0].length), name: withAge[1], age: withAge[2] };
+          } else {
+            // ② 无年龄:取窗口中第一个非停用词的中文姓名(2-4 字)
+            var nameRe = /((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})/g;
+            var nm, found = '';
+            while ((nm = nameRe.exec(seg)) !== null) {
+              var cand = nm[1];
+              var bare = cand.replace(/^(日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)/, '');
+              if (bare.length < 2) continue;
+              if (STOP_RE.test(bare)) continue;
+              found = cand;
+              break;
+            }
+            hs = { label: seg, name: found, age: '' };
+          }
         }
         out.headSeed = hs;
       } catch (e) { out.headSeed = null; }
 
       return out;
+    }
+
+    // 「赛事信息」段(p.meta)拆成结构化块 —— 适老化铁律「不要大段文字」。
+    // 原文形如:
+    //   WTT澳门冠军赛2026(中国澳门·东亚运动会体育馆,9/8-9/13,单打1000积分+80万美元总奖金,仅设男女单打各32人正赛)。
+    //   日本队全主力(张本智和/松岛辉空/张本美和/早田希娜)压境, 韩国队全员弃赛。男双/女双各2对教练组推荐。...
+    // 拆为 title(赛事名) + facts[](括号内地点/日期/奖金/赛制,带图标) + points[](括号后逐条要点)。
+    // 关键:points 用 splitOutsideParens 按 。/;/； 切,括号内的「/」(如选手名单)不会被误劈。
+    // 解析失败(ok=false)调用方回退 esc 原文,绝不丢内容。
+    function parseEventMeta(meta) {
+      var out = { title: '', facts: [], points: [], ok: false, raw: meta || '' };
+      var s = String(meta || '').trim();
+      if (!s) return out;
+
+      // 1. title = 第一个左括号之前(赛事名);无括号则取首句
+      var parenIdx = s.search(/[（(]/);
+      if (parenIdx > 0) out.title = s.slice(0, parenIdx).trim();
+      else {
+        var dotIdx = s.search(/[。;；]/);
+        out.title = (dotIdx > 0 ? s.slice(0, dotIdx) : s).trim();
+      }
+
+      // 2. facts = 第一个括号内的 key facts,按 ,/、 拆后按关键词归类(地点/日期/奖金/赛制)
+      var pm = s.match(/[（(]([^)）]*)[)）]/);
+      if (pm) {
+        splitOutsideParens(pm[1], ',，、').forEach(function (raw) {
+          var v = raw.trim();
+          if (!v) return;
+          if (/馆|中心|体育场|球场|地点/.test(v))      out.facts.push({ icon: '📍', value: v });
+          else if (/\d+\s*\/\s*\d+|\d+\s*月|月\s*\d+/.test(v)) out.facts.push({ icon: '📅', value: v });
+          else if (/元|奖金|积分|美元/.test(v))        out.facts.push({ icon: '💰', value: v });
+          else                                          out.facts.push({ icon: '🎯', value: v });
+        });
+      }
+
+      // 3. points = 括号之后的剩余内容,按 。/;/； 拆成逐条要点(每条独立一行,一眼扫完)
+      var after = '';
+      if (pm) after = s.slice(pm.index + pm[0].length).trim();
+      else if (parenIdx > 0) after = s.slice(parenIdx).trim();
+      else after = s;
+      after = after.replace(/^[，,。;；\s]+/, '').trim();
+      if (after) {
+        // 逗号也拆(括号外):「日本队全主力(...)压境, 韩国队全员弃赛」应成两条独立要点,
+        // 而不是糊成一行。括号内「/」(选手名单)仍受 splitOutsideParens 保护不被劈开。
+        splitOutsideParens(after, '。;；,，').forEach(function (raw) {
+          var v = raw.trim().replace(/^[，,、\s]+/, '').replace(/[，,、\s]+$/, '').trim();
+          if (v) out.points.push(v);
+        });
+      }
+
+      out.ok = !!(out.title || out.facts.length || out.points.length);
+      return out;
+    }
+
+    // 把 parseEventMeta 结果渲染成 title + facts 行 + points 列表;ok=false 返回空(调用方回退原文)
+    function renderEventMetaHtml(parsed) {
+      if (!parsed || !parsed.ok) return '';
+      var h = '';
+      if (parsed.title) h += '<div class="emeta__title">' + esc(parsed.title) + '</div>';
+      if (parsed.facts.length) {
+        h += '<ul class="emeta__facts">';
+        parsed.facts.forEach(function (f) {
+          h += '<li class="emeta__fact">' +
+                 '<span class="emeta__icon">' + f.icon + '</span>' +
+                 '<span class="emeta__val">' + esc(f.value) + '</span>' +
+               '</li>';
+        });
+        h += '</ul>';
+      }
+      if (parsed.points.length) {
+        h += '<ul class="emeta__points">';
+        parsed.points.forEach(function (p) {
+          // 含「队」的要点(日本队/韩国队等对手动态)加红边强调,一眼区分于赛制补充
+          var isTeam = /队/.test(p);
+          h += '<li class="emeta__point' + (isTeam ? ' emeta__point--team' : '') + '">' + esc(p) + '</li>';
+        });
+        h += '</ul>';
+      }
+      return h;
     }
 
     // 把解析结果渲染成清晰分块(适老化:大字号、左对齐、分节标题)。
@@ -967,9 +1068,12 @@
         var html2 = '<div class="day__next day__next--structured day__next--chip">';
 
         if (p.meta) {
+          // 赛事信息大段 → 拆 title + facts(📍📅💰🎯) + points 要点列表;失败回退原文
+          var em = parseEventMeta(p.meta);
+          var metaBody = em.ok ? renderEventMetaHtml(em) : esc(p.meta);
           html2 += '<div class="next__block next__block--hero">' +
                    '<div class="next__head">赛事信息</div>' +
-                   '<div class="next__body">' + esc(p.meta) + '</div>' +
+                   '<div class="next__body">' + metaBody + '</div>' +
                    '</div>';
         }
 
@@ -1031,13 +1135,24 @@
           html2 += '</div></div>';
         }
 
-        // 头号种子:单条 callout,抓眼琥珀底
-        if (p.headSeed && p.headSeed.name) {
+        // 头号种子:单条 callout,抓眼琥珀底(字号加大,见 .next__callout)。
+        // 只有分类词(「卫冕冠军·女单1号种子」)而无真实姓名时显示「待官方公布」——
+        // 子上 2026-08-29 反馈「头号种子又看不到了」:空泛标签 = 老人不知道看谁。
+        if (p.headSeed) {
+          var hsName = p.headSeed.name || '';
+          var hsFlag = '';
+          var natM = hsName.match(/^(日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)/);
+          if (natM) {
+            hsFlag = FLAGS[natM[1]] || '';
+            hsName = hsName.slice(natM[0].length);
+          }
           html2 += '<div class="next__block">' +
                    '<div class="next__head">头号种子</div>' +
-                   '<div class="next__callout"><strong>' + esc(p.headSeed.name) + '</strong>' +
+                   '<div class="next__callout">' +
+                   (hsName
+                     ? '<strong>' + (hsFlag ? hsFlag + ' ' : '') + esc(hsName) + '</strong>'
+                     : '<strong class="next__callout--tbd">待官方公布</strong>') +
                    (p.headSeed.age ? ' <span class="next__callout-meta">(' + esc(p.headSeed.age) + ')</span>' : '') +
-                   (p.headSeed.label && /单/.test(p.headSeed.label) ? '' : ' · 女单 1 号种子') +
                    '</div></div>';
         }
 
@@ -1087,11 +1202,35 @@
           html += '<ol class="next__timeline">';
           steps.forEach(function (st) { html += '<li>' + esc(st) + '</li>'; });
           html += '</ol>';
+        } else if (b.key === 'meta') {
+          // 赛事信息大段 → 拆 title + facts + points;失败回退原文
+          var em2 = parseEventMeta(b.text);
+          html += '<div class="next__body">' + (em2.ok ? renderEventMetaHtml(em2) : esc(b.text)) + '</div>';
         } else {
           html += '<div class="next__body">' + esc(b.text) + '</div>';
         }
         html += '</div>';
       });
+
+      // 头号种子 callout:旧路径(no roster)同样要显示,否则种子信息整块消失
+      if (p.headSeed) {
+        var hsName2 = p.headSeed.name || '';
+        var hsFlag2 = '';
+        var natM2 = hsName2.match(/^(日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)/);
+        if (natM2) {
+          hsFlag2 = FLAGS[natM2[1]] || '';
+          hsName2 = hsName2.slice(natM2[0].length);
+        }
+        html += '<div class="next__block">' +
+                  '<div class="next__head">头号种子</div>' +
+                  '<div class="next__callout">' +
+                  (hsName2
+                    ? '<strong>' + (hsFlag2 ? hsFlag2 + ' ' : '') + esc(hsName2) + '</strong>'
+                    : '<strong class="next__callout--tbd">待官方公布</strong>') +
+                  (p.headSeed.age ? ' <span class="next__callout-meta">(' + esc(p.headSeed.age) + ')</span>' : '') +
+                  '</div></div>';
+      }
+
       html += '</div>';
       return html;
     }
@@ -1374,6 +1513,88 @@
       };
     }
 
+    // 录像/典藏节目长文本(200+ 字赛事回顾)拆结构 —— 适老化铁律「不要大段文字」。
+    // 输入如「德国杯1/8决赛,樊振东代表的德国杜塞尔多夫客场1-3不敌卫冕冠军奥克森豪森,止步16强(...):
+    //         第一盘卡尔伯格0-3户上隼辅(8-11/8-11/6-11),第二盘...,决胜局...——这是户上隼辅职业生涯第一次赢樊振东」
+    // 拆成 headline(赛事名/阶段) + result(关键结果) + boards[](逐盘比分) + decider(决胜) + highlight(故事句)。
+    // 解析门槛:长度 ≥50 且含「第X盘」可拆结构;否则 ok=false,调用方回退原文 esc,绝不丢内容。
+    function parseRecapProgram(program) {
+      var out = { headline: '', result: '', boards: [], decider: '', highlight: '', ok: false, raw: program || '' };
+      var s = String(program || '').trim();
+      if (!s) return out;
+      if (s.length < 50 || !/第[一二三四五六七八九十\d]+盘/.test(s)) return out;
+
+      // 1. headline = 开头到第一个逗号(赛事名 + 阶段),如「德国杯1/8决赛」
+      var firstComma = s.search(/[,，]/);
+      if (firstComma > 0) out.headline = s.slice(0, firstComma).trim();
+
+      // 2. rest = 逐盘段落起点之后的内容;result = 该起点之前(去掉赛制注记括号)
+      var rest = firstComma > 0 ? s.slice(firstComma + 1) : s;
+      var boardIdx = rest.search(/第[一二三四五六七八九十\d]+盘/);
+      if (boardIdx < 0) return out;
+      var pre = rest.slice(0, boardIdx).trim();
+      var colonIdx = pre.search(/[：:]/);
+      if (colonIdx > -1) pre = pre.slice(0, colonIdx);
+      pre = pre.replace(/[（(][^)）]*[)）]\s*$/, '').trim();  // 去尾部赛制注记「(单场淘汰,输一场就回家)」
+      out.result = pre.replace(/[,，;；。]+$/, '').trim();
+
+      // 3. boards:逐盘「第X盘 选手A 比分 选手B (局分)」
+      //    mm[4] 用 [^,，（(]* 贪婪吃到左括号前,避免可选局分组让非贪婪捕获成空。
+      var re = /第([一二三四五六七八九十\d]+)盘\s*([^,，]*?)(\d+\s*-\s*\d+)\s*([^,，（(]*)(?:[（(]([^)）]*)[)）])?/g;
+      var mm, lastEnd = 0;
+      while ((mm = re.exec(rest)) !== null) {
+        var players = ((mm[2] || '').trim() + ' ' + (mm[3] || '').trim() + ' ' + (mm[4] || '').trim()).trim();
+        out.boards.push({
+          order: '第' + mm[1] + '盘',
+          players: players,
+          score: (mm[3] || '').trim(),
+          sets: (mm[5] || '').trim()
+        });
+        lastEnd = re.lastIndex;
+      }
+      if (!out.boards.length) return out;
+
+      // 4. 收尾:最后一个 board 之后的残留文本。有破折号则前半为「决胜」、后半为「故事句」。
+      var tail = lastEnd > 0 ? rest.slice(lastEnd) : '';
+      tail = tail.replace(/^[,，;；\s]+/, '').trim();
+      if (tail) {
+        var dashIdx = tail.search(/——|--/);
+        if (dashIdx > -1) {
+          out.decider = tail.slice(0, dashIdx).replace(/[,，;；\s]+$/, '').trim();
+          out.highlight = tail.slice(dashIdx).replace(/^[-—]+/, '').trim();
+        } else {
+          out.decider = tail.replace(/[,，;；\s]+$/, '').trim();
+        }
+        if (out.highlight.length > 70) out.highlight = out.highlight.slice(0, 70) + '…';
+        if (out.decider.length > 60) out.decider = out.decider.slice(0, 60) + '…';
+      }
+
+      out.ok = true;
+      return out;
+    }
+
+    // 把 parseRecapProgram 结果渲染成分层 HTML;ok=false 时返回空(调用方回退原文)
+    function renderRecapHtml(parsed) {
+      if (!parsed || !parsed.ok) return '';
+      var h = '';
+      if (parsed.headline) h += '<div class="prog__headline">' + esc(parsed.headline) + '</div>';
+      if (parsed.result)   h += '<div class="prog__result">' + esc(parsed.result) + '</div>';
+      if (parsed.boards.length) {
+        h += '<ul class="prog__boards">';
+        parsed.boards.forEach(function (b) {
+          h += '<li class="prog__board">' +
+                 '<span class="prog__board-order">' + esc(b.order) + '</span>' +
+                 '<span class="prog__board-players">' + esc(b.players) + '</span>' +
+                 (b.sets ? '<span class="prog__board-sets">' + esc(b.sets) + '</span>' : '') +
+               '</li>';
+        });
+        h += '</ul>';
+      }
+      if (parsed.decider)   h += '<div class="prog__decider">' + esc(parsed.decider) + '</div>';
+      if (parsed.highlight) h += '<div class="prog__highlight">' + esc(parsed.highlight) + '</div>';
+      return h;
+    }
+
     // 空窗期长文本条目列表(原 render 内 renderItemList,抽成纯函数返回字符串)
     function renderItemListHtml(sectionCls, headLabel, list) {
       if (!list.length) return '';
@@ -1381,12 +1602,16 @@
                 '<div class="pending__section-head">' + esc(headLabel) + '</div>' +
                 '<ul class="pending__list">';
       list.forEach(function (it) {
+        // 长文赛事回顾(含「第X盘」)走结构化三层;短节目名保持原样单行
+        var rp = parseRecapProgram(it.program);
+        var progHtml = rp.ok ? renderRecapHtml(rp)
+                             : '<div class="prog__text">' + esc(it.program) + '</div>';
         h += '<li class="pending__row">' +
                '<div class="pending__meta">' +
                  '<span class="pending__time">' + esc(it.time) + '</span>' +
                  '<span class="pending__chan">' + esc(it.channel || 'CCTV') + '</span>' +
                '</div>' +
-               '<div class="pending__prog">' + esc(it.program) + '</div>' +
+               '<div class="pending__prog">' + progHtml + '</div>' +
              '</li>';
       });
       h += '</ul></div>';

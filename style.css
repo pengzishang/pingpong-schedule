@@ -994,14 +994,117 @@
       background: rgba(214,40,40,.08); padding: .15rem .55rem; border-radius: .6rem;
     }
 
-    /* 头号种子:单条 callout,琥珀底强调(对视觉最显眼) */
+    /* 头号种子:单条 callout,琥珀底强调。
+       2026-08-29 子上反馈「头号种子又看不到了」→ 字号整体放大(1.05→1.18,strong 1.15→1.5)、
+       左侧色条加粗(6px→8px)、内边距加大,确保老人一眼扫到。 */
     .next__callout {
-      background: var(--amber-soft); border: 1px solid #f0d68a; border-left: 6px solid var(--amber);
-      border-radius: .6rem; padding: .65rem .85rem;
-      font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.5;
+      background: var(--amber-soft); border: 1px solid #f0d68a; border-left: 8px solid var(--amber);
+      border-radius: .6rem; padding: .8rem 1rem;
+      font-size: 1.18rem; font-weight: 600; color: var(--ink); line-height: 1.5;
     }
-    .next__callout strong { font-weight: 800; color: var(--amber); font-size: 1.15rem; }
-    .next__callout-meta { font-size: .92rem; color: var(--ink-2); font-weight: 600; margin-left: .2rem; }
+    .next__callout strong { font-weight: 800; color: var(--amber); font-size: 1.5rem; }
+    /* 没抽到真实姓名时显示「待官方公布」:弱化为次级灰,不加粗误导 */
+    .next__callout strong.next__callout--tbd { color: var(--ink-2); font-size: 1.15rem; font-weight: 700; }
+    .next__callout-meta { font-size: 1rem; color: var(--ink-2); font-weight: 600; margin-left: .2rem; }
+
+    /* ============================================================
+       录像/典藏节目回顾拆层 (prog__*)  —— 2026-08-29 适老化层次化
+       铁律:赛事名最大最重、比分等宽对齐、决胜/故事句用色块区分层级,
+       杜绝 200+ 字糊成一坨。零动效、高对比、大字号。
+       ============================================================ */
+    .prog__text {
+      font-size: .98rem; font-weight: 600; color: var(--ink-2); line-height: 1.5;
+      word-break: break-word;
+    }
+    .prog__headline {
+      font-size: 1.08rem; font-weight: 800; color: var(--navy);
+      line-height: 1.45; word-break: break-word;
+    }
+    /* 关键结果:中国红左边条,一眼看到「谁输谁赢」 */
+    .prog__result {
+      font-size: .98rem; font-weight: 700; color: var(--red);
+      line-height: 1.5; margin-top: .25rem;
+      padding: .2rem .55rem; border-left: 3px solid var(--red);
+      word-break: break-word;
+    }
+    .prog__boards {
+      list-style: none; margin-top: .4rem;
+      display: flex; flex-direction: column; gap: .25rem;
+    }
+    /* 逐盘一行:盘次 chip + 选手比分(可伸缩) + 局分(等宽) */
+    .prog__board {
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .5rem;
+      padding: .28rem .55rem;
+      background: rgba(14,42,71,.045); border-radius: .4rem;
+    }
+    .prog__board-order {
+      flex: 0 0 auto;
+      font-size: .85rem; font-weight: 800; color: var(--navy);
+      background: rgba(14,42,71,.09); padding: .1rem .45rem; border-radius: .35rem;
+      line-height: 1.45;
+    }
+    .prog__board-players {
+      flex: 1 1 auto; min-width: 0;
+      font-size: .96rem; font-weight: 700; color: var(--ink); line-height: 1.45;
+      word-break: break-word;
+    }
+    .prog__board-sets {
+      flex: 0 0 auto;
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: .82rem; font-weight: 600; color: var(--ink-2); line-height: 1.45;
+    }
+    /* 决胜盘:红淡底强调(这是比赛结果) */
+    .prog__decider {
+      font-size: .96rem; font-weight: 700; color: var(--ink);
+      margin-top: .35rem; padding: .32rem .6rem;
+      background: rgba(214,40,40,.06); border-left: 3px solid var(--red);
+      border-radius: .35rem; line-height: 1.5; word-break: break-word;
+    }
+    /* 故事句(如「户上隼辅职业生涯第一次赢樊振东」):琥珀底,全卡最抓眼的一句 */
+    .prog__highlight {
+      font-size: .96rem; font-weight: 700; color: #8a4b00;
+      margin-top: .35rem; padding: .38rem .65rem;
+      background: var(--amber-soft); border: 1px solid #f0d68a;
+      border-radius: .45rem; line-height: 1.55; word-break: break-word;
+    }
+
+    /* ============================================================
+       下一站「赛事信息」拆 key-value (emeta__*)  —— 2026-08-29
+       赛事名独立大标题 + 📍📅💰🎯 四行 facts + 逐条 points,
+       替代原来「一行糊 250 字」的 next__body。
+       ============================================================ */
+    .emeta__title {
+      font-size: 1.18rem; font-weight: 800; color: var(--navy);
+      line-height: 1.4; margin-bottom: .45rem; word-break: break-word;
+    }
+    .emeta__facts { list-style: none; display: flex; flex-direction: column; gap: .28rem; }
+    .emeta__fact {
+      display: flex; align-items: flex-start; gap: .5rem;
+      font-size: 1.0rem; font-weight: 600; color: var(--ink); line-height: 1.5;
+    }
+    .emeta__icon { flex: 0 0 auto; font-size: 1.06rem; line-height: 1.5; }
+    .emeta__val { flex: 1 1 auto; min-width: 0; word-break: break-word; }
+    .emeta__points {
+      list-style: none; margin-top: .55rem; padding-top: .5rem;
+      border-top: 1px dashed rgba(14,42,71,.18);
+      display: flex; flex-direction: column; gap: .32rem;
+    }
+    .emeta__point {
+      position: relative; padding-left: .9rem;
+      font-size: .98rem; font-weight: 600; color: var(--ink-2); line-height: 1.55;
+      word-break: break-word;
+    }
+    .emeta__point::before {
+      content: '·'; position: absolute; left: .3rem; top: 0;
+      font-weight: 800; color: var(--ink-2);
+    }
+    /* 对手动态(日本队/韩国队…):红边红底升权,与「赛制补充」灰点明显区分 */
+    .emeta__point--team {
+      color: var(--ink); font-weight: 700;
+      background: var(--red-soft); border-left: 3px solid var(--red);
+      border-radius: .4rem; padding: .32rem .6rem .32rem .7rem;
+    }
+    .emeta__point--team::before { content: ''; }
 
     /* ---- 临时样式兜底 (避免新元素无样式) ---- */
     .day__next--chip .next__block { border-top: none; }
