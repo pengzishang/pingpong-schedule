@@ -12,8 +12,11 @@
       if (de) de.textContent = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 ' +
         '星期' + '日一二三四五六'.charAt(now.getDay());
     }
-    tick();
-    setInterval(tick, 1000);
+    // 浏览器才跑;Node(node --test)下 document 未定义,整段 no-op
+    if (typeof document !== 'undefined') {
+      tick();
+      setInterval(tick, 1000);
+    }
 
     // ---- 国旗映射(国籍 → 国旗 emoji) ----
     // ⚠️ 地区键(中国香港/中国澳门/中国台北)必须排在「中国」之前,否则 flagFor 遍历会被「中国」短路
@@ -185,11 +188,14 @@
         }
       });
     }
-    boot();   // 启动加载(含缓存瞬显 + 渐进式渲染 + 状态机)
-    // 赛中比分每 60s 轮询一次,直播中的比赛分数自动更新(配合刷新链写入的 live 字段)
-    setInterval(function () {
-      loadData().then(function (d) { renderFull(d, { fromPoll: true }); writeCache(d); }).catch(function () {});
-    }, 60000);
+    // 同上:浏览器才启动,Node 测试环境跳过(避免触发 fetch / DOM 挂载)
+    if (typeof document !== 'undefined') {
+      boot();   // 启动加载(含缓存瞬显 + 渐进式渲染 + 状态机)
+      // 赛中比分每 60s 轮询一次,直播中的比赛分数自动更新(配合刷新链写入的 live 字段)
+      setInterval(function () {
+        loadData().then(function (d) { renderFull(d, { fromPoll: true }); writeCache(d); }).catch(function () {});
+      }, 60000);
+    }
 
     // ---- 直播中自动判定:根据当前时间,标记正在进行的比赛 ----
     function parseDt(dateStr, timeStr) {
@@ -1339,15 +1345,18 @@
         });
       });
     }
-    document.getElementById('filter').addEventListener('click', function (e) {
-      var btn = e.target.closest('.filter__btn');
-      if (!btn) return;
-      document.querySelectorAll('.filter__btn').forEach(function (b) { b.classList.remove('is-active'); });
-      btn.classList.add('is-active');
-      applyFilter(btn.dataset.scope);
-      // 切换 tab 时回到页面最顶上,避免停在原滚动位置
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    });
+    // 同上:Node 下跳过事件绑定(没有 #filter 元素,直接绑定会 TypeError)
+    if (typeof document !== 'undefined') {
+      document.getElementById('filter').addEventListener('click', function (e) {
+        var btn = e.target.closest('.filter__btn');
+        if (!btn) return;
+        document.querySelectorAll('.filter__btn').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        applyFilter(btn.dataset.scope);
+        // 切换 tab 时回到页面最顶上,避免停在原滚动位置
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      });
+    }
 
     // 视频块单场 note 解析:把 ~200 字长文拆成 lead(对阵位置) + chips(5盘3胜/对位/影院) + 渠道提示 + 后续预告。
     // 解析失败兜底:返回单 chips 字段缺失的对象,renderMatchNoteHtml 看空就走原文 esc,不破不立。
@@ -1979,4 +1988,61 @@
         });
       }, { root: null, rootMargin: '0px 0px 400px 0px', threshold: 0 });
       io.observe(ph);
+    }
+
+    // ---- 测试支持 --------------------------------------------------------
+    // Node(node --test)下导出纯逻辑与渲染构建层函数,供 tests/ 直接 require。
+    // 浏览器里 `module` 未定义 → 整段跳过,对线上零影响(部署产物行为完全不变)。
+    // 配合上方 3 处 `typeof document !== 'undefined'` 守卫,app.js 才能在 Node 里被 require
+    // 而不触发 DOM 操作。新增函数后记得同步补进这个清单。
+    if (typeof module !== 'undefined' && module.exports) {
+      module.exports = {
+        // 铁律判定
+        belongsToCN: belongsToCN,
+        isCCTVChannel: isCCTVChannel,
+        riskSaysNoTV: riskSaysNoTV,
+        isTVMatch: isTVMatch,
+        isTVReplay: isTVReplay,
+        dayHasContent: dayHasContent,
+        isReplayPassed: isReplayPassed,
+        isLiveMatch: isLiveMatch,
+        replayTargetDate: replayTargetDate,
+        mergeVideo: mergeVideo,
+        // 国旗
+        flagFor: flagFor,
+        flagsForSide: flagsForSide,
+        crossFlagsForPair: crossFlagsForPair,
+        FLAGS: FLAGS,
+        // 长文本解析(2026-08-28 / 08-29 两轮层次化)
+        parseNoteToItems: parseNoteToItems,
+        parseNextEventNote: parseNextEventNote,
+        parseNextRoster: parseNextRoster,
+        parseMatchNote: parseMatchNote,
+        renderMatchNoteHtml: renderMatchNoteHtml,
+        parseRecapProgram: parseRecapProgram,
+        renderRecapHtml: renderRecapHtml,
+        parseEventMeta: parseEventMeta,
+        renderEventMetaHtml: renderEventMetaHtml,
+        splitOutsideParens: splitOutsideParens,
+        matchOutsideParens: matchOutsideParens,
+        // 渲染构建层
+        renderReplayZone: renderReplayZone,
+        renderResult: renderResult,
+        renderLive: renderLive,
+        renderRisk: renderRisk,
+        renderStatCards: renderStatCards,
+        renderScheduleContent: renderScheduleContent,
+        renderNextCard: renderNextCard,
+        renderVideoBlock: renderVideoBlock,
+        renderItemListHtml: renderItemListHtml,
+        renderDaySection: renderDaySection,
+        prepareCtx: prepareCtx,
+        buildAbove: buildAbove,
+        buildBelow: buildBelow,
+        // 工具
+        esc: esc,
+        ordinalizeInfo: ordinalizeInfo,
+        addDays: addDays,
+        parseDt: parseDt
+      };
     }
