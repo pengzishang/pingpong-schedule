@@ -822,6 +822,25 @@
       return parts;
     }
 
+    // 在括号外(深度 0)找第一个匹配,返回 {word, index};全部在括号内则返回 null。
+    // 用途:抽「头号种子」时必须跳过阵容 rankLabel —— 真实数据
+    // 「王楚钦(头号种子·卫冕冠军·世界第1 8857分)」的种子词在括号内,是选手标签不是种子句;
+    // 真正的种子句「女单头号种子为日本张本美和(6289分)」在括号外(2026-08-29 踩坑)。
+    function matchOutsideParens(s, re) {
+      var reG = new RegExp(re.source, 'g');
+      var m;
+      while ((m = reG.exec(s)) !== null) {
+        var d = 0;
+        for (var i = 0; i < m.index; i++) {
+          var c = s.charAt(i);
+          if (c === '(' || c === '（') d++;
+          else if ((c === ')' || c === '）') && d > 0) d--;
+        }
+        if (d === 0) return { word: m[0], index: m.index };
+      }
+      return null;
+    }
+
     function parseNextRoster(nextLine) {
       var squad = [], absent = [];
       if (!nextLine) return { squad: squad, absent: absent };
@@ -942,34 +961,38 @@
       //   ④ 窗口截到第一个句读(。;；),防止把下一句里的「日本队」「主力」误当种子
       try {
         var hs = null;
-        // 优先级:「头号种子/一号种子/1号种子」>「卫冕冠军/卫冕女单/卫冕男单/卫冕」。
-        // 否则阵容里「女单孙颖莎(卫冕冠军)」的 rankLabel 会抢先命中,把后面的队员名当种子。
-        var seedWord = s.match(/(头号种子|一号种子|1\s*号种子)/) ||
-                       s.match(/(卫冕冠军|卫冕女单|卫冕男单|卫冕)/);
+        // 只认括号外的种子词(matchOutsideParens):阵容 rankLabel
+        // 「王楚钦(头号种子·卫冕冠军·世界第1 8857分)」在括号内,是选手标签不是种子句。
+        // 优先级:头号种子/一号种子/1号种子 > 卫冕冠军/卫冕女单/卫冕男单/卫冕。
+        var seedWord = matchOutsideParens(s, /(头号种子|一号种子|1\s*号种子)/) ||
+                       matchOutsideParens(s, /(卫冕冠军|卫冕女单|卫冕男单|卫冕)/);
         if (seedWord) {
-          var seg = s.slice(seedWord.index + seedWord[0].length);
+          var seg = s.slice(seedWord.index + seedWord.word.length);
           var segEnd = seg.search(/[。;；]/);
           if (segEnd > -1) seg = seg.slice(0, segEnd);
           if (seg.length > 30) seg = seg.slice(0, 30);
           // 分类停用词(含子串匹配):这些是标签不是人名
-          var STOP_RE = /冠军|种子|单打|双打|混双|男单|女单|男双|女双|团体|选手|队|头号|一号|1号|卫冕|决赛|号/;
-          // ① 优先:姓名 + (年龄)
-          var withAge = seg.match(/((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})[（\(](\d+\s*岁)[）\)]/);
-          if (withAge) {
-            hs = { label: seg.slice(0, withAge.index + withAge[0].length), name: withAge[1], age: withAge[2] };
+          var STOP_RE = /冠军|种子|单打|双打|混双|男单|女单|男双|女双|团体|选手|队|头号|一号|1号|卫冕|决赛|号|世界|排名|积分|分/;
+          var NAT = '(?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)';
+          // ① 优先:姓名 + (年龄/积分) —— 括号里是数字即认作选手属性,最可靠
+          //    「日本张本美和(18岁)」→ age=18岁;「日本张本美和(6289分)」→ rank=6289分
+          var withNum = seg.match(new RegExp('(' + NAT + '?[一-龥]{2,4})[（\\(](\\d+\\s*(?:岁|分|积分))[）\\)]'));
+          if (withNum) {
+            var nv = withNum[2];
+            var isAge = /岁/.test(nv);
+            hs = { label: seg.slice(0, withNum.index + withNum[0].length),
+                   name: withNum[1], age: isAge ? nv : '', rank: isAge ? '' : nv };
           } else {
-            // ② 无年龄:取窗口中第一个非停用词的中文姓名(2-4 字)
-            var nameRe = /((?:日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)?[一-龥]{2,4})/g;
-            var nm, found = '';
-            while ((nm = nameRe.exec(seg)) !== null) {
-              var cand = nm[1];
-              var bare = cand.replace(/^(日本|韩国|中国|瑞典|德国|法国|美国|朝鲜|新加坡)/, '');
-              if (bare.length < 2) continue;
-              if (STOP_RE.test(bare)) continue;
-              found = cand;
-              break;
-            }
-            hs = { label: seg, name: found, age: '' };
+            // ② 无括号数字:取种子词后第一段**连续中文**,剥连接词 + 国籍后判 2-4 字人名。
+            //    用连续中文段(而非 [一-龥]{2,4} 逐个扫)避免贪婪把「为日本张本美和」截成「为日本张」。
+            var segCn = (seg.match(/[一-龥]+/) || [''])[0];
+            var rest = segCn.replace(/^(?:为|是|有|之|由|的|·|\s)+/, '');
+            var nmM = rest.match(new RegExp('^(' + NAT + ')'));
+            var nat = nmM ? nmM[1] : '';
+            var nmOnly = nat ? rest.slice(nat.length) : rest;
+            var found = '';
+            if (nmOnly.length >= 2 && nmOnly.length <= 4 && !STOP_RE.test(nmOnly)) found = nat + nmOnly;
+            hs = { label: seg, name: found, age: '', rank: '' };
           }
         }
         out.headSeed = hs;
@@ -1153,6 +1176,7 @@
                      ? '<strong>' + (hsFlag ? hsFlag + ' ' : '') + esc(hsName) + '</strong>'
                      : '<strong class="next__callout--tbd">待官方公布</strong>') +
                    (p.headSeed.age ? ' <span class="next__callout-meta">(' + esc(p.headSeed.age) + ')</span>' : '') +
+                   (p.headSeed.rank ? ' <span class="next__callout-meta">' + esc(p.headSeed.rank) + '</span>' : '') +
                    '</div></div>';
         }
 
@@ -1228,6 +1252,7 @@
                     ? '<strong>' + (hsFlag2 ? hsFlag2 + ' ' : '') + esc(hsName2) + '</strong>'
                     : '<strong class="next__callout--tbd">待官方公布</strong>') +
                   (p.headSeed.age ? ' <span class="next__callout-meta">(' + esc(p.headSeed.age) + ')</span>' : '') +
+                  (p.headSeed.rank ? ' <span class="next__callout-meta">' + esc(p.headSeed.rank) + '</span>' : '') +
                   '</div></div>';
       }
 
