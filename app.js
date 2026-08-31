@@ -847,6 +847,43 @@
       return null;
     }
 
+    // 「赛事信息」要点里的排行榜(「label: 甲 分 / 乙 分 / …」)——
+    // 10 个人名+分数糊成一条 126 字巨行,适老化必须拆开。仅在「>=4 段且每段都含数字」时判定,
+    // 避免普通含「/」的要点(如「男双法国勒布伦兄弟」)被误拆。
+    function maybeRankList(p) {
+      var ci = p.search(/[:：]/);
+      if (ci < 0) return null;
+      var label = p.slice(0, ci).trim();
+      if (!label) return null;
+      var rest = p.slice(ci + 1).trim();
+      var segs = rest.split(' / ').map(function (x) { return x.trim(); }).filter(Boolean);
+      if (segs.length < 4) return null;
+      if (!segs.every(function (s) { return /\d/.test(s); })) return null;
+      return { label: label, segs: segs };
+    }
+
+    // schedule / tv 段渲染:含 → 走时间线(有序),否则按 ；(括号外)拆多行列表。
+    // 这是 2026-08-31 线上复盘的根因修复 —— 采集端现在把赛程/直播写成「；」分隔的描述段,
+    // 旧逻辑只在含 → 时才拆,否则整段 695 字一个 esc() 段落 = 适老化大坨。
+    function renderScheduleOrTvHtml(b) {
+      var text = b.text || '';
+      if (text.indexOf('→') >= 0) {
+        var steps = text.split('→').map(function (x) { return x.trim(); }).filter(Boolean);
+        var h = '<ol class="next__timeline">';
+        steps.forEach(function (st) { h += '<li>' + esc(st) + '</li>'; });
+        return h + '</ol>';
+      }
+      var lines = splitOutsideParens(text, '；;')
+        .map(function (x) { return x.trim(); })
+        .filter(Boolean);
+      if (lines.length > 1) {
+        var h2 = '<ul class="next__lines">';
+        lines.forEach(function (ln) { h2 += '<li>' + esc(ln) + '</li>'; });
+        return h2 + '</ul>';
+      }
+      return '<div class="next__body">' + esc(text) + '</div>';
+    }
+
     function parseNextRoster(nextLine) {
       var squad = [], absent = [];
       if (!nextLine) return { squad: squad, absent: absent };
@@ -1059,6 +1096,24 @@
       return out;
     }
 
+    // 单条「赛事信息」要点的渲染:排行榜(甲 分 / 乙 分)拆 2 列子列表,否则普通要点。
+    function renderEmetaPointHtml(p) {
+      var rank = maybeRankList(p);
+      if (rank) {
+        var h = '<li class="emeta__point emeta__point--rank">' +
+                '<span class="emeta__rank-label">' + esc(rank.label) + '</span>' +
+                '<ul class="emeta__rank">';
+        rank.segs.forEach(function (sg) {
+          h += '<li class="emeta__rank-item">' + esc(sg) + '</li>';
+        });
+        h += '</ul></li>';
+        return h;
+      }
+      // 含「队」的要点(日本队/韩国队等对手动态)加红边强调,一眼区分于赛制补充
+      var isTeam = /队/.test(p);
+      return '<li class="emeta__point' + (isTeam ? ' emeta__point--team' : '') + '">' + esc(p) + '</li>';
+    }
+
     // 把 parseEventMeta 结果渲染成 title + facts 行 + points 列表;ok=false 返回空(调用方回退原文)
     function renderEventMetaHtml(parsed) {
       if (!parsed || !parsed.ok) return '';
@@ -1077,9 +1132,7 @@
       if (parsed.points.length) {
         h += '<ul class="emeta__points">';
         parsed.points.forEach(function (p) {
-          // 含「队」的要点(日本队/韩国队等对手动态)加红边强调,一眼区分于赛制补充
-          var isTeam = /队/.test(p);
-          h += '<li class="emeta__point' + (isTeam ? ' emeta__point--team' : '') + '">' + esc(p) + '</li>';
+          h += renderEmetaPointHtml(p);
         });
         h += '</ul>';
       }
@@ -1194,11 +1247,8 @@
         tailBlocks.forEach(function (b) {
           html2 += '<div class="next__block">';
           html2 += '<div class="next__head">' + b.label + '</div>';
-          if (b.key === 'schedule' && b.text.indexOf('→') >= 0) {
-            var steps = b.text.split('→').map(function (x) { return x.trim(); }).filter(Boolean);
-            html2 += '<ol class="next__timeline">';
-            steps.forEach(function (st) { html2 += '<li>' + esc(st) + '</li>'; });
-            html2 += '</ol>';
+          if (b.key === 'schedule' || b.key === 'tv') {
+            html2 += renderScheduleOrTvHtml(b);
           } else {
             html2 += '<div class="next__body">' + esc(b.text) + '</div>';
           }
@@ -1227,11 +1277,8 @@
         var boxCls = b.key === 'meta' ? ' next__block--hero' : (b.key === 'sources' ? ' next__block--sources' : '');
         html += '<div class="next__block' + boxCls + '">';
         html +=   '<div class="next__head">' + b.label + '</div>';
-        if (b.key === 'schedule') {
-          var steps = b.text.split('→').map(function (x) { return x.trim(); }).filter(Boolean);
-          html += '<ol class="next__timeline">';
-          steps.forEach(function (st) { html += '<li>' + esc(st) + '</li>'; });
-          html += '</ol>';
+        if (b.key === 'schedule' || b.key === 'tv') {
+          html += renderScheduleOrTvHtml(b);
         } else if (b.key === 'meta') {
           // 赛事信息大段 → 拆 title + facts + points;失败回退原文
           var em2 = parseEventMeta(b.text);
@@ -2023,6 +2070,9 @@
         renderRecapHtml: renderRecapHtml,
         parseEventMeta: parseEventMeta,
         renderEventMetaHtml: renderEventMetaHtml,
+        maybeRankList: maybeRankList,
+        renderEmetaPointHtml: renderEmetaPointHtml,
+        renderScheduleOrTvHtml: renderScheduleOrTvHtml,
         splitOutsideParens: splitOutsideParens,
         matchOutsideParens: matchOutsideParens,
         // 渲染构建层

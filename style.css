@@ -660,6 +660,18 @@
     .next__timeline { margin: .1rem 0 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: .4rem; }
     .next__timeline li { font-size: 1.0rem; line-height: 1.6; color: var(--ink); font-weight: 600; }
 
+    /* schedule / tv 段:无 → 时按 ；(括号外)拆成的多行列表,替掉「整段 695 字一个段落」的大坨 */
+    .next__lines { list-style: none; margin: .1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+    .next__lines li {
+      position: relative; padding-left: .95rem;
+      font-size: 1.0rem; line-height: 1.62; color: var(--ink); font-weight: 600;
+      word-break: break-word;
+    }
+    .next__lines li::before {
+      content: '·'; position: absolute; left: .2rem; top: 0;
+      font-weight: 800; color: var(--navy);
+    }
+
     /* ---------- 重播:卡内一行 + 当日「今日重播」汇总区 ---------- */
     /* 适老化:重播是「没看成当晚、白天看重播」的刚需,视觉上用中国红淡底 + 深蓝标签,
        与风险卡(红/琥珀/绿)区分,但又不喧宾夺主;零动效、大字号 */
@@ -1105,6 +1117,18 @@
       border-radius: .4rem; padding: .32rem .6rem .32rem .7rem;
     }
     .emeta__point--team::before { content: ''; }
+
+    /* 排行榜要点(「label: 甲 分 / 乙 分」)拆成的 2 列子列表,替掉一条 126 字巨行 */
+    .emeta__point--rank { padding-left: 0; }
+    .emeta__point--rank::before { content: ''; }
+    .emeta__rank-label { display: block; font-weight: 800; color: var(--navy); margin-bottom: .3rem; }
+    .emeta__rank { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .22rem .8rem; }
+    .emeta__rank-item {
+      font-size: .92rem; font-weight: 600; color: var(--ink);
+      background: rgba(14,42,71,.045); border-radius: .35rem;
+      padding: .22rem .5rem; word-break: break-word;
+    }
+    @media (max-width: 480px) { .emeta__rank { grid-template-columns: 1fr; } }
 
     /* ---- 临时样式兜底 (避免新元素无样式) ---- */
     .day__next--chip .next__block { border-top: none; }

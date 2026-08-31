@@ -14,7 +14,8 @@ const api = loadApp();
 // 共享样本(全部来自真实 data.json 或子上截图)见 tests/_fixtures.js
 // ---------------------------------------------------------------------------
 const {
-  RECAP_0829, META_0829, NOTE_RANKLABEL_TRAP, NOTE_WITH_ROSTER, VIDEO_NOTE
+  RECAP_0829, META_0829, NOTE_RANKLABEL_TRAP, NOTE_WITH_ROSTER, VIDEO_NOTE,
+  SCHEDULE_BLOB, RANK_POINT
 } = require('./_fixtures');
 
 // ===========================================================================
@@ -130,6 +131,70 @@ test('parseEventMeta: points 按逗号也拆,日/韩各自独立成条', () => {
 test('parseEventMeta: 空输入 ok=false', () => {
   assert.strictEqual(api.parseEventMeta('').ok, false);
 });
+
+// ===========================================================================
+// 三·二、2026-08-31 线上复盘的层次化渲染修复(schedule/tv 大坨 + 排行榜巨行)
+// ===========================================================================
+
+test('maybeRankList: 排行榜「label: 甲 分 / 乙 分」正确拆出 label 与 10 段', () => {
+  const r = api.maybeRankList(RANK_POINT);
+  assert.ok(r, '应识别为排行榜');
+  assert.strictEqual(r.label, '第 35 周女单前十');
+  assert.strictEqual(r.segs.length, 10);
+  assert.strictEqual(r.segs[0], '孙颖莎 9675');
+  assert.match(r.segs[9], /申裕斌\(韩国\) 3520/);
+});
+
+test('maybeRankList: 普通不含「/」的要点返回 null(不误拆)', () => {
+  assert.strictEqual(api.maybeRankList('日本队全主力(张本/早田)压境,韩国队全员弃赛'), null);
+});
+
+test('maybeRankList: 含「/」但段数不足或不含数字返回 null', () => {
+  assert.strictEqual(api.maybeRankList('男双:法国勒布伦兄弟/日本张本'), null, '仅 2 段不拆');
+  assert.strictEqual(api.maybeRankList('清单:苹果/香蕉/橙子/葡萄'), null, '无数字不拆');
+});
+
+test('renderEmetaPointHtml: 排行榜渲染成 emeta__rank 2 列子列表', () => {
+  const html = api.renderEmetaPointHtml(RANK_POINT);
+  assert.match(html, /class="emeta__point emeta__point--rank"/);
+  assert.match(html, /emeta__rank-label">第 35 周女单前十/);
+  assert.strictEqual((html.match(/emeta__rank-item/g) || []).length, 10, '10 名各一行');
+  assert.ok(!html.includes('emeta__point--team'), '排行榜不带对手动态红边');
+});
+
+test('renderEmetaPointHtml: 普通要点保持原 emeta__point(含队则加红边)', () => {
+  assert.match(api.renderEmetaPointHtml('日本队全主力压境'), /class="emeta__point emeta__point--team"/);
+  assert.match(api.renderEmetaPointHtml('男双/女双各2对教练组推荐'), /class="emeta__point"/);
+});
+
+test('renderScheduleOrTvHtml: 「；」分隔的描述段拆成多行 next__lines(而非单一大段落)', () => {
+  const html = api.renderScheduleOrTvHtml({ key: 'schedule', text: SCHEDULE_BLOB });
+  assert.match(html, /<ul class="next__lines">/);
+  const lis = (html.match(/<li>/g) || []).length;
+  assert.ok(lis >= 10, '应拆成多条,而非 1 条 695 字段落,实际 ' + lis + ' 条');
+  assert.ok(!html.includes('<div class="next__body">' + SCHEDULE_BLOB + '</div>'),
+    '不得再整段 esc() 成单一大坨');
+});
+
+test('renderScheduleOrTvHtml: 含 → 仍走时间线有序列表', () => {
+  const html = api.renderScheduleOrTvHtml({ key: 'schedule', text: '9/8 开赛 → 9/13 决赛 → 收官' });
+  assert.match(html, /<ol class="next__timeline">/);
+  assert.strictEqual((html.match(/<li>/g) || []).length, 3);
+});
+
+test('renderScheduleOrTvHtml: 仅 1 行时保持 next__body 段落', () => {
+  const html = api.renderScheduleOrTvHtml({ key: 'tv', text: '直播渠道:CCTV-5(3源确认)' });
+  assert.match(html, /<div class="next__body">/);
+  assert.ok(!html.includes('next__lines'));
+});
+
+test('renderScheduleOrTvHtml: 括号外的 ； 才切,括号内说明不被切断', () => {
+  // 「(11:00、18:30两节)」内的标点不得被当分隔
+  const html = api.renderScheduleOrTvHtml({ key: 'schedule', text: '9/8 男女单打1/16决赛(11:00、18:30两节)；9/10 收尾' });
+  assert.strictEqual((html.match(/<li>/g) || []).length, 2, '只在括号外切一刀');
+});
+
+
 
 // ===========================================================================
 // 四、headSeed(头号种子)—— 2026-08-29 子上反馈「头号种子又看不到了」的重灾区

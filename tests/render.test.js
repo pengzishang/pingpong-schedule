@@ -8,7 +8,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { loadApp, loadJSON } = require('./_harness');
 const {
-  RECAP_0829, META_0829, NOTE_RANKLABEL_TRAP, NOTE_WITH_ROSTER, NOTE_SEED_NO_NAME, VIDEO_NOTE
+  RECAP_0829, META_0829, NOTE_RANKLABEL_TRAP, NOTE_WITH_ROSTER, NOTE_SEED_NO_NAME, VIDEO_NOTE,
+  SCHEDULE_BLOB, RANK_POINT
 } = require('./_fixtures');
 
 const api = loadApp();
@@ -186,4 +187,22 @@ test('buildAbove/buildBelow: 产出不含未转义的裸 script(防注入)', () 
   const ctx = api.prepareCtx(data);
   const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
   assert.ok(all.indexOf('<script') < 0, '渲染产物不应含 script 标签');
+});
+
+// 2026-08-31 线上复盘:真实下一站数据不得再出现 695 字赛程大坨 / 126 字排行榜巨行
+test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆成 emeta__rank', () => {
+  const data = loadJSON('data.json');
+  if (!data || !data.nextEvent) return;
+  const h = api.renderNextCard(data.nextEvent);
+
+  assert.ok(h.indexOf('next__lines') >= 0, '赛程/直播描述段应拆成多行列表');
+  assert.ok((h.match(/<ul class="next__lines">/g) || []).length >= 1,
+    '应至少出现一个 next__lines');
+  assert.ok(h.indexOf('emeta__rank') >= 0, '排行榜要点应拆成子列表');
+  assert.ok((h.match(/emeta__rank-item/g) || []).length >= 10, '排行榜应 >=10 名各一行');
+
+  assert.strictEqual(h.indexOf(SCHEDULE_BLOB), -1,
+    '整段 695 字赛程不得再以单一连续段落出现(已被 ； 拆开)');
+  assert.strictEqual(h.indexOf(RANK_POINT), -1,
+    '整条 126 字排行榜不得再以单一连续巨行出现(已被拆开)');
 });
