@@ -25,14 +25,25 @@
 - risk 仅未结束场填：🔴/⚠️/✅ 开头 + 括号大白话标签 + 口语原因建议，⚠️另起一句证据可靠性，📊另起一句人头对战，整段 2~3 句。已结束省略 risk。
 - 「下一站…」句内**禁句号**（前端靠首个句号截断），句内用逗号分隔出战/缺席名单。
 - **nextEvent.note 名单句必须写成 `国乒N人:男单…/…,女单…/…,缺席:…。背景:…`**（9/1 修复教训）。原因：`parseNextRoster` 正则只认 `出战|国乒\d*人|报名|参赛|阵容` + 冒号，**「国乒男单5人:」不匹配 → 出战卡片长期解析失败（0 人）**；且「缺席:」的 lookahead 会一路吞到下一个关键词（如「直播渠道:」），把后续整段当缺席人名渲染。用 `背景:` 显式截断即可。**日期块里的「下一站…出战:」写法不受影响，已可用。**
+- **【新契约·4.6.2，2026-09-01 起强制】空窗天整段说明一律写入 day 顶层字符串 `dayNote`，`schedule` 置空 `[]`**，禁止再塞 `schedule` 伪 record（前端会误当比赛占位行，且长文无法层次化）。前端 `parseDayNote` 会拆成「摘要 lead + 要点 points + 下一站区块」。
+- **`dayNote` 写法铁律（否则 lead 提取失败）**：`parseDayNote` 里 `cut = first.search(/[（(：:]/)`，**只有 `cut > 3`** 才取 `first.substring(0,cut)` 作 lead，否则退回 44 字截断分支 → lead 变长句、测试挂。
+  → **首句必须是「空窗期延续(…复核)。」这类短结论**（「空窗期延续」5 字，左括号落在索引 5，安全）。
+  → 反例：`9/1(周二)……` 左括号在**索引 3**，`3 > 3` 为假，必挂。
+  → 其余要点每条 ≤100 字、用「。」分隔、括号成对；末尾保留「下一站…」句。
+- **验证 dayNote 的正确姿势（两步都要做）**：
+  ① 解析层：`const {loadApp,loadJSON}=require('./tests/_harness'); api.parseDayNote(day.dayNote)` → 查 lead<20、points≥8、最长≤100、括号配对、next 抽到澳门。
+  ② **渲染层：`api.buildAbove(ctx,data)+api.buildBelow(ctx,data)` 数 `<section>` 与 `pending__points` 出现次数。**
+  **单看 ① 正常不代表页面正常**——中间还隔着 `dayHasContent` 折叠判定（9/1 教训：四天被整体折叠、页面只剩「还有 7 天」卡，`<section>` 只有 1 个）。
 - 修前端解析问题优先在**采集端改写法**，不动 app.js（前端由另一台机器维护）；验证手法：node 从 app.js 按花括号配平切出目标函数源码 + `new Function` 执行，喂真实 data.json，比手抄正则可靠。
+- **上述「不动 app.js」的例外判据**：若 `dayHasContent` 只认 `matches`/`videoMatches`/`schedule` 三个数据字段、而故障字段恰是新契约禁用的 `schedule`，**采集端无任何合规字段可绕过** → 允许做最小 1 行修补并**显式通知前端维护机**（9/1 已在 app.js:683 后补 `if (typeof day.dayNote === 'string' && day.dayNote.trim()) return true;`，附日期标注注释）。
 - video.json 顶层仅 `days[]`，用 `platform`（非 channel）。`renderVideoBlock` **不渲染 result** → 赛果必须写进 `note` 首句。团体赛按 5.3.1：playerHome/Away 填队名，关键球员进 Info，nationHome 填中国以进「国乒」标签页。
 
 ## 采集环境（踩过的坑）
 - **epg 参数被丢（9/1 确认·新坑）**：`sports.cctv.com/epg?channel=cctvX&date=YYYY-MM-DD` 对 **CCTV-5 / CCTV-16 会间歇性丢弃参数、返回默认页（cctv5 + 今天）**。判别：返回条目链接是否仍带 `?channel=…&date=…`，丢了的必重抓。**改用 `sports.cctv.com/epg/index.shtml?channel=cctvX&date=YYYY-MM-DD` 稳定命中**，优先走这个路径。
 - **咪咕排期会变，每轮必须重抓**：`s.miguvideo.com/ZZZVvqn` 的直播预约随开赛临近调整（9/1 阿拉木图由「13:00+19:00 两节」变成「19:00 一节」）。**禁止沿用上一轮记录的时段**；发现变化要在日期文案写明「此前显示 X、现在显示 Y，以开播前页面为准」，不静默改口径。
 - 有效通道：`WebFetch https://tv.cctv.com/live/cctv5plus/` 直抓 CCTV-5+ 当日节目单（**9/1 起失效，只返回频道导航**）；`/cctv5` 抓不到 → CCTV-5 改用节目单站 index.shtml 路径 + 搜狐/网易当日赛事汇总稿交叉。
-- 前端测试跑法：`node --test tests/*.test.js`（**不能** `node --test tests/`，会 MODULE_NOT_FOUND）。9/1 全量 85/85 通过。
+- 前端测试跑法：`node --test tests/*.test.js`（**不能** `node --test tests/`，会 MODULE_NOT_FOUND）。9/1 22:16 起全量 **89/89** 通过（8/31 时为 85/85，前端 8d7dd5a 新增 4 项）。**每轮迁移/改数据后必跑，且必须 0 fail 才推送。**
+- **咪咕专区页面结构会变（9/1 22:16 新坑）**：`s.miguvideo.com/ZZZVvqn` 本轮两次直抓**只返回 banner（如「正播资格赛 维瓦雷利领衔众将冲正赛」）与资讯栏，拿不到逐日直播预约表**。banner 可用来确认「当前是否在直播」并与赛果互证；逐日时段抓不到时沿用上轮官方一手记录，**但必须在 note 留痕「本轮未抓到、下轮须重抓核验」**。
 - 失效源黑名单：sports.sina.com.cn/pingpang、sports.163.com/pingpang（404）、s.weibo.com（需登录）、so.toutiao.com（空壳）。改用 WebSearch 间接命中正文。
 - `epg.pw` 默认 America/Chicago，**+13h = 北京时间**，必须用已知场次交叉验证换算。
 - `sports.cctv.com/epg?channel=x&date=Y-M-D` **可能返回旧日期缓存**，须核对页面日期导航栏是否高亮目标日。
