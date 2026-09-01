@@ -6,7 +6,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert');
-const { loadApp } = require('./_harness');
+const { loadApp, loadJSON } = require('./_harness');
 
 const api = loadApp();
 
@@ -382,4 +382,40 @@ test('FLAGS: 港澳台键排在「中国」之前(否则被短路)', () => {
 
 test('esc: HTML 转义,防注入', () => {
   assert.strictEqual(api.esc('<b>&"'), '&lt;b&gt;&amp;&quot;');
+});
+
+// parseDayNote:2026-09-01 叙事报道体大坨根治
+const realDayNote = (function () {
+  const d = loadJSON('data.json');
+  if (!d) return '';
+  const day = d.days.find(x => x.date === '2026-09-01');
+  if (!day) return '';
+  return (day.schedule || []).map(s => (s.content || s.tournament || '').trim()).filter(Boolean).join(' ');
+})();
+
+test('parseDayNote[真实数据]: 叙事体不再整坨,拆成要点且括号不切断', () => {
+  if (!realDayNote) return; // 数据不含该样本时跳过,不误报
+  const dn = api.parseDayNote(realDayNote);
+  // lead 是短结论,不应等于整段
+  assert.ok(dn.lead && dn.lead.length < 20, 'lead 应为短结论,实际=' + dn.lead);
+  assert.ok(dn.points.length >= 8, 'points 应拆出多条,实际=' + dn.points.length);
+  // 最长要点 ≤ 100 字(单句完整,不超长)
+  const longest = dn.points.reduce((m, p) => Math.max(m, p.length), 0);
+  assert.ok(longest <= 100, '最长要点应 ≤100 字,实际=' + longest);
+  // 括号不被切断:任何要点括号都应配对(被切断的特征是 左/右 数不等,
+  // 而非「以 ) 结尾」——完整句子本就以 ) 收尾)
+  dn.points.forEach((p, i) => {
+    const open = (p.match(/[（(]/g) || []).length;
+    const close = (p.match(/[）)]/g) || []).length;
+    assert.strictEqual(open, close, '要点[' + i + '] 括号应配对(未切断):' + p);
+  });
+  // next 抽到澳门站
+  assert.ok(/澳门/.test(dn.next || ''), 'next 应抽到下一站澳门,实际=' + (dn.next || '').substring(0, 30));
+});
+
+test('parseDayNote: 无 next 句时 next 为空(buildBelow 兜底全局 nextEvent)', () => {
+  const dn = api.parseDayNote('空窗期延续。今天没有国乒比赛,央视也不转播。');
+  assert.strictEqual(dn.lead, '空窗期延续');
+  assert.ok(dn.points.length >= 1, '应拆出要点');
+  assert.strictEqual(dn.next, '', '无下一站句时 next 应为空');
 });

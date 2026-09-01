@@ -206,3 +206,21 @@ test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆�
   assert.strictEqual(h.indexOf(RANK_POINT), -1,
     '整条 126 字排行榜不得再以单一连续巨行出现(已被拆开)');
 });
+
+// 2026-09-01 线上复盘:空窗天叙事体说明(880 字)不得再整坨
+test('buildBelow[真实数据]: 空窗天说明拆成 pending__points,容器内最长要点 ≤120 字', () => {
+  const data = loadJSON('data.json');
+  if (!data) return;
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+  const idx = all.indexOf('pending__points');
+  assert.ok(idx >= 0, '空窗说明应渲染成 pending__points 要点列表');
+  // 取 pending__points 容器段(到其闭合 </div>),逐文本块查最长
+  const end = all.indexOf('</div>', idx);
+  const seg = all.substring(idx, end + 6);
+  const texts = seg.split(/<[^>]+>/).map(s => s.trim()).filter(Boolean);
+  const longest = texts.reduce((m, t) => Math.max(m, t.length), 0);
+  assert.ok(longest <= 120,
+    'pending__points 内最长要点应 ≤120 字(适老化无大坨),实际=' + longest +
+    ' :: ' + (texts.sort((a, b) => b.length - a.length)[0] || '').substring(0, 50));
+});

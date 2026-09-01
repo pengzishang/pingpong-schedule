@@ -801,6 +801,63 @@
       return out;
     }
 
+    // 空窗/无直播天的「叙事报道体」说明解析(2026-09-01 新增,根治 695/880 字大坨)。
+    // 采集端 8/31 起把长说明从「结论句+CCTV槽」演进成「叙事报道体」(WTT赛况+央视今日排片+咪咕+对手+下一站),
+    // 旧 parseNoteToItems 的 lead 提取假设「结论+CCTV槽」格式,遇叙事体把前半段整坨吸入 lead → 大坨。
+    // 本函数专为叙事体设计:抽下一站句 + 首句作摘要 lead + 其余分句成 points 要点(每条限长,超长再切一层)。
+    // 数据来源:优先 day.dayNote(新契约字符串),兼容旧 schedule 伪 record 的 content(见 buildBelow)。
+    function parseDayNote(note) {
+      var out = { lead: '', points: [], next: '', nextSquad: [], nextAbsent: [] };
+      if (!note) return out;
+      var s = String(note).trim();
+      if (!s) return out;
+
+      // 1. 抽「下一站/下一站...」句(复用解析器,出战/缺席名单一起抽)
+      var nm = s.match(/(下一[场站][^。]*?。)/);
+      if (nm) {
+        out.next = nm[1].replace(/[。;；,，]+$/, '').trim();
+        s = s.replace(nm[1], '').trim();
+        var roster = parseNextRoster(out.next);
+        out.nextSquad = roster.squad;
+        out.nextAbsent = roster.absent;
+      }
+
+      // 2. 分句(括号外才切,避免切断「(当晚 19:30 足协杯...,足球;下午...那场)」这类括号内说明)
+      var clauses = splitOutsideParens(s, '。；;').map(function (c) { return c.trim(); }).filter(Boolean);
+
+      // 3. lead = 开头短结论(截到第一个 ( 或 : 前;否则首句限长44)
+      if (clauses.length) {
+        var first = clauses[0];
+        var cut = first.search(/[（(：:]/);
+        if (cut > 3) out.lead = first.substring(0, cut).trim();
+        else if (first.length <= 44) out.lead = first;
+        else out.lead = first.substring(0, 44) + '…';
+        clauses = clauses.slice(1); // lead 抽取后,避免要点重复
+      }
+
+      // 4. points:每条限长,超长则按括号外逗号再切一层(括号内切分保护)
+      var MAX = 100;
+      clauses.forEach(function (cl) {
+        if (!cl) return;
+        if (cl.length <= MAX) { out.points.push(cl); return; }
+        var parts = splitOutsideParens(cl, '，,；;').map(function (p) { return p.trim(); }).filter(Boolean);
+        if (parts.length > 1) parts.forEach(function (p) { if (p) out.points.push(p); });
+        else out.points.push(cl); // 括号外无逗号,整条保留(避免切断括号内的说明)
+      });
+
+      return out;
+    }
+
+    // 给 dayNote 要点按内容打图标(适老化:一眼区分信息类别)
+    function dayNoteIcon(p) {
+      if (/央视|CCTV/.test(p)) return '📺';
+      if (/咪咕|手机|平板|电脑|客户端|app|APP/.test(p)) return '📱';
+      if (/日本|张本|早田|桥本|户上|对手|外国|海外/.test(p)) return '🌏';
+      if (/亚运|集训|崇明|备战|封闭/.test(p)) return '🏟️';
+      if (/WTT|阿拉木图|冠军赛|大满贯|世乒|乒乓|国乒|中国乒协|出战|资格赛|正赛|退赛/.test(p)) return '🏓';
+      return '•';
+    }
+
     // 「下一站...」句里拆出出战名单与缺席主力。
     // 格式约定(采集说明.md §4.6):
     //   出战:男单王楚钦(世界第1)/林诗栋(世界第2)/温瑞博/向鹏/周启豪,女单蒯曼(2号种子)/...
@@ -1698,6 +1755,59 @@
       h += '</ul></div>';
       return h;
     }
+
+    // 下一站区块(从 buildBelow 旧逻辑抽出,供 renderDayNoteHtml 复用):
+    // 摘要截到「出战」前 + 国乒出战名单(男/女分行) + 缺席主力。
+    function renderNextMini(parsed) {
+      var summary = parsed.next;
+      var cutIdx = summary.search(/出战[:：]/);
+      if (cutIdx > -1) {
+        summary = summary.substring(0, cutIdx).replace(/[、,，\s]+$/, '').trim();
+      }
+      var h = '<div class="pending__next-event">' +
+                '<span class="pending__next-label">📅 下一场国乒直播</span>' +
+                '<span class="pending__next-text">' + esc(summary) + '</span>';
+
+      if (parsed.nextSquad && parsed.nextSquad.length) {
+        h += '<div class="pending__roster pending__roster--squad">' +
+               '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
+               rosterGroupHtml(parsed.nextSquad, '男', '男队') +
+               rosterGroupHtml(parsed.nextSquad, '女', '女队') +
+             '</div>';
+      }
+      if (parsed.nextAbsent && parsed.nextAbsent.length) {
+        h += '<div class="pending__roster pending__roster--absent">' +
+               '<div class="pending__roster-head">😴 缺席主力</div><ul class="pending__roster-list">';
+        parsed.nextAbsent.forEach(function (p) {
+          h += '<li class="pending__roster-item">' +
+                '<span class="roster-name">' + esc(p.name) + '</span>' +
+                (p.reason ? '<span class="roster-reason">' + esc(p.reason) + '</span>' : '') +
+              '</li>';
+        });
+        h += '</ul></div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    // 把 parseDayNote 结果渲染成:lead 摘要 + points 要点列表(图标+文本) + 下一站区块
+    function renderDayNoteHtml(parsed) {
+      if (!parsed) return '';
+      var h = '';
+      if (parsed.lead) h += '<p class="pending__lead">' + esc(parsed.lead) + '</p>';
+      if (parsed.points && parsed.points.length) {
+        h += '<ul class="pending__points">';
+        parsed.points.forEach(function (p) {
+          h += '<li class="pending__point">' +
+                 '<span class="pending__point-ic">' + dayNoteIcon(p) + '</span>' +
+                 '<span class="pending__point-tx">' + esc(p) + '</span>' +
+               '</li>';
+        });
+        h += '</ul>';
+      }
+      if (parsed.next) h += renderNextMini(parsed);
+      return h;
+    }
     // 出战名单按性别分组(原 render 内 rosterGroup,抽成纯函数)
     function rosterGroupHtml(squad, gender, label) {
       var group = squad.filter(function (p) { return p.gender === gender; });
@@ -1863,67 +1973,30 @@
                     '</div>';
           });
           html += '</div>';
-        } else if ((day.schedule || []).length) {
-          // 空窗期/无直播天:当日有赛程说明。把一坨长文本解析成结构化清单(摘要 + 乒乓节目 + 其他体育 + 下一场),
-          // 比平铺一段文字对外婆友好得多。解析失败时回退到原始文本展示,绝不丢内容。
-          var rawNote = (day.schedule || []).map(function (s) { return (s.content || s.tournament || '').trim(); })
-                                  .filter(Boolean).join(' ');
-          var parsed = parseNoteToItems(rawNote);
+        } else if ((day.schedule || []).length || (typeof day.dayNote === 'string' && day.dayNote.trim())) {
+          // 空窗期/无直播天:当日有说明。优先读新契约 day.dayNote(字符串),
+          // 无则兼容旧 schedule 伪 record(time:'—'&&channel:'—' 的 content)。
+          // 用 parseDayNote 专为「叙事报道体」层次化(摘要 lead + 要点 points + 下一站区块),根治整坨大段。
+          var noteSrc = '';
+          if (typeof day.dayNote === 'string' && day.dayNote.trim()) {
+            noteSrc = day.dayNote.trim();
+          } else {
+            noteSrc = (day.schedule || []).map(function (s) { return (s.content || s.tournament || '').trim(); })
+                                         .filter(Boolean).join(' ');
+          }
+          var dn = parseDayNote(noteSrc);
+          // 说明里没抽到「下一站」句时,兜底用全局 nextEvent(与旧版空白天行为一致)
+          if (!dn.next && data.nextEvent && data.nextEvent.date) {
+            dn.next = nextEventCompact(data.nextEvent, gapMode) || '';
+          }
           html += '<div class="day__pending day__pending--none">';
           html +=   '<span class="pending__badge">📺 今日无直播</span>';
-          if (parsed.lead) {
-            html += '<p class="pending__lead">' + esc(parsed.lead) + '</p>';
-          }
-          html += renderItemListHtml('pending__section--pp', '🏓 乒乓节目(录像/典藏)', parsed.pingpong);
-          // 外婆只对国乒感兴趣,「其他体育」(羽毛球/中超等)不展示
-
-          // 下一场:优先用原文里的「下一场/下一站...」句(更简洁),无则兜底用全局 nextEvent
-          var nextLine = parsed.next;
-          if (!nextLine && data.nextEvent && data.nextEvent.date) {
-            nextLine = nextEventCompact(data.nextEvent, gapMode);
-          }
-          if (nextLine) {
-            // 摘要 = 「出战:」之前的赛事概要(出战/缺席明细已拆到下方列表,避免重复)
-            var summary = nextLine;
-            var cutIdx = summary.search(/出战[:：]/);
-            if (cutIdx > -1) {
-              summary = summary.substring(0, cutIdx).replace(/[、,，\s]+$/, '').trim();
-            }
-            html += '<div class="pending__next-event">' +
-                      '<span class="pending__next-label">📅 下一场国乒直播</span>' +
-                      '<span class="pending__next-text">' + esc(summary) + '</span>';
-
-            // 出战名单(仅当从原文解析出时展示;兜底无名单则不渲染,保持旧版单行)
-            // 男队/女队分行展示(解析时按「男单/女单...」前缀标记 gender,同段继承)
-            if (parsed.nextSquad && parsed.nextSquad.length) {
-              html += '<div class="pending__roster pending__roster--squad">' +
-                        '<div class="pending__roster-head">🇨🇳 国乒出战 ' + parsed.nextSquad.length + ' 人</div>' +
-                        rosterGroupHtml(parsed.nextSquad, '男', '男队') +
-                        rosterGroupHtml(parsed.nextSquad, '女', '女队') +
-                      '</div>';
-            }
-
-            // 缺席主力
-            if (parsed.nextAbsent && parsed.nextAbsent.length) {
-              html += '<div class="pending__roster pending__roster--absent">' +
-                        '<div class="pending__roster-head">😴 缺席主力</div>' +
-                        '<ul class="pending__roster-list">';
-              parsed.nextAbsent.forEach(function (p) {
-                html += '<li class="pending__roster-item">' +
-                          '<span class="roster-name">' + esc(p.name) + '</span>' +
-                          (p.reason ? '<span class="roster-reason">' + esc(p.reason) + '</span>' : '') +
-                        '</li>';
-              });
-              html += '</ul></div>';
-            }
-
-            html += '</div>';
-          }
-
-          // 解析失败/解析结果为空:回退到原文(防止空卡)
-          // 其他体育不展示,故"是否为空"只看 lead/乒乓/下一场(其他体育有内容也不算有内容)
-          if (!parsed.lead && !parsed.pingpong.length && !parsed.next) {
-            html += '<div class="pending__fallback"><span class="pending__note">' + esc(rawNote) + '</span></div>';
+          var dnHtml = renderDayNoteHtml(dn);
+          if (dnHtml) {
+            html += dnHtml;
+          } else {
+            // 解析结果为空:回退到原文(防止空卡)
+            html += '<div class="pending__fallback"><span class="pending__note">' + esc(noteSrc) + '</span></div>';
           }
           html += '</div>';
         } else if (data.nextEvent && data.nextEvent.date) {
@@ -2062,6 +2135,10 @@
         FLAGS: FLAGS,
         // 长文本解析(2026-08-28 / 08-29 两轮层次化)
         parseNoteToItems: parseNoteToItems,
+        parseDayNote: parseDayNote,
+        dayNoteIcon: dayNoteIcon,
+        renderDayNoteHtml: renderDayNoteHtml,
+        renderNextMini: renderNextMini,
         parseNextEventNote: parseNextEventNote,
         parseNextRoster: parseNextRoster,
         parseMatchNote: parseMatchNote,

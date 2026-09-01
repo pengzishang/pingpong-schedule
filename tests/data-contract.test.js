@@ -44,6 +44,15 @@ test('data.json: 每个 day 都有合法 date(YYYY-MM-DD)' + skipNote, (t) => {
   });
 });
 
+test('data.json: dayNote(若有)必须是字符串,空窗说明契约守约' + skipNote, (t) => {
+  if (!hasData) return t.skip('data.json 缺失');
+  data.days.forEach(d => {
+    if (d.dayNote !== undefined) {
+      assert.strictEqual(typeof d.dayNote, 'string', 'dayNote 必须是字符串:' + d.date);
+    }
+  });
+});
+
 // ===========================================================================
 // 二、电视铁律:能上电视卡的必须是央视
 // ===========================================================================
