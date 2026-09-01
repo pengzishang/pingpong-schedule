@@ -681,6 +681,11 @@
       // 有赛程说明(含空窗期/录像说明)即视为有内容——这是外婆关心的「今日央视乒乓情况」,
       // 不应被折叠;只有既无比赛、又无任何说明的天才是真空档,才会被跳过。
       if ((day.schedule || []).length) return true;
+      // 2026-09-01 22:16 采集端最小修补(新契约 4.6.2 遗漏项):
+      // 空窗天整段说明自 2026-09-01 起改写入 day 顶层 dayNote 字符串,schedule 置空。
+      // 若不在此把 dayNote 也算「有内容」,只写 dayNote 的天会被 dayHasContent 判为真空档而整体折叠,
+      // 外婆将完全看不到「今日为什么不播 + 下一站是什么」——buildBelow 已支持 dayNote,此处是漏改。
+      if (typeof day.dayNote === 'string' && day.dayNote.trim()) return true;
       return false;
     }
 
