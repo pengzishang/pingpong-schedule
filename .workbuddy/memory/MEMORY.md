@@ -40,6 +40,8 @@
 - **排行榜只在 meta 块渲染**：`maybeRankList` 要求「`标签:项1 / 项2 / …`」且每项含数字、≥4 项；分块顺序 isTV>isSeeds>isSched>isSquad，**子句含「种子/排名/参赛/国乒/出战」会落进 seeds/squad** → 位次表措辞须避开这些词（测试要求 `emeta__rank-item` ≥10）。
 - **`next__lines` 需要 schedule 或 tv 段含 ≥2 个分句**（多句被 `；` 拼起来）；只有 1 句会退化成 `next__body`，`render.test.js` 第 20 例会挂 → 采集端保证写 ≥2 个含「转播/直播/CCTV」的子句。
 - 修前端解析问题优先**在采集端改写法**，不动 app.js。
+- **【9/8 新坑·空窗期结束后的守卫用例】** 空窗期一结束，四日窗口内再无「无央视直播 + 带 dayNote」的可见天 → `pending__points` 不产出，`render.test.js` 末例会挂。已在该例加「窗口内存在可见空窗天才断言」的守卫（自动休眠、下个空窗期自动恢复）。⚠️ 判「今天」必须用**本地日期**拼接（`getFullYear/getMonth/getDate`），**禁用 `toISOString().slice(0,10)`**——UTC 差 8 小时，凌晨场会误判成昨天。
+- **`nextEvent.note` 追加句必须命中分类关键词**（`CCTV/直播/转播/频道`→tv；`赛程/开打/1/8/决赛/对阵/签表`→sched；`国乒/出战/参赛`→squad），否则落进 `meta` 把首段撑成大坨。
 
 ## 前端已知行为（不是 bug）
 - 昨日若 `matches` 为空 → 该日整段（含 dayNote 与 video 块）都不可见，video.json 给"昨日"写内容属死内容（保留无害）。
