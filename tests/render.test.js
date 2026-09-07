@@ -211,6 +211,17 @@ test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆�
 test('buildBelow[真实数据]: 空窗天说明拆成 pending__points,容器内最长要点 ≤120 字', () => {
   const data = loadJSON('data.json');
   if (!data) return;
+  // 2026-09-08 空窗期结束(澳门站开赛):只有「窗口内可见、且当天无央视直播」的空窗天
+  // 才会渲染 dayNote 要点块。若四日窗口内已无此类空窗天(今日/明日/后日都有真实直播),
+  // pending__points 自然为 0,本守卫自动休眠;下一个空窗期到来时自动恢复生效。
+  const _n = new Date();
+  const todayStr = _n.getFullYear() + '-' +
+    String(_n.getMonth() + 1).padStart(2, '0') + '-' +
+    String(_n.getDate()).padStart(2, '0');
+  const hasVisibleEmptyDay = (data.days || []).some(function (x) {
+    return x.date >= todayStr && !(x.matches || []).length && x.dayNote;
+  });
+  if (!hasVisibleEmptyDay) return;
   const ctx = api.prepareCtx(data);
   const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
   const idx = all.indexOf('pending__points');
