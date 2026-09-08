@@ -545,8 +545,14 @@ test('buildBelow[真实数据]: nextEvent.date=9/8 落在窗口内 → 不渲染
 test('buildBelow: nextEvent 在窗口外(3 天后) → 仍渲染「下一站国乒赛事」模块', () => {
   const data = require('./../data.json');
   // 复制并改写 nextEvent.date 为 3 天后,模拟「空窗期后才有下一站」场景
+  // 2026-09-09 修复:日期改为相对「今天」动态计算。原先硬编码 '2026-09-11',
+  // 一旦真实日期推进到 9/9,该日期就变成「后天」(= 窗口内),模块按铁律隐藏 → 用例误报失败。
   const fake = JSON.parse(JSON.stringify(data));
-  fake.nextEvent = { date: '2026-09-11', weekday: '周五', daysAway: 3, note: '下一站WTT某站9/11-15' };
+  const t0 = new Date();
+  const d3 = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + 3);
+  const key3 = d3.getFullYear() + '-' + String(d3.getMonth() + 1).padStart(2, '0') +
+               '-' + String(d3.getDate()).padStart(2, '0');
+  fake.nextEvent = { date: key3, weekday: '周五', daysAway: 3, note: '下一站WTT某站' + key3 };
   const ctx = api.prepareCtx(fake);
   const below = api.buildBelow(ctx, fake);
   assert.ok(/下一站国乒赛事/.test(below), '窗口外赛事应显示「下一站」模块');
