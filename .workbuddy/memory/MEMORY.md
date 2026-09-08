@@ -36,6 +36,11 @@
   - **判定用真实日期** `isNextEventStarted(ne, today)`（`ne.date ≤ today`）；**不依赖采集端 daysAway 字段**（2026-09-08 实测：date=9/8 但采集端错填 daysAway=7 → 即便如此徽章也隐藏）。
   - 三个函数都得加 `now` 形参（compact/NoDate），调用点在 `renderDaySection`（`ctx.now` 可用）。
   - 末尾 `module.exports` 同步补 `isNextEventStarted / nextEventCompact / nextEventCompactNoDate`；`tests/logic.test.js` 加 9 条真值表 + 渲染断言。
+- **【下一站模块窗口铁律 2026-09-08 子上定】** 整个「下一站国乒赛事」模块**仅在「今天/明天/后天都没有当前赛事安排」时出现**；只要 `nextEvent` 指向的赛事开始日落在 `[今天, 今天+2]` 窗口内（含今天），模块整体不显示。子上原话：`那个模块出现的条件是"今天明天后天已经没有当前赛事的安排了"`。
+  - 新增 `isNextEventWithinWindow(ne, today, horizonDays=2)`（`ne.date <= addDays(todayKey, 2)`）。
+  - `buildBelow` 模块渲染条件：`data.nextEvent && data.nextEvent.date && !isNextEventWithinWindow(data.nextEvent, ctx.now)`。
+  - 判据用**真实日期**（不依赖采集端 daysAway）；上一轮「倒数日徽章」铁律已覆盖 `isNextEventStarted`，本铁律范围更宽（±2 天），模块消失即徽章随之消失。
+  - 末尾 `module.exports` 补 `isNextEventWithinWindow`；`tests/logic.test.js` 加 9 条（107/107 全绿）。
 
 ## 自检两层必做
 ① **解析层** `api.parseDayNote`：points≥8、最长≤100、括号配对、next 抽到、squad/absent 与 dayNote 一致。
