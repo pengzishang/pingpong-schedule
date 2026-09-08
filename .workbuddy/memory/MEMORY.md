@@ -31,6 +31,11 @@
 - 名单句 `出战:男单…/…,女单…/…,缺席:…。`；**口诀「名单句在前、`背景:` 断后」**（`缺席:` 的 lookahead 会吞掉后续全部文本，必须用 `背景:` 截断）。
 - **`nextEvent.note` 追加文本禁用 `→`**（触发时间线分支），脚本里加 `assert`。
 - video.json 顶层仅 `days[]`，用 `platform`（非 channel）；`renderVideoBlock` **不渲染 result** → 赛果写进 `note` 首句。团体赛按 5.3.1。
+- **【倒数日铁律 2026-09-08 子上定】** 赛事已开打（`ne.date ≤ today`）→「距今天 X 天」徽章/字段**一律不显示**。日期本身已是「今天/已开始」的清晰信号，「距今天 0 天」是无信息量的冗余。
+  - **三处同步守卫**：`buildBelow` 的 `tag--soon` 徽章 + `nextEventCompact`（「今日无直播」卡简版）+ `nextEventCompactNoDate`（顶部 pending__next 简版）。
+  - **判定用真实日期** `isNextEventStarted(ne, today)`（`ne.date ≤ today`）；**不依赖采集端 daysAway 字段**（2026-09-08 实测：date=9/8 但采集端错填 daysAway=7 → 即便如此徽章也隐藏）。
+  - 三个函数都得加 `now` 形参（compact/NoDate），调用点在 `renderDaySection`（`ctx.now` 可用）。
+  - 末尾 `module.exports` 同步补 `isNextEventStarted / nextEventCompact / nextEventCompactNoDate`；`tests/logic.test.js` 加 9 条真值表 + 渲染断言。
 
 ## 自检两层必做
 ① **解析层** `api.parseDayNote`：points≥8、最长≤100、括号配对、next 抽到、squad/absent 与 dayNote 一致。
