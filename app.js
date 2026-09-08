@@ -1386,6 +1386,19 @@
       return ne.date <= (y + '-' + m + '-' + d);
     }
 
+    // 铁律(2026-09-08 子上定):「下一站国乒赛事」模块**仅在「今天/明天/后天都没有当前赛事安排」时出现**;
+    // 只要 nextEvent 指向的赛事开始日落在 [今天, 今天+2] 窗口内(含今天),模块整体不显示。
+    // 判据用真实日期(不依赖采集端 daysAway 字段)。horizonDays 默认 2(= 今/明/后三天)。
+    function isNextEventWithinWindow(ne, today, horizonDays) {
+      if (!ne || !ne.date || !(today instanceof Date)) return false;
+      if (typeof horizonDays !== 'number') horizonDays = 2;
+      var y = today.getFullYear();
+      var m = today.getMonth() + 1; if (m < 10) m = '0' + m;
+      var d = today.getDate(); if (d < 10) d = '0' + d;
+      var todayKey = y + '-' + m + '-' + d;
+      return ne.date <= addDays(todayKey, horizonDays);
+    }
+
     // 紧凑版:用于「今日无直播」「待公布」等小卡里的「下一场」一行(只点要点,不堆整段 note)
     // omitCountdown=true 时去掉「距今天 X 天」(该倒数已上移到顶部「近期无比赛」横幅,避免重复)
     // now 用于判定赛事是否已开打(已开打则不显示倒数日)
@@ -2055,7 +2068,8 @@
         html += '<div class="recap-sep"><span>—— ' + recapLabel + ' ——</span></div>';
         pastContent.forEach(function (x) { html += renderDaySection(x, ctx, data); });
       }
-      if (data.nextEvent && data.nextEvent.date) {
+      // 铁律:今天/明天/后天已无当前赛事安排才显示「下一站」模块;窗口内(nextEvent.date ≤ 今天+2)则整体隐藏
+      if (data.nextEvent && data.nextEvent.date && !isNextEventWithinWindow(data.nextEvent, ctx.now)) {
         var ne = data.nextEvent;
         html += '<section class="day day--next" aria-label="下一站国乒赛事">' +
                   '<div class="day__head">' +
@@ -2164,6 +2178,7 @@
         nextEventCompact: nextEventCompact,
         nextEventCompactNoDate: nextEventCompactNoDate,
         isNextEventStarted: isNextEventStarted,
+        isNextEventWithinWindow: isNextEventWithinWindow,
         parseMatchNote: parseMatchNote,
         renderMatchNoteHtml: renderMatchNoteHtml,
         parseRecapProgram: parseRecapProgram,

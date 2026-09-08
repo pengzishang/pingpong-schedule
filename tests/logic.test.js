@@ -492,3 +492,63 @@ test('nextEventCompactNoDate: 已开打赛事同样不显示倒数日', () => {
   );
   assert.ok(!/距今天/.test(out), '已开打赛事应隐藏倒数日,实际=' + out);
 });
+
+// ===========================================================================
+// 下一站模块窗口铁律(2026-09-08 子上定:今天明天后天有当前赛事安排,模块整体消失)
+// ===========================================================================
+
+test('isNextEventWithinWindow: 赛事首日 = 今天 → 在窗口内(true,模块隐藏)', () => {
+  const today = new Date(2026, 8, 8); // 2026-09-08
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-08' }, today), true);
+});
+
+test('isNextEventWithinWindow: 赛事日 = 明天 → 在窗口内(true)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-09' }, today), true);
+});
+
+test('isNextEventWithinWindow: 赛事日 = 后天 → 在窗口内(true)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-10' }, today), true);
+});
+
+test('isNextEventWithinWindow: 赛事日 = 大后天(3 天后) → 窗口外(false,模块显示)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-11' }, today), false);
+});
+
+test('isNextEventWithinWindow: 赛事日 = 一周后 → 窗口外(false)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-15' }, today), false);
+});
+
+test('isNextEventWithinWindow: 缺失 date → false(不误判)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({}, today), false);
+  assert.strictEqual(api.isNextEventWithinWindow(null, today), false);
+});
+
+test('isNextEventWithinWindow: 自定义 horizon(1 天)= 仅今天明天在窗口', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-09' }, today, 1), true);
+  assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-10' }, today, 1), false);
+});
+
+test('buildBelow[真实数据]: nextEvent.date=9/8 落在窗口内 → 不渲染「下一站国乒赛事」模块', () => {
+  const data = require('./../data.json');
+  const ctx = api.prepareCtx(data);
+  const below = api.buildBelow(ctx, data);
+  assert.ok(!/下一站国乒赛事/.test(below), '今天已是当前赛事首日,「下一站」模块应整体消失');
+  assert.ok(!/day--next/.test(below), '下一站 section 不应出现,实际仍含 day--next');
+});
+
+test('buildBelow: nextEvent 在窗口外(3 天后) → 仍渲染「下一站国乒赛事」模块', () => {
+  const data = require('./../data.json');
+  // 复制并改写 nextEvent.date 为 3 天后,模拟「空窗期后才有下一站」场景
+  const fake = JSON.parse(JSON.stringify(data));
+  fake.nextEvent = { date: '2026-09-11', weekday: '周五', daysAway: 3, note: '下一站WTT某站9/11-15' };
+  const ctx = api.prepareCtx(fake);
+  const below = api.buildBelow(ctx, fake);
+  assert.ok(/下一站国乒赛事/.test(below), '窗口外赛事应显示「下一站」模块');
+  assert.ok(/day--next/.test(below), '下一站 section 应出现');
+});
