@@ -1375,9 +1375,21 @@
       return html;
     }
 
+    // 铁律:赛事已开打(ne.date ≤ today)即视为「今天/已开始/已结束」,倒数日徽章/字段一律不再显示——
+// 日期本身已是清晰信号,「距今天 0 天」是无信息量的冗余。
+// 兼容采集端 daysAway 错填(2026-09-08 实测:date=9/8 但 daysAway 误填 7),以真实日期为准。
+    function isNextEventStarted(ne, today) {
+      if (!ne || !ne.date || !(today instanceof Date)) return false;
+      var y = today.getFullYear();
+      var m = today.getMonth() + 1; if (m < 10) m = '0' + m;
+      var d = today.getDate(); if (d < 10) d = '0' + d;
+      return ne.date <= (y + '-' + m + '-' + d);
+    }
+
     // 紧凑版:用于「今日无直播」「待公布」等小卡里的「下一场」一行(只点要点,不堆整段 note)
     // omitCountdown=true 时去掉「距今天 X 天」(该倒数已上移到顶部「近期无比赛」横幅,避免重复)
-    function nextEventCompact(ne, omitCountdown) {
+    // now 用于判定赛事是否已开打(已开打则不显示倒数日)
+    function nextEventCompact(ne, omitCountdown, now) {
       if (!ne) return '';
       var p = parseNextEventNote(ne.note || '');
       var name = '';
@@ -1388,7 +1400,8 @@
       var parts = [];
       if (name) parts.push(name);
       if (ne.date) parts.push(ne.date + (ne.weekday ? '(' + ne.weekday + ')' : ''));
-      if (!omitCountdown && typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
+      // 赛事已开打 → 不再显示「距今天 X 天」
+      if (!omitCountdown && typeof ne.daysAway === 'number' && ne.daysAway > 0 && !isNextEventStarted(ne, now)) parts.push('距今天 ' + ne.daysAway + ' 天');
       if (p.tv) {
         var ch = p.tv.match(/CCTV[-\d+]+/);
         if (ch) parts.push(ch[0] + ' 预计直播');
@@ -1396,7 +1409,7 @@
       return parts.join(' · ');
     }
     // 去掉日期版本(用于已经把日期加粗展示的场景,避免重复)
-    function nextEventCompactNoDate(ne, omitCountdown) {
+    function nextEventCompactNoDate(ne, omitCountdown, now) {
       if (!ne) return '';
       var p = parseNextEventNote(ne.note || '');
       var name = '';
@@ -1406,7 +1419,8 @@
       }
       var parts = [];
       if (name) parts.push(name);
-      if (!omitCountdown && typeof ne.daysAway === 'number') parts.push('距今天 ' + ne.daysAway + ' 天');
+      // 赛事已开打 → 不再显示「距今天 X 天」
+      if (!omitCountdown && typeof ne.daysAway === 'number' && ne.daysAway > 0 && !isNextEventStarted(ne, now)) parts.push('距今天 ' + ne.daysAway + ' 天');
       if (p.tv) {
         var ch = p.tv.match(/CCTV[-\d+]+/);
         if (ch) parts.push(ch[0] + ' 预计直播');
@@ -2008,7 +2022,7 @@
           // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
           html += '<div class="day__pending">' +
                     '<span class="pending__badge">📋 待公布</span>' +
-                    '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode) || '国乒比赛') + '</span>' +
+                    '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode, now) || '国乒比赛') + '</span>' +
                   '</div>';
         }
       }
@@ -2049,7 +2063,8 @@
                       '<span class="day__date">' + esc(ne.date) + '</span>' +
                       '<span class="day__week">' + esc(ne.weekday || '') + '</span>' +
                     '</div>' +
-                    (ctx.gapMode ? '' : '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>') +
+                    // 赛事已开打(以 ne.date ≤ today 为准,容错采集端 daysAway 错填)不显示「距今天 X 天」徽章
+                    (ctx.gapMode || isNextEventStarted(ne, ctx.now) ? '' : '<span class="tag tag--soon">距今天 ' + esc(ne.daysAway) + ' 天</span>') +
                   '</div>' +
                   '<div class="day__next-title">📅 下一站国乒赛事</div>' +
                   renderNextCard(ne) +
@@ -2146,6 +2161,9 @@
         renderNextMini: renderNextMini,
         parseNextEventNote: parseNextEventNote,
         parseNextRoster: parseNextRoster,
+        nextEventCompact: nextEventCompact,
+        nextEventCompactNoDate: nextEventCompactNoDate,
+        isNextEventStarted: isNextEventStarted,
         parseMatchNote: parseMatchNote,
         renderMatchNoteHtml: renderMatchNoteHtml,
         parseRecapProgram: parseRecapProgram,

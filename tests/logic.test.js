@@ -419,3 +419,76 @@ test('parseDayNote: 无 next 句时 next 为空(buildBelow 兜底全局 nextEven
   assert.ok(dn.points.length >= 1, '应拆出要点');
   assert.strictEqual(dn.next, '', '无下一站句时 next 应为空');
 });
+
+// ===========================================================================
+// 倒数日铁律(2026-09-08 子上反馈:赛事已经开始就不用显示「距今天 X 天」了. 记住)
+// ===========================================================================
+
+test('isNextEventStarted: 今天 = 赛事首日 → 已开打(true)', () => {
+  const today = new Date(2026, 8, 8); // 2026-09-08
+  assert.strictEqual(api.isNextEventStarted({ date: '2026-09-08' }, today), true);
+});
+
+test('isNextEventStarted: 赛事日 = 早于今天 → 已开打(true)', () => {
+  const today = new Date(2026, 8, 8); // 2026-09-08
+  assert.strictEqual(api.isNextEventStarted({ date: '2026-09-01' }, today), true);
+});
+
+test('isNextEventStarted: 赛事日 = 明天 → 未开打(false)', () => {
+  const today = new Date(2026, 8, 8); // 2026-09-08
+  assert.strictEqual(api.isNextEventStarted({ date: '2026-09-09' }, today), false);
+});
+
+test('isNextEventStarted: 缺失 date → false(不误判)', () => {
+  const today = new Date(2026, 8, 8);
+  assert.strictEqual(api.isNextEventStarted({}, today), false);
+  assert.strictEqual(api.isNextEventStarted(null, today), false);
+});
+
+test('isNextEventStarted: 缺 now → false(不误判)', () => {
+  assert.strictEqual(api.isNextEventStarted({ date: '2026-09-01' }, null), false);
+  assert.strictEqual(api.isNextEventStarted({ date: '2026-09-01' }), false);
+});
+
+test('nextEventCompact: 赛事已开打时不显示「距今天 X 天」(即便 daysAway 误填)', () => {
+  // 真实数据 9/8 实测:date=9/8 但采集端 daysAway 错填 7 → 即便如此也必须隐藏
+  const today = new Date(2026, 8, 8);
+  const out = api.nextEventCompact(
+    { date: '2026-09-08', weekday: '周二', daysAway: 7, note: '下一站WTT澳门冠军赛9/8-13' },
+    false,
+    today
+  );
+  assert.ok(!/距今天/.test(out), '已开打赛事不应再显示「距今天 X 天」,实际=' + out);
+  // 日期仍正常出现
+  assert.ok(/2026-09-08/.test(out), '日期应保留,实际=' + out);
+});
+
+test('nextEventCompact: 未来赛事(daysAway>0 且未到) 正常显示「距今天 X 天」', () => {
+  const today = new Date(2026, 8, 8); // 9/8
+  const out = api.nextEventCompact(
+    { date: '2026-09-15', weekday: '周二', daysAway: 7, note: '下一站WTT冠军赛' },
+    false,
+    today
+  );
+  assert.ok(/距今天 7 天/.test(out), '未来赛事应显示倒数日,实际=' + out);
+});
+
+test('nextEventCompact: omitCountdown=true → 一律不显示「距今天 X 天」', () => {
+  const today = new Date(2026, 8, 8);
+  const out = api.nextEventCompact(
+    { date: '2026-09-15', weekday: '周二', daysAway: 7, note: '下一站WTT冠军赛' },
+    true,
+    today
+  );
+  assert.ok(!/距今天/.test(out), 'omitCountdown 应屏蔽倒数日,实际=' + out);
+});
+
+test('nextEventCompactNoDate: 已开打赛事同样不显示倒数日', () => {
+  const today = new Date(2026, 8, 8);
+  const out = api.nextEventCompactNoDate(
+    { date: '2026-09-08', weekday: '周二', daysAway: 7, note: '下一站WTT澳门冠军赛9/8-13' },
+    false,
+    today
+  );
+  assert.ok(!/距今天/.test(out), '已开打赛事应隐藏倒数日,实际=' + out);
+});
