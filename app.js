@@ -58,11 +58,27 @@
     function flagsForSide(name, info, nation) {
       var parts = [];
       function pushFlag(s) { var f = flagFor(s); if (f && parts.indexOf(f) === -1) parts.push(f); }
-      if (info) info.split(/[\/／·・,，]/).forEach(function (seg) { pushFlag(seg.trim()); });
+      // ① 权威国籍优先:nation 是该选手真实国别时直接用,避免 info 描述文本里提到的对手国被误挂成该选手的旗
+      if (nation && nation.indexOf('跨国') === -1) {
+        pushFlag(nation);
+      }
+      // ② 跨国组合:info 形如「日本/波多黎各」时拆出国别补充(段本身须精确等于某国别 key,带「组合/队/选手」等后缀也先剥离再匹配)。
+      //    单打的描述性 info(如「国乒女单,首轮3-0横扫德国米特兰姆」)整段不会命中,杜绝「德国米特兰姆」误出德国旗。
+      if (info) {
+        info.split(/[\/／·・]/).forEach(function (seg) {
+          seg = seg.trim();
+          var f = FLAGS[seg];
+          if (!f) {
+            var bare = seg.replace(/(组合|队|选手|名将)?$/, '').trim();
+            f = FLAGS[bare];
+          }
+          if (f && parts.indexOf(f) === -1) parts.push(f);
+        });
+      }
+      // ③ 跨国组合兜底:nation 为「跨国组合」且 info 未拆出时,按已知配对补旗
       if (!parts.length && nation && nation.indexOf('跨国') !== -1) {
         crossFlagsForPair(name).forEach(pushFlag);
       }
-      if (!parts.length && nation) pushFlag(nation);
       return parts.join(' ');
     }
 
