@@ -617,7 +617,7 @@ test('renderSurvivalBar: 空窗无赛程 → 返回空串(渲染层据此隐藏�
   assert.strictEqual(api.renderSurvivalBar({ title: 'x', updatedAt: '', days: [] }), '');
 });
 
-test('renderSurvivalBar: 输出赛事名 + 存活计数 + 淘汰者标记 ✕(类名带 surv- 前缀)', () => {
+test('renderSurvivalBar: 输出赛事名 + 淘汰者标记 ✕(类名带 surv- 前缀,无「剩 N 人」)', () => {
   const data = {
     title: 'x', updatedAt: '',
     days: [
@@ -635,11 +635,53 @@ test('renderSurvivalBar: 输出赛事名 + 存活计数 + 淘汰者标记 ✕(�
   const html = api.renderSurvivalBar(data);
   assert.ok(/WTT澳门冠军赛2026/.test(html), '应含当前赛事名');
   assert.ok(/参赛人员存活现状/.test(html), '应含副标题');
-  assert.ok(/剩 1 人/.test(html), '应显示存活人数');
+  assert.ok(!/剩 \d+ 人/.test(html), '「剩 N 人」角标应已删除');
   assert.strictEqual((html.match(/surv-chip--out/g) || []).length, 1, '应仅 1 人淘汰');
   assert.ok(/surv-chip--out">王楚钦/.test(html), '王楚钦应带淘汰样式');
   assert.ok(/>陈幸同<\/span>/.test(html) && !/surv-chip--out">陈幸同/.test(html), '陈幸同不应带淘汰样式');
   assert.ok(/✕/.test(html), '淘汰者应带 ✕ 标记');
   // 回归护栏:绝不可再产出裸 .player 类名(会污染比赛卡布局)
+  assert.ok(!/class="player/.test(html), '不得复用 .player 类名');
+});
+
+// ---------- 名单全集 + 淘汰判定(2026-09-11 二改:全部出战选手都要列出) ----------
+
+test('rosterFromNextEvent: 赛事未开打(date 在未来) → 不用作名册', () => {
+  const data = { days: [], nextEvent: { date: '2099-01-01', note: '出战:男单张三/李四' } };
+  assert.deepStrictEqual(api.rosterFromNextEvent(data), []);
+  assert.deepStrictEqual(api.rosterFromNextEvent({}), []);
+});
+
+test('eliminatedNamesFromText: 只标记「止步/出局」分句里的名字,同句晋级者不误标', () => {
+  const names = ['周启豪', '陈垣宇', '陈幸同', '陈熠', '王艺迪', '蒯曼', '黄友政'];
+  const txt = '国乒首轮收官4胜3负,周启豪、陈垣宇、陈幸同、陈熠四人进16强,王艺迪、蒯曼、黄友政三人止步首轮。';
+  const out = api.eliminatedNamesFromText(txt, names);
+  assert.deepStrictEqual(Object.keys(out).sort(), ['黄友政', '王艺迪', '蒯曼'].sort());
+  // 空输入安全
+  assert.deepStrictEqual(api.eliminatedNamesFromText('', names), {});
+  assert.deepStrictEqual(api.eliminatedNamesFromText(txt, []), {});
+});
+
+test('computeSurvival[真实数据]: 名册取全部 7 名出战选手,止步首轮者画叉', () => {
+  const data = require('./../data.json');
+  const s = api.computeSurvival(data);
+  assert.ok(s, '有赛程时应返回结果');
+  const all = s.male.concat(s.female);
+  assert.strictEqual(all.length, 7, '应列出全部 7 名出战选手(而非只列有比赛的 4 人)');
+  assert.strictEqual(s.male.length, 3, '男队 3 人');
+  assert.strictEqual(s.female.length, 4, '女队 4 人');
+  const elim = all.filter(p => p.eliminated).map(p => p.name).sort();
+  assert.deepStrictEqual(elim, ['黄友政', '王艺迪', '蒯曼'].sort(), '止步首轮 3 人应画叉');
+  const alive = all.filter(p => !p.eliminated).map(p => p.name).sort();
+  assert.deepStrictEqual(alive, ['周启豪', '陈垣宇', '陈幸同', '陈熠'].sort(), '晋级 4 人无叉');
+});
+
+test('renderSurvivalBar[真实数据]: 7 个 chip、3 个画叉、无「剩 N 人」', () => {
+  const data = require('./../data.json');
+  const html = api.renderSurvivalBar(data);
+  // 注意:必须限定「surv-chip 后紧跟空格或引号」,否则会把叉号类名 surv-chip__x 也算进来
+  assert.strictEqual((html.match(/class="surv-chip[" ]/g) || []).length, 7, '应渲染 7 个选手标签');
+  assert.strictEqual((html.match(/surv-chip--out/g) || []).length, 3, '应 3 个画叉');
+  assert.ok(!/剩 \d+ 人/.test(html), '「剩 N 人」角标应已删除');
   assert.ok(!/class="player/.test(html), '不得复用 .player 类名');
 });

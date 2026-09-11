@@ -735,7 +735,31 @@
       if (awayWin && !homeWin) return playerName === m.playerHome;
       return false;
     }
+    // 名册来源:nextEvent.note 的「出战」名单(parseNextRoster,已带男女)。
+    // 仅当该赛事已开打(isNextEventStarted = 当前赛事)时才用作名册,
+    // 否则会把「未来某站」的名单套到当前赛事上。
+    function rosterFromNextEvent(data) {
+      var ne = data && data.nextEvent;
+      if (!ne || !ne.note) return [];
+      if (!isNextEventStarted(ne, new Date())) return [];
+      var r = parseNextRoster(ne.note);
+      return (r && r.squad) ? r.squad : [];
+    }
+    // 淘汰来源之二:note 叙事里「…止步…/出局/被淘汰」的分句中出现过的名册选手。
+    // 只对已知名册名字做白名单匹配,且按强分隔符(。;；,，)切句,
+    // 避免把同句里活着的选手误标(如「…四人进16强,王艺迪、蒯曼、黄友政三人止步首轮」)。
+    function eliminatedNamesFromText(text, names) {
+      var out = {};
+      if (!text || !names || !names.length) return out;
+      String(text).split(/[。;；,，\n]/).forEach(function (clause) {
+        if (!/止步|出局|被淘汰|遭淘汰/.test(clause)) return;
+        names.forEach(function (n) { if (clause.indexOf(n) !== -1) out[n] = true; });
+      });
+      return out;
+    }
     // 汇总当前赛事国乒参赛选手的存活状况。无任何赛程 → 返回 null(渲染层据此隐藏整块)。
+    // 名册 = nextEvent 出战名单 ∪ 窗口内有比赛的国乒选手;
+    // 淘汰 = 窗口内比赛 result 判负 ∪ note 叙事「止步/出局」。
     function computeSurvival(data) {
       var days = (data && data.days) || [];
       var allMatches = [];
@@ -747,21 +771,42 @@
       var tournament = '', max = 0;
       Object.keys(tCount).forEach(function (t) { if (tCount[t] > max) { max = tCount[t]; tournament = t; } });
       if (!tournament) return null;
-      // 收集该赛事国乒选手 + 性别 + 淘汰状态
-      var players = {};
+
+      var players = {}; // name -> {name, gender, eliminated}
+      function ensure(name, gender) {
+        if (!name) return null;
+        if (!players[name]) players[name] = { name: name, gender: gender || '', eliminated: false };
+        else if (gender && !players[name].gender) players[name].gender = gender;
+        return players[name];
+      }
+
+      // 来源 1:参赛名册(覆盖「还没轮到打」与「已淘汰出窗口」的选手)
+      rosterFromNextEvent(data).forEach(function (p) {
+        var g = p.gender === '女' ? 'f' : (p.gender === '男' ? 'm' : '');
+        ensure(p.name, g);
+      });
+
+      // 来源 2:窗口内该赛事的比赛 —— 补性别 + 由 result(负者)直接判淘汰
       allMatches.forEach(function (m) {
         if (m.tournament !== tournament) return;
         var g = genderOf(m.stage);
         [[m.playerHome, m.nationHome], [m.playerAway, m.nationAway]].forEach(function (p) {
           var name = p[0], nation = p[1];
           if (!name || !belongsToCN(nation)) return;
-          if (!players[name]) players[name] = { name: name, gender: g, eliminated: false };
-          else if (g && !players[name].gender) players[name].gender = g;
+          ensure(name, g);
           if (playerLostInMatch(m, name)) players[name].eliminated = true;
         });
       });
+
       var names = Object.keys(players);
       if (!names.length) return null; // 该赛事无国乒选手
+
+      // 来源 3:note 叙事里的「止步/出局」——补窗口外已淘汰的名册选手
+      var text = [data && data.note, data && data.nextEvent && data.nextEvent.note]
+        .filter(Boolean).join('。');
+      var elim = eliminatedNamesFromText(text, names);
+      names.forEach(function (n) { if (elim[n]) players[n].eliminated = true; });
+
       var male = [], female = [];
       names.forEach(function (n) {
         var p = players[n];
@@ -791,7 +836,6 @@
       return '<h2 class="survival__title">' +
                '<span class="survival__icon" aria-hidden="true">🔥</span>' +
                '<span class="survival__name">' + esc(s.tournament) + ' · 参赛人员存活现状</span>' +
-               '<span class="survival__count">剩 ' + s.alive + ' 人</span>' +
              '</h2>' + sections;
     }
     function renderSurvivalInto(data) {
@@ -2314,6 +2358,8 @@
         nameContains: nameContains,
         genderOf: genderOf,
         playerLostInMatch: playerLostInMatch,
+        rosterFromNextEvent: rosterFromNextEvent,
+        eliminatedNamesFromText: eliminatedNamesFromText,
         computeSurvival: computeSurvival,
         renderSurvivalBar: renderSurvivalBar,
         renderSurvivalInto: renderSurvivalInto,

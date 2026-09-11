@@ -44,24 +44,22 @@
     /* ---------- 国乒参赛人员存活现状(替代原顶部筛选条;仅赛事进行中显示) ----------
        注意:所有类名一律加 surv-/survival 前缀,绝不复用 .player(比赛卡已占用) */
     .survival {
-      margin: .9rem 0 0;
-      padding: .9rem .2rem 1rem;
-      background: var(--page);
-      border-bottom: 1px solid var(--line);
+      margin: 1rem 0 0;
+      padding: .95rem 1rem 1.05rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--navy);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
     .survival[hidden] { display: none; }
     .survival__title {
       display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
-      margin: 0 0 .7rem;
+      margin: 0 0 .75rem;
       font-size: 1.02rem; font-weight: 800; color: var(--navy);
     }
     .survival__icon { font-size: 1.2rem; line-height: 1; }
     .survival__name { min-width: 0; }
-    .survival__count {
-      margin-left: auto; flex: 0 0 auto; white-space: nowrap;
-      font-size: .8rem; font-weight: 700; color: var(--red);
-      background: var(--red-soft); padding: .2rem .6rem; border-radius: 2rem;
-    }
     .surv-squad { margin-bottom: .6rem; }
     .surv-squad:last-child { margin-bottom: 0; }
     .surv-squad__label {
