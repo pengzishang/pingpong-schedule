@@ -671,17 +671,27 @@ test('computeSurvival[真实数据]: 名册取全部 7 名出战选手,止步首
   assert.strictEqual(s.male.length, 3, '男队 3 人');
   assert.strictEqual(s.female.length, 4, '女队 4 人');
   const elim = all.filter(p => p.eliminated).map(p => p.name).sort();
-  assert.deepStrictEqual(elim, ['黄友政', '王艺迪', '蒯曼'].sort(), '止步首轮 3 人应画叉');
+  // 赛事进行中淘汰名单会逐轮增加,只断言「已成定局的三位首轮出局者」必在其中,
+  // 不写死总人数——否则每轮淘汰一人测试就会误报失败(2026-09-11 陈垣宇 1/8 出局时踩过)。
+  for (const n of ['王艺迪', '蒯曼', '黄友政']) {
+    assert.ok(elim.includes(n), n + ' 已出局应画叉');
+  }
+  assert.ok(elim.length >= 3 && elim.length <= 7, '淘汰人数应在 3~7 之间,实际 ' + elim.length);
   const alive = all.filter(p => !p.eliminated).map(p => p.name).sort();
-  assert.deepStrictEqual(alive, ['周启豪', '陈垣宇', '陈幸同', '陈熠'].sort(), '晋级 4 人无叉');
+  const roster = ['周启豪', '陈垣宇', '陈幸同', '陈熠', '王艺迪', '蒯曼', '黄友政'];
+  assert.deepStrictEqual(alive.slice().sort(), roster.filter(n => !elim.includes(n)).sort(), '存活与淘汰应互补且无重复');
+  assert.strictEqual(alive.length + elim.length, 7, '存活 + 淘汰 = 7');
 });
 
-test('renderSurvivalBar[真实数据]: 7 个 chip、3 个画叉、无「剩 N 人」', () => {
+test('renderSurvivalBar[真实数据]: 7 个 chip、画叉数与存活面板一致、无「剩 N 人」', () => {
   const data = require('./../data.json');
   const html = api.renderSurvivalBar(data);
   // 注意:必须限定「surv-chip 后紧跟空格或引号」,否则会把叉号类名 surv-chip__x 也算进来
   assert.strictEqual((html.match(/class="surv-chip[" ]/g) || []).length, 7, '应渲染 7 个选手标签');
-  assert.strictEqual((html.match(/surv-chip--out/g) || []).length, 3, '应 3 个画叉');
+  // 画叉数随赛事推进变化,以 computeSurvival 的结果为唯一事实来源,不写死数字
+  const s = api.computeSurvival(data);
+  const expectOut = (s.male.concat(s.female)).filter(p => p.eliminated).length;
+  assert.strictEqual((html.match(/surv-chip--out/g) || []).length, expectOut, '画叉数应与存活面板一致');
   assert.ok(!/剩 \d+ 人/.test(html), '「剩 N 人」角标应已删除');
   assert.ok(!/class="player/.test(html), '不得复用 .player 类名');
 });
