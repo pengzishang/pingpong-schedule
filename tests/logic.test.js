@@ -558,3 +558,86 @@ test('buildBelow: nextEvent 在窗口外(3 天后) → 仍渲染「下一站国�
   assert.ok(/下一站国乒赛事/.test(below), '窗口外赛事应显示「下一站」模块');
   assert.ok(/day--next/.test(below), '下一站 section 应出现');
 });
+
+// ===========================================================================
+// 十一、国乒参赛人员存活现状(2026-09-11 新增)
+// ===========================================================================
+
+test('computeSurvival: 空窗无赛程 → 返回 null(满足「只在赛事赛程中显示」铁律)', () => {
+  const data = { title: 'x', updatedAt: '', days: [] };
+  assert.strictEqual(api.computeSurvival(data), null);
+});
+
+test('computeSurvival: 选出出现最多的赛事为当前赛事', () => {
+  const data = {
+    title: 'x', updatedAt: '',
+    days: [
+      { date: '2026-09-11', weekday: '周五',
+        matches: [
+          { tournament: 'WTT澳门冠军赛2026', stage: '女单1/8决赛', playerHome: '陈幸同', nationHome: '中国', playerAway: '米特兰姆', nationAway: '德国' },
+          { tournament: 'WTT澳门冠军赛2026', stage: '男单1/8决赛', playerHome: '王楚钦', nationHome: '中国', playerAway: '张本智和', nationAway: '日本' }
+        ] },
+      { date: '2026-09-12', weekday: '周六',
+        matches: [
+          { tournament: '其他赛事', stage: '男单', playerHome: 'A', nationHome: '中国', playerAway: 'B', nationAway: '韩国' }
+        ] }
+    ]
+  };
+  const s = api.computeSurvival(data);
+  assert.strictEqual(s.tournament, 'WTT澳门冠军赛2026');
+});
+
+test('computeSurvival: 依据 result(负者)标记淘汰,短名模糊匹配对手', () => {
+  const data = {
+    title: 'x', updatedAt: '',
+    days: [
+      { date: '2026-09-11', weekday: '周五',
+        matches: [
+          // 陈幸同 3-0 米特兰姆,陈幸同赢 → 未淘汰
+          { tournament: 'WTT澳门冠军赛2026', stage: '女单1/8决赛',
+            playerHome: '陈幸同', nationHome: '中国', playerAway: '米特兰姆', nationAway: '德国',
+            result: '陈幸同 3-0 米特兰姆(11-5/11-6/11-3)' },
+          // 王楚钦负于张本 → 淘汰。result 用短名「张本」,需模糊匹配 playerAway「张本智和」
+          { tournament: 'WTT澳门冠军赛2026', stage: '男单1/8决赛',
+            playerHome: '王楚钦', nationHome: '中国', playerAway: '张本智和', nationAway: '日本',
+            result: '张本 3-1 王楚钦(11-9/9-11/11-7/11-5)' }
+        ] }
+    ]
+  };
+  const s = api.computeSurvival(data);
+  const cxt = s.female.find(p => p.name === '陈幸同');
+  const wcq = s.male.find(p => p.name === '王楚钦');
+  assert.ok(cxt && !cxt.eliminated, '陈幸同胜,未淘汰');
+  assert.ok(wcq && wcq.eliminated, '王楚钦负于张本(短名模糊匹配),应标记淘汰');
+  assert.strictEqual(s.alive, 1);
+  assert.strictEqual(s.total, 2);
+});
+
+test('renderSurvivalBar: 空窗无赛程 → 返回空串(渲染层据此隐藏容器)', () => {
+  assert.strictEqual(api.renderSurvivalBar({ title: 'x', updatedAt: '', days: [] }), '');
+});
+
+test('renderSurvivalBar: 输出赛事名 + 存活计数 + 淘汰者标记 ✕', () => {
+  const data = {
+    title: 'x', updatedAt: '',
+    days: [
+      { date: '2026-09-11', weekday: '周五',
+        matches: [
+          { tournament: 'WTT澳门冠军赛2026', stage: '女单1/8决赛',
+            playerHome: '陈幸同', nationHome: '中国', playerAway: '米特兰姆', nationAway: '德国',
+            result: '陈幸同 3-0 米特兰姆(11-5/11-6/11-3)' },
+          { tournament: 'WTT澳门冠军赛2026', stage: '男单1/8决赛',
+            playerHome: '王楚钦', nationHome: '中国', playerAway: '张本智和', nationAway: '日本',
+            result: '张本 3-1 王楚钦(11-9/9-11/11-7/11-5)' }
+        ] }
+    ]
+  };
+  const html = api.renderSurvivalBar(data);
+  assert.ok(/WTT澳门冠军赛2026/.test(html), '应含当前赛事名');
+  assert.ok(/参赛人员存活现状/.test(html), '应含副标题');
+  assert.ok(/剩 1 人/.test(html), '应显示存活人数');
+  assert.strictEqual((html.match(/player--eliminated/g) || []).length, 1, '应仅 1 人淘汰');
+  assert.ok(/player--eliminated">王楚钦/.test(html), '王楚钦应带淘汰样式');
+  assert.ok(/>陈幸同<\/span>/.test(html) && !/player--eliminated">陈幸同/.test(html), '陈幸同不应带淘汰样式');
+  assert.ok(/✕/.test(html), '淘汰者应带 ✕ 标记');
+});

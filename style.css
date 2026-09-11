@@ -62,6 +62,57 @@
     .filter__btn.is-active { background: var(--navy); color: #fff; border-color: var(--navy); }
     .filter__btn:active { opacity: .85; }
 
+    /* ---------- 国乒参赛人员存活现状（仅赛事进行中显示） ---------- */
+    .survival {
+      padding: .85rem .2rem .45rem;
+      background: var(--page);
+      border-bottom: 1px solid var(--line);
+    }
+    .survival[hidden] { display: none; }
+    .survival__title {
+      display: flex; align-items: center; gap: .4rem;
+      margin: 0 0 .65rem;
+      font-size: 1.02rem; font-weight: 800; color: var(--navy);
+    }
+    .survival__title .icon { font-size: 1.2rem; }
+    .survival__count {
+      margin-left: auto;
+      font-size: .8rem; font-weight: 700; color: var(--red);
+      background: var(--red-soft); padding: .2rem .6rem; border-radius: 2rem;
+    }
+    .squad { margin-bottom: .65rem; }
+    .squad:last-child { margin-bottom: 0; }
+    .squad__label {
+      display: flex; align-items: center; gap: .35rem;
+      margin: 0 0 .4rem;
+      font-size: .85rem; font-weight: 700; color: var(--ink-2);
+    }
+    .squad__label::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red);
+    }
+    .squad--male .squad__label::before { background: #3b82f6; }
+    .squad__row { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .player {
+      display: inline-flex; align-items: center; gap: .25rem;
+      padding: .45rem .8rem;
+      border-radius: 2rem;
+      font-size: 1.02rem; font-weight: 700;
+      border: 2px solid var(--line); background: #fff; color: var(--ink);
+      white-space: nowrap;
+    }
+    .player--eliminated {
+      background: #f3f5f7; border-color: #d5dbe3; color: var(--ink-2);
+      text-decoration: line-through;
+    }
+    .player .cross {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--red-soft); color: var(--red);
+      font-size: .7rem; line-height: 1; font-weight: 900;
+      text-decoration: none;
+    }
+
     /* ---------- 顶部品牌带(深海蓝) ---------- */
     .top {
       background: var(--navy);
