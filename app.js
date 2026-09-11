@@ -705,100 +705,6 @@
       return false;
     }
 
-    // 当前赛事国乒参赛人员存活现状:扫描全部 days 的 matches(含已结束/进行中/未来),
-    // 提取当前赛事(出现最多的 tournament)的国乒选手,依据 result 推导淘汰状态。
-    // 仅在该赛事有赛程(任意 match 存在)时返回数据,否则返回 null —— 空窗期不显示(与 dayHasContent 一致)。
-    function nameContains(a, b) {
-      a = String(a || ''); b = String(b || '');
-      if (a === b) return true;
-      if (a.length >= 2 && b.indexOf(a) !== -1) return true;
-      if (b.length >= 2 && a.indexOf(b) !== -1) return true;
-      return false;
-    }
-    function genderOf(stage) {
-      if (/女/.test(stage || '')) return 'f';
-      if (/男/.test(stage || '')) return 'm';
-      return '';
-    }
-    // 某场已结束比赛(m.result 存在)中,以 playerName 为国乒一方的选手是否在该场被淘汰(为负者)
-    function playerLostInMatch(m, playerName) {
-      if (!m || !m.result) return false;
-      var body = String(m.result).split('(')[0].trim();
-      var parts = body.split(/\s+/);
-      if (parts.length < 3) return false;
-      var winner = parts[0], loser = parts[parts.length - 1];
-      var homeWin = nameContains(winner, m.playerHome) || nameContains(m.playerHome, winner);
-      var awayWin = nameContains(winner, m.playerAway) || nameContains(m.playerAway, winner);
-      if (homeWin && !awayWin) return playerName === m.playerAway;
-      if (awayWin && !homeWin) return playerName === m.playerHome;
-      return false; // 无法从 result 判定胜负归属时保守:不标记淘汰
-    }
-    function computeSurvival(data) {
-      var days = (data && data.days) || [];
-      var allMatches = [];
-      days.forEach(function (d) { (d.matches || []).forEach(function (m) { allMatches.push(m); }); });
-      if (!allMatches.length) return null; // 空窗:无赛程
-      // 当前赛事 = 出现最多的 tournament
-      var tCount = {};
-      allMatches.forEach(function (m) { if (m.tournament) tCount[m.tournament] = (tCount[m.tournament] || 0) + 1; });
-      var tournament = '', max = 0;
-      Object.keys(tCount).forEach(function (t) { if (tCount[t] > max) { max = tCount[t]; tournament = t; } });
-      if (!tournament) return null;
-      // 收集该赛事国乒选手 + 性别 + 淘汰状态
-      var players = {};
-      allMatches.forEach(function (m) {
-        if (m.tournament !== tournament) return;
-        var g = genderOf(m.stage);
-        [[m.playerHome, m.nationHome], [m.playerAway, m.nationAway]].forEach(function (p) {
-          var name = p[0], nation = p[1];
-          if (!name || !belongsToCN(nation)) return;
-          if (!players[name]) players[name] = { name: name, gender: g, eliminated: false };
-          else if (g && !players[name].gender) players[name].gender = g;
-          if (playerLostInMatch(m, name)) players[name].eliminated = true;
-        });
-      });
-      var names = Object.keys(players);
-      if (!names.length) return null; // 该赛事无国乒选手
-      var male = [], female = [];
-      names.forEach(function (n) {
-        var p = players[n];
-        (p.gender === 'f' ? female : male).push(p);
-      });
-      var alive = names.filter(function (n) { return !players[n].eliminated; }).length;
-      return { tournament: tournament, male: male, female: female, alive: alive, total: names.length };
-    }
-    function renderSurvivalBar(data) {
-      var s = computeSurvival(data);
-      if (!s) return '';
-      function chips(arr) {
-        return arr.map(function (p) {
-          var cls = 'player' + (p.eliminated ? ' player--eliminated' : '');
-          var mark = p.eliminated ? '<span class="cross" aria-label="已淘汰">✕</span>' : '';
-          return '<span class="' + cls + '">' + esc(p.name) + mark + '</span>';
-        }).join('');
-      }
-      var sections = '';
-      if (s.male.length) {
-        sections += '<div class="squad squad--male"><div class="squad__label">男队</div><div class="squad__row">' + chips(s.male) + '</div></div>';
-      }
-      if (s.female.length) {
-        sections += '<div class="squad"><div class="squad__label">女队</div><div class="squad__row">' + chips(s.female) + '</div></div>';
-      }
-      if (!sections) return '';
-      return '<section class="survival__inner" aria-label="国乒参赛人员存活现状">' +
-               '<h2 class="survival__title"><span class="icon" aria-hidden="true">🔥</span>' +
-               '<span>' + esc(s.tournament) + ' · 参赛人员存活现状</span>' +
-               '<span class="survival__count">剩 ' + s.alive + ' 人</span></h2>' +
-               sections + '</section>';
-    }
-    function renderSurvivalInto(data) {
-      var el = document.getElementById('survival');
-      if (!el) return;
-      var html = renderSurvivalBar(data);
-      if (html) { el.innerHTML = html; el.hidden = false; }
-      else { el.innerHTML = ''; el.hidden = true; }
-    }
-
     // 把空窗期/录像说明天的一坨长文本拆成结构化项:
     //   lead       — 摘要(第一个 CCTV 之前的文字)
     //   pingpong[] — 乒乓节目(录像/典藏):{channel, time, program}
@@ -2217,7 +2123,6 @@
       holder.classList.remove('is-slow');
       if (keepY) window.scrollTo(0, keepY);
       applyFilter(FILTER);
-      renderSurvivalInto(data);
     }
 
     // 渐进式:首屏先出 above(横幅 + 今天/明天/后天),下方 below(往期战报 + 下一站卡)用「轻量占位条」占位,
@@ -2234,7 +2139,6 @@
       holder.innerHTML = above + '<div class="lazy-placeholder" id="belowPlaceholder" aria-hidden="true"></div>';
       holder.classList.remove('is-slow');
       applyFilter(FILTER);
-      renderSurvivalInto(data);
       mountBelowWhenVisible(holder, below);
     }
     // 滚动临近视口时把 below 的真实 HTML 挂上去(替换占位条),挂完即重跑筛选
@@ -2316,13 +2220,6 @@
         prepareCtx: prepareCtx,
         buildAbove: buildAbove,
         buildBelow: buildBelow,
-        // 国乒参赛人员存活现状(2026-09-11 新增)
-        nameContains: nameContains,
-        genderOf: genderOf,
-        playerLostInMatch: playerLostInMatch,
-        computeSurvival: computeSurvival,
-        renderSurvivalBar: renderSurvivalBar,
-        renderSurvivalInto: renderSurvivalInto,
         // 工具
         esc: esc,
         ordinalizeInfo: ordinalizeInfo,
