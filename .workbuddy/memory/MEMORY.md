@@ -45,7 +45,7 @@
 
 ## 采集环境
 - **epg**（直播时间一手权威）：`sports.cctv.com/epg/index.shtml?channel=cctv5|cctv5plus|cctv16&date=YYYY-MM-DD`，须核对日期导航栏。**同一天 cctv5 与 cctv5plus 的乒乓窗口可能不同**（9/11 CCTV-5 上午是皮划艇，CCTV-5+ 才是 1/8 决赛）。
-- **逐场对阵权威源（9/10 新增）**：澳门特区政府旅游局/体育局官方口径（经「澳门本地宝」发布）+ **银河娱乐集团官方活动页**（各节时段 S1~S12）→ 与央视 epg 双源互证。
+- **逐场对阵权威源（9/10 新增，9/11 升级）**：**澳门特区政府官网新闻稿（gov.mo，如 1265227）——一手中的一手，逐日发「明日赛程表 + 今日成绩」，一次给全 11 场时刻且有英文/葡文对照**，优先于一切门户；次选澳门特区政府旅游局/体育局口径（经「澳门本地宝」发布）+ **银河娱乐集团官方活动页**（各节时段 S1~S12）→ 与央视 epg 双源互证。
 - `WebFetch tv.cctv.com/live/cctv5plus/` 自 9/1 失效。
 - 失效源黑名单：sports.sina.com.cn/pingpang、sports.163.com/pingpang、s.weibo.com、so.toutiao.com、sports.sina.cn 首页聚合稿、k.sina.cn 聚合稿、**cnyouth.com**（9/10 又命中：错误时间戳稿）、搜狐 1071907758、网易号「乒乓乐园」L61A6BPG0556J6QW。
 - **AI 体例聚合稿识别**：「结论:」式结构、无一手信源、标题带问号/已过时 → 不采其独有细节。
