@@ -1726,21 +1726,45 @@
       return html;
     }
 
-    // stage 尾部括号里的补充说明拆层(2026-09-13)。
-    // 真实数据形态:「女单半决赛(七局四胜,胜者进今晚18:30决赛)」——括号里既有赛制、
-    // 又有「决赛对手未定但决赛时间已定」的赛程信息。整串塞进标题 pill 会变成两大行,
-    // 层次全糊。故:标题 pill 只留主体(女单半决赛),括号内容另起一条独立说明条目。
+    // stage 括号 / 逗号补充说明拆层(2026-09-13)。
+    // 线上真实形态有两类:
+    //   ① 「女单半决赛(七局四胜,胜者进今晚18:30决赛)」——对阵未出,括号在结尾
+    //   ② 「女单半决赛(七局四胜),陈熠已晋级今晚18:30决赛」——比赛已打完,括号在中间、后面还有内容
+    // 整串塞进标题 pill 会撑成两三行,层次全糊。故:标题 pill 只留主体(女单半决赛),
+    // 括号内容与逗号后的补充一律另起一条独立说明条目。
     // 契约零改动:采集端仍写整串,拆分由前端负责(与 parseMatchNote / parseDayNote 同一路数)。
     function parseStageDetail(stage) {
       var raw = (stage || '').trim();
       if (!raw) return { main: '', detail: '' };
-      // 非贪婪主体 + 末尾锚定 → 只认「最后一对、且收尾」的括号段
-      var m = raw.match(/^([\s\S]*?)[（(]\s*([^（()）]+?)\s*[）)]\s*$/);
-      if (!m || !m[1].trim()) return { main: raw, detail: '' };
-      // 括号内多项按逗号切分,展示成「 · 」,读起来是一条条目而不是一句话
-      var detail = m[2].split(/[,，、]/).map(function (t) { return t.trim(); })
-                    .filter(function (t) { return !!t; }).join(' · ');
-      return { main: m[1].trim(), detail: detail };
+
+      // 逐段扫描:括号内内容 / 括号外文本,各自保留出现顺序
+      var chunks = [], re = /[（(]\s*([^（()）]*?)\s*[）)]/g, m, last = 0;
+      while ((m = re.exec(raw))) {
+        if (m.index > last) chunks.push({ text: raw.slice(last, m.index), paren: false });
+        chunks.push({ text: m[1], paren: true });
+        last = re.lastIndex;
+      }
+      chunks.push({ text: raw.slice(last), paren: false });
+
+      // 各段再按标点切细:括号内「七局四胜,胜者进…」与括号后「,陈熠已晋级…」都拆成独立信息
+      var items = [];
+      chunks.forEach(function (c) {
+        c.text.split(/[，,；;、]/).forEach(function (t) {
+          t = t.trim();
+          if (t) items.push({ text: t, paren: c.paren });
+        });
+      });
+      if (!items.length) return { main: raw, detail: '' };
+
+      // 主体 = 第一个「括号外」的片段;整串都在括号里(如「(补赛)」)则原样返回,避免把标题清空
+      var mi = -1;
+      for (var i = 0; i < items.length; i++) { if (!items[i].paren) { mi = i; break; } }
+      if (mi < 0) return { main: raw, detail: '' };
+
+      // 其余信息以「 · 」连接,读起来是一条条目而不是一句话
+      var detail = items.filter(function (_, k) { return k !== mi; })
+                    .map(function (x) { return x.text; }).join(' · ');
+      return { main: items[mi].text, detail: detail };
     }
 
     // 视频平台直播块(咪咕/央视频):仅当天无央视电视直播时兜底显示(见 render 调用点)。

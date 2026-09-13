@@ -715,13 +715,26 @@ test('parseStageDetail: 拆出主体与括号说明,括号内逗号转「 · 」
     { main: '女单半决赛', detail: '七局四胜' });
 });
 
-test('parseStageDetail: 无括号 / 括号不在结尾 / 主体为空 都保持原样', () => {
+// 线上 2026-09-13 真实形态:第一场半决赛打完后,采集端写的是
+// 「女单半决赛(七局四胜),陈熠已晋级今晚18:30决赛」——括号在中间、后面还有内容。
+// 只认「收尾括号」的实现拆不掉这种,标题会继续长串,故单列一条守住。
+test('parseStageDetail: 括号在中间 + 逗号后还有内容(已完赛形态)同样只留主体', () => {
+  assert.deepStrictEqual(
+    api.parseStageDetail('女单半决赛(七局四胜),陈熠已晋级今晚18:30决赛'),
+    { main: '女单半决赛', detail: '七局四胜 · 陈熠已晋级今晚18:30决赛' });
+  // 括号后面没有逗号,直接跟正文
+  assert.deepStrictEqual(
+    api.parseStageDetail('男单半决赛(七局四胜)王楚钦已晋级今晚19:30决赛'),
+    { main: '男单半决赛', detail: '七局四胜 · 王楚钦已晋级今晚19:30决赛' });
+});
+
+test('parseStageDetail: 无括号保持原样,主体为空时不把标题清空', () => {
   assert.deepStrictEqual(api.parseStageDetail('女单1/4决赛'),
     { main: '女单1/4决赛', detail: '' });
-  // 括号后面还有内容 → 不是尾部说明,不拆
+  // 逗号前后的补充信息挪到说明条目
   assert.deepStrictEqual(api.parseStageDetail('男单半决赛(上午场)对阵待定'),
-    { main: '男单半决赛(上午场)对阵待定', detail: '' });
-  // 整串就是括号(主体为空) → 不拆,避免把标题清空
+    { main: '男单半决赛', detail: '上午场 · 对阵待定' });
+  // 整串就是括号(没有括号外主体) → 原样返回,避免把标题清空
   assert.deepStrictEqual(api.parseStageDetail('(补赛)'),
     { main: '(补赛)', detail: '' });
 });

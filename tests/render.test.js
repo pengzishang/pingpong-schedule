@@ -243,8 +243,10 @@ test('buildBelow[真实数据]: 空窗天说明拆成 pending__points,容器内�
 // ===========================================================================
 
 const STAGE_WITH_DETAIL = '女单半决赛(七局四胜,胜者进今晚18:30决赛)';
+// 线上 2026-09-13 13:05 真实形态:第一场半决赛已打完
+const STAGE_DONE = '女单半决赛(七局四胜),陈熠已晋级今晚18:30决赛';
 
-function stageFixtureData() {
+function stageFixtureData(stage) {
   const data = loadJSON('data.json');
   if (!data) return null;
   const clone = JSON.parse(JSON.stringify(data));
@@ -252,7 +254,7 @@ function stageFixtureData() {
     date: '2026-09-13', weekday: '周日',
     matches: [{
       time: '11:00', channel: 'CCTV-5', tournament: 'WTT澳门冠军赛2026',
-      stage: STAGE_WITH_DETAIL,
+      stage: stage || STAGE_WITH_DETAIL,
       nationHome: '中国', playerHome: '陈熠',
       playerHomeInfo: '国乒女单,本站8号种子,1/4决赛4-0零封德国43岁削球老将韩莹',
       nationAway: '日本', playerAway: '早田希娜',
@@ -284,6 +286,33 @@ test('match 卡: 括号说明不留在标题 pill,另起 .match__stage-detail �
     '顺序应为 标题 → 说明条目 → 时间条');
   // 不得复用 .match__event 的类名(否则两条视觉同级,层次又糊了)
   assert.strictEqual((all.match(/class="match__stage-detail">/g) || []).length, 1);
+});
+
+test('match 卡: 已完赛形态(括号在中间 + 逗号后补充)标题同样只留主体', () => {
+  const data = stageFixtureData(STAGE_DONE);
+  if (!data) return;
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+
+  assert.match(all, /class="match__event">🏆 WTT澳门冠军赛2026 · 女单半决赛</);
+  assert.strictEqual(all.indexOf('(七局四胜)'), -1, '括号说明不得留在标题里');
+  assert.strictEqual(all.indexOf(',陈熠已晋级'), -1, '逗号后的补充不得留在标题里');
+  assert.ok(all.indexOf('<div class="match__stage-detail">七局四胜 · 陈熠已晋级今晚18:30决赛</div>') >= 0,
+    '应产出独立说明条目');
+});
+
+// 真实数据守卫:标题 pill 一律不得含括号说明(本项目约定 tournament 名称本身不带括号)。
+// 窗口里没有带括号的 stage 时本守卫无害通过。
+test('buildAbove[真实数据]: 标题 pill 一律不含 stage 括号说明', () => {
+  const data = loadJSON('data.json');
+  if (!data) return;
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+  const events = (all.match(/class="match__event">(.*?)<\/div>/g) || []);
+  for (const e of events) {
+    assert.ok(e.indexOf('(') < 0 && e.indexOf('（') < 0,
+      '标题 pill 不得含括号说明: ' + e);
+  }
 });
 
 test('match 卡: stage 无括号时不得凭空产出说明条目', () => {
