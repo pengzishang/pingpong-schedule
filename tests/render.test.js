@@ -250,8 +250,13 @@ function stageFixtureData(stage) {
   const data = loadJSON('data.json');
   if (!data) return null;
   const clone = JSON.parse(JSON.stringify(data));
+  // 2026-09-14 修复:原写死 2026-09-13,日期推进后该日变成「昨天」,视频兜底块只在
+  // 今天/明天/后天分支渲染 → 用例拿不到 vmatch__stage-detail。改为相对 new Date() 动态取今天。
+  const t0 = new Date();
+  const todayKey = t0.getFullYear() + '-' + String(t0.getMonth() + 1).padStart(2, '0') +
+                   '-' + String(t0.getDate()).padStart(2, '0');
   clone.days = [{
-    date: '2026-09-13', weekday: '周日',
+    date: todayKey, weekday: '周日',
     matches: [{
       time: '11:00', channel: 'CCTV-5', tournament: 'WTT澳门冠军赛2026',
       stage: stage || STAGE_WITH_DETAIL,

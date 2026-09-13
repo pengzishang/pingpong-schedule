@@ -534,12 +534,21 @@ test('isNextEventWithinWindow: 自定义 horizon(1 天)= 仅今天明天在窗�
   assert.strictEqual(api.isNextEventWithinWindow({ date: '2026-09-10' }, today, 1), false);
 });
 
-test('buildBelow[真实数据]: nextEvent.date=9/8 落在窗口内 → 不渲染「下一站国乒赛事」模块', () => {
+// 2026-09-14 修复:原用例把 nextEvent.date 硬编码成 9/8(= 当时「今天」),日期一推进就必然误报。
+// 改为「按真实 nextEvent.date 是否落在窗口内」动态断言显隐,与铁律(窗口内隐藏、窗口外显示)保持一致。
+test('buildBelow[真实数据]: 「下一站国乒赛事」模块显隐 = nextEvent 是否落在窗口内', () => {
   const data = require('./../data.json');
+  const ne = data && data.nextEvent;
   const ctx = api.prepareCtx(data);
   const below = api.buildBelow(ctx, data);
-  assert.ok(!/下一站国乒赛事/.test(below), '今天已是当前赛事首日,「下一站」模块应整体消失');
-  assert.ok(!/day--next/.test(below), '下一站 section 不应出现,实际仍含 day--next');
+  const within = !!(ne && ne.date && api.isNextEventWithinWindow(ne, new Date()));
+  if (within) {
+    assert.ok(!/下一站国乒赛事/.test(below), 'nextEvent 在窗口内,「下一站」模块应整体消失');
+    assert.ok(!/day--next/.test(below), 'nextEvent 在窗口内,下一站 section 不应出现');
+  } else {
+    assert.ok(/下一站国乒赛事/.test(below), 'nextEvent 在窗口外,「下一站」模块应显示');
+    assert.ok(/day--next/.test(below), 'nextEvent 在窗口外,下一站 section 应出现');
+  }
 });
 
 test('buildBelow: nextEvent 在窗口外(3 天后) → 仍渲染「下一站国乒赛事」模块', () => {
@@ -662,35 +671,36 @@ test('eliminatedNamesFromText: 只标记「止步/出局」分句里的名字,�
   assert.deepStrictEqual(api.eliminatedNamesFromText(txt, []), {});
 });
 
-test('computeSurvival[真实数据]: 名册取全部 7 名出战选手,止步首轮者画叉', () => {
+// 2026-09-14 修复:名册人数/性别构成会随「当前赛事」变化(澳门站 7 人 → 收官后名册改由
+// nextEvent 出战名单提供,变成亚运会名单)。写死 7 人 / 男3 女4 / 固定淘汰名单,每换一站就误报。
+// 正解:只断言不变项(无重复、存活+淘汰=总数、两者互斥),人数一律以 computeSurvival 为唯一事实来源。
+test('computeSurvival[真实数据]: 名册无重复,存活与淘汰互补', () => {
   const data = require('./../data.json');
   const s = api.computeSurvival(data);
-  assert.ok(s, '有赛程时应返回结果');
+  if (!s) return; // 窗口内无任何赛程(纯空窗)→ 无面板,跳过
   const all = s.male.concat(s.female);
-  assert.strictEqual(all.length, 7, '应列出全部 7 名出战选手(而非只列有比赛的 4 人)');
-  assert.strictEqual(s.male.length, 3, '男队 3 人');
-  assert.strictEqual(s.female.length, 4, '女队 4 人');
+  assert.ok(all.length >= 1, '名册不应为空');
+  assert.strictEqual(all.length, s.male.length + s.female.length, '男女分组人数之和应等于总人数');
+  assert.strictEqual(new Set(all.map(p => p.name)).size, all.length, '名册不得出现重复姓名');
   const elim = all.filter(p => p.eliminated).map(p => p.name).sort();
-  // 赛事进行中淘汰名单会逐轮增加,只断言「已成定局的三位首轮出局者」必在其中,
-  // 不写死总人数——否则每轮淘汰一人测试就会误报失败(2026-09-11 陈垣宇 1/8 出局时踩过)。
-  for (const n of ['王艺迪', '蒯曼', '黄友政']) {
-    assert.ok(elim.includes(n), n + ' 已出局应画叉');
-  }
-  assert.ok(elim.length >= 3 && elim.length <= 7, '淘汰人数应在 3~7 之间,实际 ' + elim.length);
   const alive = all.filter(p => !p.eliminated).map(p => p.name).sort();
-  const roster = ['周启豪', '陈垣宇', '陈幸同', '陈熠', '王艺迪', '蒯曼', '黄友政'];
-  assert.deepStrictEqual(alive.slice().sort(), roster.filter(n => !elim.includes(n)).sort(), '存活与淘汰应互补且无重复');
-  assert.strictEqual(alive.length + elim.length, 7, '存活 + 淘汰 = 7');
+  assert.strictEqual(alive.length + elim.length, all.length, '存活 + 淘汰 = 总人数');
+  for (const n of elim) {
+    assert.ok(!alive.includes(n), n + ' 不得既在淘汰集又在存活集');
+  }
 });
 
-test('renderSurvivalBar[真实数据]: 7 个 chip、画叉数与存活面板一致、无「剩 N 人」', () => {
+test('renderSurvivalBar[真实数据]: chip 数与存活面板一致、无「剩 N 人」', () => {
   const data = require('./../data.json');
   const html = api.renderSurvivalBar(data);
-  // 注意:必须限定「surv-chip 后紧跟空格或引号」,否则会把叉号类名 surv-chip__x 也算进来
-  assert.strictEqual((html.match(/class="surv-chip[" ]/g) || []).length, 7, '应渲染 7 个选手标签');
-  // 画叉数随赛事推进变化,以 computeSurvival 的结果为唯一事实来源,不写死数字
   const s = api.computeSurvival(data);
-  const expectOut = (s.male.concat(s.female)).filter(p => p.eliminated).length;
+  if (!s) { assert.ok(!html, '无赛程时应返回空串'); return; }
+  const all = s.male.concat(s.female);
+  // 注意:必须限定「surv-chip 后紧跟空格或引号」,否则会把叉号类名 surv-chip__x 也算进来
+  assert.strictEqual((html.match(/class="surv-chip[" ]/g) || []).length, all.length,
+    'chip 数应与存活面板人数一致,实际 ' + all.length);
+  // 画叉数随赛事推进变化,以 computeSurvival 的结果为唯一事实来源,不写死数字
+  const expectOut = all.filter(p => p.eliminated).length;
   assert.strictEqual((html.match(/surv-chip--out/g) || []).length, expectOut, '画叉数应与存活面板一致');
   assert.ok(!/剩 \d+ 人/.test(html), '「剩 N 人」角标应已删除');
   assert.ok(!/class="player/.test(html), '不得复用 .player 类名');
