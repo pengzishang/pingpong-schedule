@@ -1726,6 +1726,23 @@
       return html;
     }
 
+    // stage 尾部括号里的补充说明拆层(2026-09-13)。
+    // 真实数据形态:「女单半决赛(七局四胜,胜者进今晚18:30决赛)」——括号里既有赛制、
+    // 又有「决赛对手未定但决赛时间已定」的赛程信息。整串塞进标题 pill 会变成两大行,
+    // 层次全糊。故:标题 pill 只留主体(女单半决赛),括号内容另起一条独立说明条目。
+    // 契约零改动:采集端仍写整串,拆分由前端负责(与 parseMatchNote / parseDayNote 同一路数)。
+    function parseStageDetail(stage) {
+      var raw = (stage || '').trim();
+      if (!raw) return { main: '', detail: '' };
+      // 非贪婪主体 + 末尾锚定 → 只认「最后一对、且收尾」的括号段
+      var m = raw.match(/^([\s\S]*?)[（(]\s*([^（()）]+?)\s*[）)]\s*$/);
+      if (!m || !m[1].trim()) return { main: raw, detail: '' };
+      // 括号内多项按逗号切分,展示成「 · 」,读起来是一条条目而不是一句话
+      var detail = m[2].split(/[,，、]/).map(function (t) { return t.trim(); })
+                    .filter(function (t) { return !!t; }).join(' · ');
+      return { main: m[1].trim(), detail: detail };
+    }
+
     // 视频平台直播块(咪咕/央视频):仅当天无央视电视直播时兜底显示(见 render 调用点)。
     // 明确标注「电视上看不到,需用手机/平板/电脑看」,与外婆的央视电视卡视觉区分(紫色强调)。
     // 字段与 day.matches 对齐(time/platform/tournament/stage/nation*/player*/player*Info/note),
@@ -1740,9 +1757,12 @@
         var hasJP = m.nationHome === '日本' || m.nationAway === '日本';
         var hasKR = m.nationHome === '韩国' || m.nationAway === '韩国';
         var scopeAttr = (hasCN ? ' data-cn="1"' : '') + ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
+        var sp = parseStageDetail(m.stage);
         var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
-                         (m.tournament && m.stage ? ' · ' : '') +
-                         (m.stage ? esc(m.stage) : '');
+                         (m.tournament && sp.main ? ' · ' : '') +
+                         (sp.main ? esc(sp.main) : '');
+        var stageDetailHtml = sp.detail
+          ? '<div class="vmatch__stage-detail">' + esc(sp.detail) + '</div>' : '';
         var homeInfo = ordinalizeInfo(m.playerHomeInfo);
         var awayInfo = ordinalizeInfo(m.playerAwayInfo);
         var noteParsed = parseMatchNote(m.note);
@@ -1753,6 +1773,7 @@
         }
         return '<article class="vmatch' + (live ? ' vmatch--live' : '') + '"' + scopeAttr + '>' +
           (eventLabel ? '<div class="vmatch__event">' + eventLabel + '</div>' : '') +
+          stageDetailHtml +
           '<div class="vmatch__bar">' +
             '<span class="vmatch__time">' + esc(m.time) + '</span>' +
             '<span class="vmatch__chan">' + esc(m.platform || '视频平台') + '</span>' +
@@ -2053,10 +2074,13 @@
           var scopeAttr = (hasCN ? ' data-cn="1"' : '') +
                           ((hasJP || hasKR) ? ' data-jpkr="1"' : '');
           html += '<article class="match' + (live ? ' match--live' : '') + '"' + scopeAttr + '">';
+          var sp = parseStageDetail(m.stage);
           var eventLabel = (m.tournament ? '🏆 ' + esc(m.tournament) : '') +
-                           (m.tournament && m.stage ? ' · ' : '') +
-                           (m.stage ? esc(m.stage) : '');
+                           (m.tournament && sp.main ? ' · ' : '') +
+                           (sp.main ? esc(sp.main) : '');
           if (eventLabel) html += '<div class="match__event">' + eventLabel + '</div>';
+          // 赛制 / 后续赛程(如「七局四胜 · 胜者进今晚18:30决赛」)——标题下方独立条目
+          if (sp.detail) html += '<div class="match__stage-detail">' + esc(sp.detail) + '</div>';
           html += '<div class="match__bar">' +
                     '<span class="match__time">' + esc(m.time) + '</span>' +
                     '<span class="match__chan">' + esc(m.channel) + '</span>' +
@@ -2331,6 +2355,7 @@
         isNextEventWithinWindow: isNextEventWithinWindow,
         parseMatchNote: parseMatchNote,
         renderMatchNoteHtml: renderMatchNoteHtml,
+        parseStageDetail: parseStageDetail,
         parseRecapProgram: parseRecapProgram,
         renderRecapHtml: renderRecapHtml,
         parseEventMeta: parseEventMeta,

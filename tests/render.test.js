@@ -235,3 +235,84 @@ test('buildBelow[真实数据]: 空窗天说明拆成 pending__points,容器内�
     'pending__points 内最长要点应 ≤120 字(适老化无大坨),实际=' + longest +
     ' :: ' + (texts.sort((a, b) => b.length - a.length)[0] || '').substring(0, 50));
 });
+
+// ===========================================================================
+// 八、stage 括号说明拆层(2026-09-13)
+// 标题 pill 只留「赛事 · 轮次」,括号里的赛制/后续赛程另起一条说明。
+// 用线上 9/13 真实 stage 形态构造一天,走整页构建链路断言。
+// ===========================================================================
+
+const STAGE_WITH_DETAIL = '女单半决赛(七局四胜,胜者进今晚18:30决赛)';
+
+function stageFixtureData() {
+  const data = loadJSON('data.json');
+  if (!data) return null;
+  const clone = JSON.parse(JSON.stringify(data));
+  clone.days = [{
+    date: '2026-09-13', weekday: '周日',
+    matches: [{
+      time: '11:00', channel: 'CCTV-5', tournament: 'WTT澳门冠军赛2026',
+      stage: STAGE_WITH_DETAIL,
+      nationHome: '中国', playerHome: '陈熠',
+      playerHomeInfo: '国乒女单,本站8号种子,1/4决赛4-0零封德国43岁削球老将韩莹',
+      nationAway: '日本', playerAway: '早田希娜',
+      playerAwayInfo: '日本女单,本站4号种子,1/4决赛4-1淘汰队友大藤沙月'
+    }],
+    schedule: [], pending: []
+  }];
+  clone.nextEvent = null;
+  return clone;
+}
+
+test('match 卡: 括号说明不留在标题 pill,另起 .match__stage-detail 条目', () => {
+  const data = stageFixtureData();
+  if (!data) return;
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+
+  // 标题 pill:赛事 + 轮次,不带括号
+  assert.match(all, /class="match__event">🏆 WTT澳门冠军赛2026 · 女单半决赛</);
+  assert.strictEqual(all.indexOf('女单半决赛(七局四胜'), -1, '括号说明不得留在标题里');
+  // 说明条目紧随其后
+  assert.ok(all.indexOf('<div class="match__stage-detail">七局四胜 · 胜者进今晚18:30决赛</div>') >= 0,
+    '应产出独立说明条目');
+  // 说明条目必须排在标题 pill 之后、时间条之前
+  const iEvent = all.indexOf('class="match__event"');
+  const iDetail = all.indexOf('class="match__stage-detail"');
+  const iBar = all.indexOf('class="match__bar"');
+  assert.ok(iEvent > -1 && iDetail > iEvent && iBar > iDetail,
+    '顺序应为 标题 → 说明条目 → 时间条');
+  // 不得复用 .match__event 的类名(否则两条视觉同级,层次又糊了)
+  assert.strictEqual((all.match(/class="match__stage-detail">/g) || []).length, 1);
+});
+
+test('match 卡: stage 无括号时不得凭空产出说明条目', () => {
+  const data = stageFixtureData();
+  if (!data) return;
+  data.days[0].matches[0].stage = '女单1/4决赛';
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+  assert.match(all, /class="match__event">🏆 WTT澳门冠军赛2026 · 女单1\/4决赛</);
+  assert.strictEqual(all.indexOf('match__stage-detail'), -1, '无括号说明时不应产出空条目');
+});
+
+test('视频块: 走同一条拆分规则(.vmatch__stage-detail),标题 pill 也不带括号', () => {
+  const data = stageFixtureData();
+  if (!data) return;
+  const m = data.days[0].matches[0];
+  const video = {
+    time: m.time, platform: '咪咕视频', tournament: m.tournament, stage: m.stage,
+    nationHome: m.nationHome, playerHome: m.playerHome, playerHomeInfo: m.playerHomeInfo,
+    nationAway: m.nationAway, playerAway: m.playerAway, playerAwayInfo: m.playerAwayInfo
+  };
+  // 无央视电视直播 → 该日走视频块兜底分支
+  data.days[0].matches = [];
+  data.days[0].videoMatches = [video];
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+
+  assert.match(all, /class="vmatch__event">🏆 WTT澳门冠军赛2026 · 女单半决赛</);
+  assert.strictEqual(all.indexOf('女单半决赛(七局四胜'), -1, '视频块标题同样不得带括号');
+  assert.ok(all.indexOf('<div class="vmatch__stage-detail">七局四胜 · 胜者进今晚18:30决赛</div>') >= 0,
+    '视频块应产出独立说明条目');
+});

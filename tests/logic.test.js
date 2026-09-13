@@ -695,3 +695,39 @@ test('renderSurvivalBar[真实数据]: 7 个 chip、画叉数与存活面板一�
   assert.ok(!/剩 \d+ 人/.test(html), '「剩 N 人」角标应已删除');
   assert.ok(!/class="player/.test(html), '不得复用 .player 类名');
 });
+
+// ===========================================================================
+// 2026-09-13:stage 尾部括号拆层 —— 标题 pill 只留主体,赛制/后续赛程另起条目
+// 线上真实形态:'女单半决赛(七局四胜,胜者进今晚18:30决赛)'
+// ===========================================================================
+
+test('parseStageDetail: 拆出主体与括号说明,括号内逗号转「 · 」', () => {
+  assert.deepStrictEqual(
+    api.parseStageDetail('女单半决赛(七局四胜,胜者进今晚18:30决赛)'),
+    { main: '女单半决赛', detail: '七局四胜 · 胜者进今晚18:30决赛' });
+  // 全角括号 / 全角逗号同效
+  assert.deepStrictEqual(
+    api.parseStageDetail('男单半决赛（七局四胜，胜者进今晚19:30决赛）'),
+    { main: '男单半决赛', detail: '七局四胜 · 胜者进今晚19:30决赛' });
+  // 括号内多项(顿号)也拆开,并丢掉空项
+  assert.deepStrictEqual(
+    api.parseStageDetail('女单半决赛(七局四胜、)'),
+    { main: '女单半决赛', detail: '七局四胜' });
+});
+
+test('parseStageDetail: 无括号 / 括号不在结尾 / 主体为空 都保持原样', () => {
+  assert.deepStrictEqual(api.parseStageDetail('女单1/4决赛'),
+    { main: '女单1/4决赛', detail: '' });
+  // 括号后面还有内容 → 不是尾部说明,不拆
+  assert.deepStrictEqual(api.parseStageDetail('男单半决赛(上午场)对阵待定'),
+    { main: '男单半决赛(上午场)对阵待定', detail: '' });
+  // 整串就是括号(主体为空) → 不拆,避免把标题清空
+  assert.deepStrictEqual(api.parseStageDetail('(补赛)'),
+    { main: '(补赛)', detail: '' });
+});
+
+test('parseStageDetail: 空输入安全', () => {
+  assert.deepStrictEqual(api.parseStageDetail(''), { main: '', detail: '' });
+  assert.deepStrictEqual(api.parseStageDetail(null), { main: '', detail: '' });
+  assert.deepStrictEqual(api.parseStageDetail(undefined), { main: '', detail: '' });
+});

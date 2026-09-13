@@ -208,6 +208,20 @@
       word-break: break-word;
     }
 
+    /* 赛制 / 后续赛程条目:由 stage 尾部括号拆出,置于标题 pill 下方(2026-09-13)。
+       权重必须低于标题 pill —— 更小字号、更浅底色、无深色描边,一眼是「补充说明」而非第二个标题。
+       上边距取负值吃掉标题 pill 的部分下边距,让「标题 + 说明」归成一组。 */
+    .match__stage-detail {
+      display: block; width: fit-content; max-width: 100%;
+      margin: -.45rem auto .75rem;
+      padding: .18rem .7rem;
+      font-size: .93rem; font-weight: 600; line-height: 1.45;
+      color: #46586c;
+      background: #f6f9fc; border: 1px solid #e3ecf4;
+      border-radius: 1rem; text-align: center;
+      word-break: break-word;
+    }
+
     .match__bar {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem .7rem;
       margin-bottom: .7rem;
@@ -852,6 +866,17 @@
       font-size: .98rem; font-weight: 700; color: #6a289c;
       background: #f0e7f8; border: 1px solid #d9c7e8;
       padding: .28rem .85rem; border-radius: 2rem; text-align: center;
+      word-break: break-word;
+    }
+    /* 赛制 / 后续赛程条目(视频平台块,紫色系;层次规则同 .match__stage-detail) */
+    .vmatch__stage-detail {
+      display: block; width: fit-content; max-width: 100%;
+      margin: -.35rem auto .65rem;
+      padding: .16rem .68rem;
+      font-size: .92rem; font-weight: 600; line-height: 1.45;
+      color: #55426e;
+      background: #faf7fd; border: 1px solid #e9def4;
+      border-radius: 1rem; text-align: center;
       word-break: break-word;
     }
     .vmatch__bar {
