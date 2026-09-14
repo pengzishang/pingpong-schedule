@@ -1,3 +1,61 @@
 {
-  "days": []
+ "days": [
+  {
+   "date": "2026-09-15",
+   "matches": [
+    {
+     "time": "14:00",
+     "platform": "咪咕视频",
+     "tournament": "WTT阿斯塔纳球星挑战赛",
+     "stage": "男单资格赛(五局三胜)",
+     "nationHome": "中国",
+     "playerHome": "于海洋",
+     "playerHomeInfo": "资格赛选手",
+     "nationAway": "哈萨克斯坦",
+     "playerAway": "辰洋·希",
+     "playerAwayInfo": "东道主选手",
+     "note": "1号台。对手英文名 Chenyang SHI,中文译名各源不一(亦有稿称「不知如何翻译、像华人名字」),以WTT官方对阵表为准。赢下首轮后次轮大概率碰日本世青赛U19冠军川上流星。央视不转播,咪咕视频全程直播。"
+    },
+    {
+     "time": "14:35",
+     "platform": "咪咕视频",
+     "tournament": "WTT阿斯塔纳球星挑战赛",
+     "stage": "男单资格赛(五局三胜)",
+     "nationHome": "中国",
+     "playerHome": "唐乙仁",
+     "playerHomeInfo": "资格赛选手",
+     "nationAway": "哈萨克斯坦",
+     "playerAway": "阿西尔汗·马格祖姆别科夫",
+     "playerAwayInfo": "东道主选手",
+     "note": "2号台。唐乙仁与周冠宏同处资格赛5/8区,两人首轮都过关的话最后一轮要打国乒内战。央视不转播,咪咕视频全程直播。"
+    },
+    {
+     "time": "15:10",
+     "platform": "咪咕视频",
+     "tournament": "WTT阿斯塔纳球星挑战赛",
+     "stage": "男单资格赛(五局三胜)",
+     "nationHome": "中国",
+     "playerHome": "周冠宏",
+     "playerHomeInfo": "资格赛选手",
+     "nationAway": "哈萨克斯坦",
+     "playerAway": "阿努尔·奥拉尔哈诺夫",
+     "playerAwayInfo": "东道主选手",
+     "note": "2号台。译名亦作奥拉尔汉诺夫。与唐乙仁同区,存在资格赛末轮内战可能。央视不转播,咪咕视频全程直播。"
+    },
+    {
+     "time": "20:35",
+     "platform": "咪咕视频",
+     "tournament": "WTT阿斯塔纳球星挑战赛",
+     "stage": "男单资格赛(五局三胜)",
+     "nationHome": "中国",
+     "playerHome": "李和宸",
+     "playerHomeInfo": "资格赛选手",
+     "nationAway": "俄罗斯",
+     "playerAway": "马克西姆·格雷布涅夫",
+     "playerAwayInfo": "欧锦赛团体亚军成员",
+     "note": "1号台晚间场。译名亦作格列布涅夫;对手所在队伍长期远离国际赛场、排名低但实力不弱。有报道称本场为资格赛第二轮。李和宸与李天阳同在7/8区。央视不转播,咪咕视频全程直播。"
+    }
+   ]
+  }
+ ]
 }
