@@ -8,7 +8,7 @@
 3. **先拉后采 / 先拉后推**：`git fetch origin && git rebase origin/main`；禁强推；**每轮开头先 `git status --short`**。
 4. **前端测试 `node --test tests/*.test.js`**（不是 `tests/`），**0 fail 才推**。
 5. **生成脚本幂等**：prepend note 的临时 .py 加 MARK 检查（`if MARK in note: sys.exit(1)`）。
-6. **curl 校验**下载到**仓库内**再删（Git Bash `/tmp` Windows 版 Python 看不到），或用 PowerShell（注意 GBK 乱码，只做肉眼核对）。
+6. **远端校验优先用 PowerShell**：`Invoke-RestMethod` + 代理 127.0.0.1:7897 直接读 raw.githubusercontent.com（Git Bash 里 curl 直连会挂死 3 分钟）；要下载到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。临时文件被占用删不掉时先 TaskStop 再用 Python `os.remove`。
 
 ## 推送环境
 - GitHub 直连 `Recv failure` → 代理 `http://127.0.0.1:7897`（PowerShell 设 `$env:http_proxy`/`$env:https_proxy`）。
@@ -63,6 +63,7 @@
 - 条件场作废：上轮「若 A 胜则…」本轮必复查。终局后 5~15 分钟发稿 → 开赛超 1 小时仍未发＝仍在进行。
 - **命中即判错**：亚运写成「杭州亚运会」（实为日本爱知·名古屋）；澳门站名单出现温瑞博/向鹏/林诗栋；「537 万/2000 积分」＝大满贯口径；同稿内时差 ≠ 6 小时。
 - 单源新事实不写 matches，改在 note 以「仅 N 源、待复核」披露。
+- **【签表 vs 逐场时刻分开判定】（9/16 定案）**：正赛签表（分区/首轮对手/谁轮空）常可 4 源确认 → 写进 dayNote；**逐场开赛时刻常 0 源 → video.json 一律不写**。公众号「X日X点 A vs B」式清单常常与官方签表冲突（轮空种子被写成有比赛、跨区乱配），属 AI 体例聚合稿，不采信。
 - **官方公示 vs 黑名单单源**（9/15 定案）：两头都要防——官方旧名单会过期（王晓彤外卡案 9/14 翻案），黑名单单源会骗人（亚运男双案 9/15 翻案）。**定案看「官方原文 + 独立源数」，且每轮重估。**
 
 ## 赛事背景（指针，细节见早报/data.json）
