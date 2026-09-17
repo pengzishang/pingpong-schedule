@@ -147,6 +147,235 @@
           "note": "女单资格赛最后一轮,当天最晚一场,赢下就锁定正赛名额。央视不转播,咪咕视频全程直播(手机、平板、电脑上打开咪咕搜「WTT阿斯塔纳」就能看)。对阵与开赛时刻由腾讯新闻(两稿)、搜狐(两稿)、今日头条等四组以上独立来源给出且零分歧,以WTT官方当天对阵表为准。【赛果】已结束:朱思冰3比0胜阿赫马达利耶娃(11-2/11-3/11-3),拿到女单正赛名额。"
         }
       ]
+    },
+    {
+      "date": "2026-09-17",
+      "matches": [
+        {
+          "time": "14:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "覃予萱/纵歌曼",
+          "nationAway": "韩国",
+          "playerAway": "刘叡潾/金成珍",
+          "playerHomeInfo": "头号种子",
+          "playerAwayInfo": "刘叡潾是奥运男单冠军刘南奎的女儿",
+          "note": "正赛第一场就打韩国组合。赢球进八强。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "14:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "陈垣宇/陈俊菘",
+          "nationAway": "中国",
+          "playerAway": "李和宸/周冠宏",
+          "note": "国乒内战,赢的一方进八强。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "14:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "朱思冰",
+          "nationAway": "意大利",
+          "playerAway": "盖娅·蒙法蒂尼",
+          "playerHomeInfo": "削球,资格赛三局只让对手得8分",
+          "note": "朱思冰从资格赛打上来,旋转变化是最大武器。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "15:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "朱梓予/杨屹韵",
+          "nationAway": "俄罗斯",
+          "playerAway": "潘菲洛娃/斯劳蒂娜",
+          "playerHomeInfo": "双削组合",
+          "note": "两个削球手搭档,要靠削中反攻拿分。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "15:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "王艺迪/韩菲儿",
+          "nationAway": "罗马尼亚",
+          "playerAway": "德拉戈曼/扎哈里亚",
+          "playerHomeInfo": "本站国乒唯一的世界冠军主力,头号种子",
+          "playerAwayInfo": "韩菲儿资格赛三局只丢5分",
+          "note": "王艺迪本站首秀,先打女双找手感。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "15:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "薛飞",
+          "nationAway": "奥地利",
+          "playerAway": "安德莱斯·勒文科",
+          "playerHomeInfo": "直板打法",
+          "note": "过关的话下一轮碰赛会头号种子、法国的A·勒布伦。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "16:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "王晓彤/石洵瑶",
+          "nationAway": "日本",
+          "playerAway": "平野美宇/木原美悠",
+          "playerHomeInfo": "二号种子",
+          "playerAwayInfo": "平野美宇是女单世界冠军",
+          "note": "今天最难的一场外战,日本这对发接发和快变都很细。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "16:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "纵歌曼",
+          "nationAway": "韩国",
+          "playerAway": "梁夏银",
+          "playerAwayInfo": "混双世界冠军",
+          "note": "纵歌曼要用速度冲,少打慢相持。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "17:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "混双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "李和宸/姚睿轩",
+          "nationAway": "土耳其",
+          "playerAway": "伊根勒/哈拉克",
+          "note": "两人从资格赛打上来,赢球进八强。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "17:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "混双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "李天阳/朱思冰",
+          "nationAway": "俄罗斯",
+          "playerAway": "季霍诺夫/潘菲洛娃",
+          "playerHomeInfo": "双削组合",
+          "note": "两个削球手搭混双,接发球轮次是关键。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "20:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "混双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "陈俊菘/王艺迪",
+          "nationAway": "罗马尼亚",
+          "playerAway": "莫维利亚努/德拉戈曼",
+          "note": "莫维利亚努就是资格赛连着淘汰国乒两位小将的那个人。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "20:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "周启豪/薛飞",
+          "nationAway": "德国",
+          "playerAway": "弗朗西斯卡/奥恰洛夫",
+          "playerAwayInfo": "奥恰洛夫是世界冠军",
+          "note": "今晚最硬的一场,德国这对配合多年。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "20:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男双1/8决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "于海洋/唐乙仁",
+          "nationAway": "俄罗斯",
+          "playerAway": "阿尔乔缅科/伊沃宁",
+          "note": "两人从资格赛打上来,赢球进八强。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "21:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "韩菲儿",
+          "nationAway": "韩国",
+          "playerAway": "金成珍",
+          "note": "韩菲儿资格赛三局只丢5分,状态正热。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "22:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "nationAway": "罗马尼亚",
+          "playerAway": "安德烈娅·德拉戈曼",
+          "note": "王晓彤本站身兼女单和女双。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "23:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "姚睿轩",
+          "nationAway": "中国",
+          "playerAway": "杨屹韵",
+          "note": "国乒内战,一攻一削,谁过关都正常。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "23:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "女单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "朱梓予",
+          "nationAway": "俄罗斯",
+          "playerAway": "叶卡捷琳娜·日罗诺娃",
+          "note": "朱梓予本站身兼女单和女双。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "23:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "徐瑛彬",
+          "nationAway": "罗马尼亚",
+          "playerAway": "爱德华·约内斯库",
+          "playerHomeInfo": "国乒第120位世界冠军,资格赛决胜局险胜过关",
+          "note": "徐瑛彬从资格赛一路打上来,今晚压轴出场。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        },
+        {
+          "time": "23:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT阿斯塔纳球星挑战赛",
+          "stage": "男单1/32决赛(五局三胜)",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "nationAway": "法国",
+          "playerAway": "迪博·泊雷特",
+          "playerHomeInfo": "削球手",
+          "playerAwayInfo": "法国男单8号种子",
+          "note": "对手是本站男单前八号种子,李天阳要靠削球变化咬住。央视不转播,咪咕视频全程直播(手机、平板、电脑都能看)。"
+        }
+      ]
     }
   ]
 }
