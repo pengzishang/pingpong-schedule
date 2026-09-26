@@ -65,18 +65,29 @@
       "date": "2026-09-26",
       "matches": [
         {
-          "time": "18:30",
+          "time": "14:30",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "混双决赛",
+          "stage": "男双1/4决赛",
           "nationHome": "中国",
-          "playerHome": "王楚钦/孙颖莎",
-          "nationAway": "中国",
-          "playerAway": "林诗栋/蒯曼",
-          "note": "国乒内战,央视5/央视频/咪咕同步直播,提前包揽金银牌"
+          "playerHome": "林诗栋/黄友政",
+          "nationAway": "中国台北",
+          "playerAway": "冯翊新/郭冠宏",
+          "note": "国乒组合争四强,央视5/央视频/咪咕同步直播"
         },
         {
           "time": "14:30",
+          "platform": "央视频/咪咕",
+          "tournament": "第20届名古屋亚运会乒乓球",
+          "stage": "男双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "温瑞博/向鹏",
+          "nationAway": "伊朗",
+          "playerAway": "阿拉米扬/阿拉米安",
+          "note": "国乒组合争四强,央视5/央视频/咪咕同步直播"
+        },
+        {
+          "time": "16:45",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
           "stage": "女双1/4决赛",
@@ -87,7 +98,7 @@
           "note": "中日对决,央视5黄金档同步直播"
         },
         {
-          "time": "14:30",
+          "time": "16:45",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
           "stage": "女双1/4决赛",
@@ -98,15 +109,15 @@
           "note": "中日对决"
         },
         {
-          "time": "14:30",
+          "time": "18:30",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/4决赛",
+          "stage": "混双决赛",
           "nationHome": "中国",
-          "playerHome": "林诗栋/黄友政",
-          "nationAway": "中国台北",
-          "playerAway": "冯翊新/郭冠宏",
-          "note": "国乒组合争四强"
+          "playerHome": "王楚钦/孙颖莎",
+          "nationAway": "中国",
+          "playerAway": "林诗栋/蒯曼",
+          "note": "国乒内战,央视5/央视频/咪咕同步直播,提前包揽金银牌"
         }
       ]
     }
