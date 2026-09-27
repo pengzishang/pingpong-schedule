@@ -347,9 +347,10 @@ test('riskSaysNoTV: 风险卡含「看APP/咪咕/不直播」→ 电视不可看
   assert.strictEqual(api.riskSaysNoTV(''), false);
 });
 
-test('isTVMatch: CCTV 频道 + 无否定风险 才算电视可看', () => {
+test('isTVMatch: 只按 CCTV 频道判定电视可看(risk 文案不再删场 · R-1)', () => {
   assert.strictEqual(api.isTVMatch({ channel: 'CCTV-5', risk: '' }), true);
-  assert.strictEqual(api.isTVMatch({ channel: 'CCTV-5', risk: '需用手机看APP' }), false);
+  // R-1 修复:原为 false。采集端一句措辞不该让整场比赛消失(详见本文件末「R-1」回归)
+  assert.strictEqual(api.isTVMatch({ channel: 'CCTV-5', risk: '需用手机看APP' }), true);
   assert.strictEqual(api.isTVMatch({ channel: '咪咕视频', risk: '' }), false);
 });
 
@@ -361,9 +362,10 @@ test('belongsToCN: 含中国/中国澳门,不含中国香港与中国台北', ()
   assert.strictEqual(api.belongsToCN('日本'), false);
 });
 
-test('isTVSchedule: schedule 项同样按频道+风险判定电视可看', () => {
+test('isTVSchedule: 同样只按频道判定(risk 文案不再删节目单 · R-1)', () => {
   assert.strictEqual(api.isTVSchedule({ channel: 'CCTV-5', program: '亚运会乒乓球' }), true);
-  assert.strictEqual(api.isTVSchedule({ channel: 'CCTV-5', risk: '需用手机看APP', program: 'x' }), false);
+  // R-1 修复:原为 false
+  assert.strictEqual(api.isTVSchedule({ channel: 'CCTV-5', risk: '需用手机看APP', program: 'x' }), true);
   assert.strictEqual(api.isTVSchedule({ channel: '咪咕视频', program: 'x' }), false);
 });
 
@@ -819,4 +821,21 @@ test('prepareCtx: 今天无 schedule 无 match,4 天后才有比赛时才显示�
   const ctx = api.prepareCtx(data);
   assert.strictEqual(ctx.gapMode, true);
   assert.strictEqual(ctx.countdownDays, 4);
+});
+
+// R-1 回归(2026-09-27 M1 止血):risk 文案不得再改变场次集合。
+// 原实现 isTVMatch = isCCTVChannel && !riskSaysNoTV(risk),采集端写「建议用央视频全程观看」
+// 会让整场央视比赛从页面消失,前端不报错、采集端不知道。现判定只认频道。
+test('R-1: risk 文案含「央视频/咪咕/手机」时,央视场次仍必须留在电视表内', () => {
+  assert.strictEqual(
+    api.isTVMatch({ channel: 'CCTV-5', risk: '⚠️可能被《体育新闻》插播,建议用央视频全程观看' }),
+    true, 'risk 提到央视频不再删场(修复前为 false)');
+  assert.strictEqual(
+    api.isTVMatch({ channel: 'CCTV-5', risk: '✅低风险(正常转播)' }), true);
+  assert.strictEqual(
+    api.isTVSchedule({ channel: 'CCTV-5+', risk: '手机央视频同步直播' }),
+    true, '节目单同样不按 risk 文案删');
+  // 非央视频道仍应被排除——判定能力没有一起丢掉
+  assert.strictEqual(api.isTVMatch({ channel: '咪咕视频', risk: '' }), false);
+  assert.strictEqual(api.isTVMatch({ channel: '央视频', risk: '' }), false);
 });

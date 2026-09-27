@@ -680,12 +680,15 @@
       return /手机|APP|App|app|客户端|咪咕|央视频|不直播|电视上不播|电视不播|看APP|开手机|仅app|仅APP|只在.*播|只在.*看/i.test(txt);
     }
     function isTVMatch(m) {
-      return isCCTVChannel(m.channel) && !riskSaysNoTV(m.risk);
+      // R-1 止血(M1):不再按 risk 文案删场——采集端一句措辞就让整场比赛从外婆表里消失,前后端都不报错。
+      // 判定只认频道;riskSaysNoTV 保留不删,将来只用于告警,不参与判定。
+      return isCCTVChannel(m.channel);
     }
     // schedule(央视节目单/直播窗口)同样算外婆能在电视上看到的乒乓球内容,
     // 空窗横幅计算最近一场时必须把它纳入,否则会出现"今天有 CCTV-5 节目却显示还有 X 天"的矛盾。
     function isTVSchedule(it) {
-      return isCCTVChannel(it.channel) && !riskSaysNoTV(it.risk);
+      // 同 isTVMatch:R-1 止血,不按 risk 文案删节目单,只认频道。
+      return isCCTVChannel(it.channel);
     }
     // 央视电视上、且是乒乓球的直播窗口(剔除录像/录播与非乒乓栏目)。
     // 空窗横幅、当日标签计数、赛程列表三处共用同一判据,避免口径打架。
