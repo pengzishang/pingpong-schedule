@@ -330,6 +330,46 @@ test('match 卡: stage 无括号时不得凭空产出说明条目', () => {
   assert.strictEqual(all.indexOf('match__stage-detail'), -1, '无括号说明时不应产出空条目');
 });
 
+// 2026-09-27 子上反馈:今天/明天的赛程早已公布(对阵清清楚楚),页面却顶着「📋 待公布」。
+// 根因在两处:① 当天有 CCTV 节目单但无 matches → 徽章走「待公布」分支;
+// ② 头部 tag 只在 tvMatches 存在时显示「N 场」,否则写「待公布」。
+test('[真实数据] 当天已有赛程时不出现「待公布」,徽章改写「今日赛程」', () => {
+  const data = loadJSON('data.json');
+  if (!data) return;
+  const t0 = new Date();
+  const fmt = d => d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+  const todayKey = fmt(t0);
+  const tomorrowKey = fmt(new Date(t0.getTime() + 86400000));
+  const todayDay = (data.days || []).find(x => x.date === todayKey);
+  // 数据窗口推进、今天没有赛程时本守卫休眠
+  if (!todayDay || !(todayDay.schedule || []).length) return;
+
+  const ctx = api.prepareCtx(data);
+  const all = api.buildAbove(ctx, data) + api.buildBelow(ctx, data);
+  const end = all.indexOf(tomorrowKey) > 0 ? all.indexOf(tomorrowKey) : all.length;
+  const seg = all.substring(all.indexOf(todayKey), end);
+
+  assert.ok(!/pending__badge">📋 待公布/.test(seg),
+    '当天赛程已公布,徽章不得再是「待公布」');
+  assert.match(seg, /pending__badge">📺 今天赛程</, '应显示「今天赛程」徽章');
+  // 头部标签按赛程数走,不再退化成「待公布」
+  assert.ok(!/tag--muted">待公布</.test(seg), '头部标签不得显示「待公布」');
+  assert.match(seg, /tag tag--muted">(\d+) 场</, '头部标签应显示赛程/场次');
+});
+
+test('isPPTVWindow: 只留央视电视上的乒乓直播窗口,剔除录像与非乒乓栏目', () => {
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '第20届名古屋亚运会乒乓球', content: '女单半决赛 王曼昱 vs 张本美和' }), true);
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: 'x', content: '澳门站实况录像' }), false, '录像不算直播窗口');
+  assert.strictEqual(api.isPPTVWindow({ channel: '咪咕视频', tournament: 'WTT', content: '女单决赛' }), false, 'app 平台不算');
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '央视体育新闻', content: '今日体育要闻' }), false, '新闻类不算');
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5' }), false, '缺 content/tournament 时安全返回 false');
+  // [已知局限] 关键词表含「锦标」,「全国田径锦标赛」这类也会被命中(与既有判据一致,本轮未改口径);
+  // 非乒乓栏目的剔除实际依赖采集端不要把非乒乓节目写进 schedule。
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '全国田径锦标赛', content: '男子百米' }), true, '已知宽口径:「锦标」关键词');
+});
+
 test('视频块: 走同一条拆分规则(.vmatch__stage-detail),标题 pill 也不带括号', () => {
   const data = stageFixtureData();
   if (!data) return;

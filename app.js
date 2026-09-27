@@ -687,6 +687,16 @@
     function isTVSchedule(it) {
       return isCCTVChannel(it.channel) && !riskSaysNoTV(it.risk);
     }
+    // 央视电视上、且是乒乓球的直播窗口(剔除录像/录播与非乒乓栏目)。
+    // 空窗横幅、当日标签计数、赛程列表三处共用同一判据,避免口径打架。
+    function isPPTVWindow(s) {
+      var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
+      if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
+      if (!isCCTVChannel(s.channel)) return false;   // 只留央视电视窗口,app/咪咕不进表
+      var tt = ['乒乓', 'wtt', '世乒', '冠军赛', '大满贯', '世界杯', '锦标',
+                '单打', '双打', '团体', '混双', '男单', '女单', '男双', '女双', '决赛'];
+      return tt.some(function (k) { return txt.indexOf(k) !== -1; });
+    }
     // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
     // —— 直播当晚可能只在 app/咪咕,但白天重播照样上央视电视,外婆能在电视看重播,必须显示
     function isTVReplay(m) {
@@ -2068,6 +2078,9 @@
       else if (diff === -1) { rel = '昨日战报'; tagClass = 'tag--past'; dayClass = ' day--past'; }
       else if (diff < -1) { rel = '已结束'; tagClass = 'tag--past'; dayClass = ' day--past'; }
 
+      // 当日央视乒乓赛程(无具体对阵、只有节目单的日子也算),供头部标签计数复用
+      var liveSchedule = (day.schedule || []).filter(isPPTVWindow);
+
       var html = '';
       html = '<section class="day' + dayClass + '">';
       html += '<div class="day__head">' +
@@ -2077,7 +2090,13 @@
                 '</div>' +
                 '<div class="day__tags">' +
                   (rel ? '<span class="tag ' + tagClass + '">' + esc(rel) + '</span>' : '') +
-                  '<span class="tag tag--muted">' + (tvMatches.length ? tvMatches.length + ' 场' : '待公布') + '</span>' +
+                  // 有已确认对阵的场次优先算「场」;当天只有节目单(对阵未拆到 matches)时,
+                  // 也按央视乒乓赛程数算——否则会误显示「待公布」,而数据其实早已公布(子上 2026-09-27)。
+                  // 连节目单都没有的空窗日一律写「无直播」,与下方徽章口径一致,不再说「待公布」。
+                  '<span class="tag tag--muted">' +
+                    (tvMatches.length ? tvMatches.length + ' 场'
+                      : liveSchedule.length ? liveSchedule.length + ' 场' : '无直播') +
+                  '</span>' +
                 '</div>' +
               '</div>';
 
@@ -2174,24 +2193,29 @@
         var videoHtml = renderVideoBlock(day, now);
         if (videoHtml) html += videoHtml;
 
-        // 只保留「乒乓球」直播窗口:剔除录像/录播,以及篮球/网球/田径/斯诺克/体育新闻等非乒乓球栏目
-        var liveSchedule = (day.schedule || []).filter(function (s) {
-          var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
-          if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
-          if (!isCCTVChannel(s.channel)) return false;   // 只保留央视电视窗口,app/咪咕不进表
-          var tt = ['乒乓','wtt','世乒','冠军赛','大满贯','世界杯','锦标','单打','双打','团体','混双','男单','女单','男双','女双','决赛'];
-          return tt.some(function (k) { return txt.indexOf(k) !== -1; });
-        });
-
         if (liveSchedule.length) {
-          // 待公布:精简,直接说下一场时间,不堆解释
-          var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
-          var nextTime = (firstS.time || '').split('-')[0] || '';
-          var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
-          html += '<div class="day__pending">' +
-                    '<span class="pending__badge">📋 待公布</span>' +
-                    '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
-                  '</div>';
+          // 子上 2026-09-27 反馈:当天赛程早已公布(对阵清清楚楚),却顶着「📋 待公布」,
+          // 看着像没数据;那句「下一场:11:00」标的还是已打完那场,纯属误导。
+          // 只要赛程里有明确对阵(vs/对阵),徽章改用「今日赛程 / 明日赛程」;
+          // 「下一场」提示只留给「对手待定」这类确实不知道下一场的情况。
+          var hasLineup = liveSchedule.some(function (s) {
+            return /vs|对阵/.test(s.content || '');
+          });
+          if (hasLineup) {
+            // 赛程已公布:徽章直接说这是哪一天的赛程,不再挂「待公布」
+            html += '<div class="day__pending">' +
+                      '<span class="pending__badge">📺 ' + rel + '赛程</span>' +
+                    '</div>';
+          } else {
+            // 确实还没拆出对阵:精简一句下一场时间,不堆解释
+            var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
+            var nextTime = (firstS.time || '').split('-')[0] || '';
+            var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
+            html += '<div class="day__pending">' +
+                      '<span class="pending__badge">📋 待公布</span>' +
+                      '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
+                    '</div>';
+          }
           html += '<div class="sched">';
           liveSchedule.forEach(function (s) {
             var sLive = isLiveSchedule(day.date, s.time, now);
@@ -2362,6 +2386,7 @@
         riskSaysNoTV: riskSaysNoTV,
         isTVMatch: isTVMatch,
         isTVSchedule: isTVSchedule,
+        isPPTVWindow: isPPTVWindow,
         isTVReplay: isTVReplay,
         dayHasContent: dayHasContent,
         isReplayPassed: isReplayPassed,
