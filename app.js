@@ -2256,7 +2256,10 @@
                     '</div>';
           });
           html += '</div>';
-        } else if ((day.schedule || []).length || (typeof day.dayNote === 'string' && day.dayNote.trim())) {
+        }
+        // dayNote 独立于 schedule 渲染:原为 else-if 互斥链,若当天有 schedule 则本分支永不执行,
+        // 实测后果:同天同时有 schedule 与 dayNote 时,【dayNote 整段被静默丢弃】(HTML 不含其内容)。
+        if (typeof day.dayNote === 'string' && day.dayNote.trim()) {
           // 空窗期/无直播天:当日有说明。优先读新契约 day.dayNote(字符串),
           // 无则兼容旧 schedule 伪 record(time:'—'&&channel:'—' 的 content)。
           // 用 parseDayNote 专为「叙事报道体」层次化(摘要 lead + 要点 points + 下一站区块),根治整坨大段。
