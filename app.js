@@ -698,8 +698,14 @@
       var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
       if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
       if (!isCCTVChannel(s.channel)) return false;   // 只留央视电视窗口,app/咪咕不进表
-      var tt = ['乒乓', 'wtt', '世乒', '冠军赛', '大满贯', '世界杯', '锦标',
-                '单打', '双打', '团体', '混双', '男单', '女单', '男双', '女双', '决赛'];
+      // ⚠️ 只保留「乒乓专属词」。原词表含 决赛/单打/双打/团体/混双/世界杯/锦标/冠军赛/大满贯
+      // 等跨项目通用词,实测 8 个样本误判 5 个:足球世界杯预选赛、羽毛球公开赛、网球中网、
+      // 排球世锦赛、全国田径锦标赛 全部被判成乒乓 —— 会让外婆按足球时间打开电视。
+      // 宁可漏(少显示一个窗口),不可误报。M2 后「是不是乒乓」应交由结构化字段判断。
+      var tt = ['乒乓', 'wtt', '世乒', '国乒', '桌球', 'table tennis'];
+      // tournament 优先:赛事名里出现专属词即可判定,不受 content 描述干扰
+      var tour = (s.tournament || '').toLowerCase();
+      if (tt.some(function (k) { return tour.indexOf(k) !== -1; })) return true;
       return tt.some(function (k) { return txt.indexOf(k) !== -1; });
     }
     // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
