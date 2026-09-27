@@ -160,7 +160,7 @@
 
     .day__tags { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; flex-shrink: 0; }
     .tag {
-      font-size: .92rem; font-weight: 800;
+      font-size: 18px; font-weight: 800;
       padding: .25rem .7rem; border-radius: 2rem; white-space: nowrap;
     }
     .tag--today { background: var(--red); color: #fff; }
@@ -215,7 +215,7 @@
       display: block; width: fit-content; max-width: 100%;
       margin: -.45rem auto .75rem;
       padding: .18rem .7rem;
-      font-size: .93rem; font-weight: 600; line-height: 1.45;
+      font-size: 18px; font-weight: 600; line-height: 1.45;
       color: #46586c;
       background: #f6f9fc; border: 1px solid #e3ecf4;
       border-radius: 1rem; text-align: center;
@@ -231,7 +231,7 @@
       font-variant-numeric: tabular-nums; line-height: 1;
     }
     .match__chan {
-      font-size: .95rem; font-weight: 700; color: #fff; background: var(--navy);
+      font-size: 18px; font-weight: 700; color: #fff; background: var(--navy);
       padding: .28rem .8rem; border-radius: 2rem; white-space: nowrap;
     }
 
@@ -255,14 +255,14 @@
     .score-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .score-table {
       width: 100%; border-collapse: collapse; table-layout: fixed;
-      font-size: .98rem; line-height: 1.2;
+      font-size: 18px; line-height: 1.2;
     }
     .score-table th, .score-table td {
       padding: .35rem .25rem; text-align: center; vertical-align: middle;
       border: 1px solid rgba(10,122,58,.25);
     }
     .score-table thead th {
-      background: var(--navy); color: #fff; font-weight: 800; font-size: .85rem;
+      background: var(--navy); color: #fff; font-weight: 800; font-size: 18px;
     }
     .score-table thead th:first-child { background: #1b3e63; }
     .score-table tbody td { background: #fff; color: var(--ink); font-weight: 700; }
@@ -334,7 +334,7 @@
     .risk--low  .risk__head { background: rgba(10,122,58,.07); }
 
     .risk__badge {
-      font-size: .92rem; font-weight: 800; color: #fff;
+      font-size: 18px; font-weight: 800; color: #fff;
       padding: .22rem .65rem; border-radius: 2rem; white-space: nowrap;
       line-height: 1.2;
     }
@@ -342,7 +342,7 @@
     .risk--mid  .risk__badge { background: var(--amber); }
     .risk--low  .risk__badge { background: var(--green); }
 
-    .risk__type { font-size: .9rem; font-weight: 700; color: var(--ink-2); }
+    .risk__type { font-size: 18px; font-weight: 700; color: var(--ink-2); }
 
     /* 影响点:短句标签流,一行一个结论 */
     .risk__impacts {
@@ -415,7 +415,7 @@
     }
     .pending__badge {
       display: inline-flex; align-items: center;
-      font-size: .85rem; font-weight: 800; color: var(--navy);
+      font-size: 18px; font-weight: 800; color: var(--navy);
       background: #eaf1f8; border: 1px solid #cdddee;
       padding: .2rem .65rem; border-radius: 2rem;
     }
@@ -458,7 +458,7 @@
     }
     .pending__section { display: flex; flex-direction: column; gap: .35rem; }
     .pending__section-head {
-      font-size: .92rem; font-weight: 800; color: var(--navy);
+      font-size: 18px; font-weight: 800; color: var(--navy);
       letter-spacing: .02em;
     }
     .pending__section--other .pending__section-head { color: #888; }
@@ -494,7 +494,7 @@
       font-weight: 700; color: var(--ink);
       background: #eaf1f8; padding: .1rem .45rem;
       border-radius: .3rem; text-align: center;
-      font-size: .78rem; white-space: nowrap;
+      font-size: 18px; white-space: nowrap;
       line-height: 1.3;
     }
     .pending__section--other .pending__chan {
@@ -514,7 +514,7 @@
       border: 1px solid #f0d68a; border-radius: .55rem;
     }
     .pending__next-label {
-      font-size: .85rem; font-weight: 800; color: #b06a00;
+      font-size: 18px; font-weight: 800; color: #b06a00;
       letter-spacing: .02em;
     }
     .pending__next-text {
@@ -578,7 +578,7 @@
     }
     /* 解析失败时的回退样式,保留旧版观感 */
     .pending__fallback .pending__note {
-      font-size: .95rem; line-height: 1.65; color: var(--ink-2);
+      font-size: 18px; line-height: 1.65; color: var(--ink-2);
       word-break: break-word; white-space: normal;
     }
 
@@ -610,11 +610,11 @@
       min-width: 0;
     }
     .sched__chan {
-      display: inline-block; font-size: .82rem; font-weight: 700; color: #fff;
+      display: inline-block; font-size: 18px; font-weight: 700; color: #fff;
       background: var(--navy); padding: .18rem .6rem; border-radius: 2rem; margin-bottom: .2rem;
       white-space: normal; word-break: break-word;
     }
-    .sched__text { font-size: .98rem; color: var(--ink); line-height: 1.5; word-break: break-word; }
+    .sched__text { font-size: 18px; color: var(--ink); line-height: 1.5; word-break: break-word; }
     /* 待公布窗口拆成「对决」卡片:阶段 + 双方 + 状态,干净可读 */
     .sched__list { display: flex; flex-direction: column; gap: .55rem; }
     .sched__duel {
@@ -625,7 +625,7 @@
       min-width: 0;
     }
     .sched__duel-stage {
-      font-size: .88rem; font-weight: 800; color: var(--navy);
+      font-size: 18px; font-weight: 800; color: var(--navy);
       margin-bottom: .25rem; line-height: 1.2;
       word-break: break-word;
     }
@@ -638,7 +638,7 @@
       display: inline-block;
       margin: 0 .35rem;
       padding: .1rem .42rem;
-      font-size: .78rem; font-weight: 800; color: #fff;
+      font-size: 18px; font-weight: 800; color: #fff;
       background: var(--red); border-radius: 2rem;
       vertical-align: middle; line-height: 1;
     }
@@ -732,57 +732,6 @@
       font-weight: 800; color: var(--navy);
     }
 
-    /* ---------- 重播:卡内一行 + 当日「今日重播」汇总区 ---------- */
-    /* 适老化:重播是「没看成当晚、白天看重播」的刚需,视觉上用中国红淡底 + 深蓝标签,
-       与风险卡(红/琥珀/绿)区分,但又不喧宾夺主;零动效、大字号 */
-    .match__replay {
-      margin-top: .6rem;
-      padding: .5rem .7rem;
-      background: rgba(14,42,71,.05);
-      border: 1px dashed #bcd4e6;
-      border-radius: .6rem;
-      font-size: .98rem; font-weight: 700; color: var(--navy);
-      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
-    }
-    .match__replay .replay__note { font-weight: 600; color: var(--ink-2); font-size: .9rem; }
-    .day__replays {
-      padding: .6rem 1.1rem .85rem;
-      background: linear-gradient(to right, rgba(214,40,40,.06), rgba(214,40,40,0) 60%);
-      border-bottom: 1px solid var(--line);
-    }
-    .replays__head {
-      font-size: .95rem; font-weight: 800; color: var(--red);
-      margin-bottom: .45rem;
-    }
-    /* 当日底部「已重播」归档区:灰底静音符,与顶部「今日重播」(红/待看)明显区分 */
-    .day__replays--done {
-      background: linear-gradient(to right, rgba(88,100,116,.05), rgba(88,100,116,0) 60%);
-      border-bottom: none;
-      border-top: 1px solid var(--line);
-    }
-    .replays__head--done { color: var(--ink-2); }
-    .replay__item {
-      padding: .45rem .65rem;
-      background: #fff; border: 1px solid var(--line); border-radius: .6rem;
-      margin-bottom: .45rem;
-      font-size: .95rem;
-    }
-    .replay__item:last-child { margin-bottom: 0; }
-    .replay__line1 {
-      display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem;
-    }
-    .replay__line2 {
-      margin-top: .35rem;
-      display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .25rem;
-      font-weight: 600; color: var(--ink);
-    }
-    .replay__line2 .replay__flag { font-size: 1.05rem; line-height: 1; margin-right: .15rem; }
-    .replay__vs { color: var(--ink-2); font-weight: 700; margin: 0 .25rem; }
-    .replay__time { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
-    .replay__chan { font-size: .8rem; font-weight: 700; color: #fff; background: var(--navy); padding: .16rem .55rem; border-radius: 2rem; }
-    .replay__match { color: var(--ink); font-weight: 600; }
-    .replay__flag { font-size: 1rem; line-height: 1; letter-spacing: .04rem; }
-    .replay__live { color: var(--ink-2); font-weight: 600; font-size: .85rem; }
 
     /* ---------- 页脚 ---------- */
     footer { margin-top: 2rem; text-align: center; }
@@ -813,7 +762,7 @@
     /* 直播中胶囊徽章:放在时间行/时段行,红底白字 + 小白点 */
     .live-badge {
       display: inline-flex; align-items: center; gap: .35rem;
-      font-size: .9rem; font-weight: 800; color: #fff;
+      font-size: 18px; font-weight: 800; color: #fff;
       background: var(--red); padding: .2rem .65rem; border-radius: 2rem;
       white-space: nowrap; line-height: 1.3;
     }
@@ -863,7 +812,7 @@
     .vmatch__event {
       display: block; width: fit-content; margin: 0 auto .7rem;
       max-width: 100%;
-      font-size: .98rem; font-weight: 700; color: #6a289c;
+      font-size: 18px; font-weight: 700; color: #6a289c;
       background: #f0e7f8; border: 1px solid #d9c7e8;
       padding: .28rem .85rem; border-radius: 2rem; text-align: center;
       word-break: break-word;
@@ -873,7 +822,7 @@
       display: block; width: fit-content; max-width: 100%;
       margin: -.35rem auto .65rem;
       padding: .16rem .68rem;
-      font-size: .92rem; font-weight: 600; line-height: 1.45;
+      font-size: 18px; font-weight: 600; line-height: 1.45;
       color: #55426e;
       background: #faf7fd; border: 1px solid #e9def4;
       border-radius: 1rem; text-align: center;
@@ -889,7 +838,7 @@
     }
     /* 平台 chip 用紫色,和央视蓝 chip 区分:外婆一看颜色就知道这是「手机上看的」 */
     .vmatch__chan {
-      font-size: .9rem; font-weight: 700; color: #fff; background: #6a289c;
+      font-size: 18px; font-weight: 700; color: #fff; background: #6a289c;
       padding: .26rem .75rem; border-radius: 2rem; white-space: nowrap;
     }
     .vmatch__note {
@@ -1105,7 +1054,7 @@
     }
     /* 关键结果:中国红左边条,一眼看到「谁输谁赢」 */
     .prog__result {
-      font-size: .98rem; font-weight: 700; color: var(--red);
+      font-size: 18px; font-weight: 700; color: var(--red);
       line-height: 1.5; margin-top: .25rem;
       padding: .2rem .55rem; border-left: 3px solid var(--red);
       word-break: break-word;
@@ -1128,7 +1077,7 @@
     }
     .prog__board-players {
       flex: 1 1 auto; min-width: 0;
-      font-size: .96rem; font-weight: 700; color: var(--ink); line-height: 1.45;
+      font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.45;
       word-break: break-word;
     }
     .prog__board-sets {
@@ -1195,7 +1144,7 @@
     .emeta__rank-label { display: block; font-weight: 800; color: var(--navy); margin-bottom: .3rem; }
     .emeta__rank { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .22rem .8rem; }
     .emeta__rank-item {
-      font-size: .92rem; font-weight: 600; color: var(--ink);
+      font-size: 18px; font-weight: 600; color: var(--ink);
       background: rgba(14,42,71,.045); border-radius: .35rem;
       padding: .22rem .5rem; word-break: break-word;
     }
