@@ -1,123 +1,100 @@
 {
   "days": [
     {
-      "date": "2026-09-25",
+      "date": "2026-09-27",
       "matches": [
         {
-          "time": "09:00",
-          "platform": "央视频",
+          "time": "11:00",
+          "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "混双1/4决赛",
+          "stage": "男双半决赛",
           "nationHome": "中国",
-          "playerHome": "林诗栋/蒯曼",
-          "playerHomeInfo": "栋曼组合",
-          "nationAway": "印度",
-          "playerAway": "德赛/格尔帕德",
-          "note": "央视频/咪咕端内直播(非央视5/5+电视窗);国乒栋曼组合3-0晋级四强(11-5/12-10/11-9)"
+          "playerHome": "林诗栋/黄友政",
+          "nationAway": "日本",
+          "playerAway": "松岛辉空/户上隼辅",
+          "note": "国乒组合冲决赛,央视5/央视频/咪咕同步直播"
         },
         {
-          "time": "10:00",
-          "platform": "央视频",
+          "time": "11:45",
+          "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/16决赛",
-          "nationHome": "中国",
-          "playerHome": "黄友政/林诗栋",
-          "nationAway": "蒙古",
-          "playerAway": "恩赫图古尔德/恩赫塔米尔",
-          "note": "央视频/咪咕端内直播(非央视5/5+电视窗);国乒出战"
-        },
-        {
-          "time": "10:45",
-          "platform": "央视频",
-          "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/16决赛",
+          "stage": "男双半决赛",
           "nationHome": "中国",
           "playerHome": "温瑞博/向鹏",
-          "nationAway": "也门",
-          "playerAway": "古布兰/阿尔杜巴尼",
-          "note": "央视频/咪咕端内直播(非央视5/5+电视窗);国乒出战"
+          "nationAway": "日本",
+          "playerAway": "张本智和/篠塚大登",
+          "note": "国乒组合冲决赛,央视5/央视频/咪咕同步直播"
         },
         {
-          "time": "16:00",
-          "platform": "央视频",
+          "time": "12:30",
+          "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/8决赛",
+          "stage": "女单半决赛",
           "nationHome": "中国",
-          "playerHome": "黄友政/林诗栋",
-          "nationAway": "中国香港",
-          "playerAway": "林兆恒/姚钧涛",
-          "note": "央视频/咪咕端内直播(非央视5/5+电视窗);国乒出战"
+          "playerHome": "王曼昱",
+          "nationAway": "日本",
+          "playerAway": "张本美和",
+          "note": "中日对决,央视5直播"
         },
         {
-          "time": "16:45",
-          "platform": "央视频",
+          "time": "13:15",
+          "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/8决赛",
+          "stage": "女单半决赛",
           "nationHome": "中国",
-          "playerHome": "温瑞博/向鹏",
-          "nationAway": "韩国",
-          "playerAway": "李正植/宇泰龙",
-          "note": "央视频/咪咕端内直播(非央视5/5+电视窗);国乒出战"
+          "playerHome": "孙颖莎",
+          "nationAway": "日本",
+          "playerAway": "早田希娜",
+          "note": "中日对决,央视5直播"
         }
       ]
     },
     {
-      "date": "2026-09-26",
+      "date": "2026-09-28",
       "matches": [
         {
-          "time": "14:30",
+          "time": "11:00",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/4决赛",
-          "nationHome": "中国",
-          "playerHome": "林诗栋/黄友政",
-          "nationAway": "中国台北",
-          "playerAway": "冯翊新/郭冠宏",
-          "note": "国乒组合争四强,央视5/央视频/咪咕同步直播"
+          "stage": "女双半决赛",
+          "nationHome": "日本",
+          "playerHome": "张本美和/早田希娜",
+          "nationAway": "中国香港",
+          "playerAway": "杜凯琹/吴咏琳",
+          "note": "日本组合冲决赛,央视5/央视频/咪咕同步直播"
         },
         {
-          "time": "14:30",
+          "time": "11:45",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "男双1/4决赛",
-          "nationHome": "中国",
-          "playerHome": "温瑞博/向鹏",
-          "nationAway": "伊朗",
-          "playerAway": "阿拉米扬/阿拉米安",
-          "note": "国乒组合争四强,央视5/央视频/咪咕同步直播"
-        },
-        {
-          "time": "16:45",
-          "platform": "央视频/咪咕",
-          "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "女双1/4决赛",
+          "stage": "女双半决赛",
           "nationHome": "中国",
           "playerHome": "王曼昱/蒯曼",
-          "nationAway": "日本",
-          "playerAway": "长崎美柚/面手凛",
-          "note": "中日对决,央视5黄金档同步直播"
+          "nationAway": "泰国",
+          "playerAway": "素塔西尼/帕拉南",
+          "note": "国乒组合冲决赛,央视5/央视频/咪咕同步直播"
         },
         {
-          "time": "16:45",
+          "time": "12:30",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "女双1/4决赛",
+          "stage": "男单半决赛",
           "nationHome": "中国",
-          "playerHome": "陈熠/范姝涵",
-          "nationAway": "日本",
-          "playerAway": "张本美和/早田希娜",
-          "note": "中日对决"
+          "playerHome": "王楚钦",
+          "nationAway": "伊朗",
+          "playerAway": "阿拉米扬",
+          "note": "国乒冲决赛,央视5/央视频/咪咕同步直播"
         },
         {
-          "time": "18:30",
+          "time": "13:15",
           "platform": "央视频/咪咕",
           "tournament": "第20届名古屋亚运会乒乓球",
-          "stage": "混双决赛",
+          "stage": "男单半决赛",
           "nationHome": "中国",
-          "playerHome": "王楚钦/孙颖莎",
-          "nationAway": "中国",
-          "playerAway": "林诗栋/蒯曼",
-          "note": "国乒内战,央视5/央视频/咪咕同步直播,提前包揽金银牌"
+          "playerHome": "林诗栋",
+          "nationAway": "中国台北",
+          "playerAway": "林昀儒",
+          "note": "国乒冲决赛,央视5/央视频/咪咕同步直播"
         }
       ]
     }
