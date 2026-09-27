@@ -281,7 +281,9 @@
 
     function ordinalizeInfo(info) {
       if (!info) return '';
-      return esc(info).replace(/世界第(\d+)/g, function (_, n) { return ordinal(parseInt(n, 10)) + ''; });
+      // Q12 拍板:对老人「世界第1」比「1st」更好懂 —— 不再转成英文序数,保留中文原样。
+      // (ordinal/fmtRank 保留:fmtRank 实测为死代码 0 调用点,待 M3 一并清理)
+      return esc(info);
     }
 
     // 重播归属日:默认随直播场所在日;直播 start∈[23:00,24:00) 视为前一日深夜,重播归次日;replay.date 可覆盖
