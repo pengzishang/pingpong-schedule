@@ -1878,7 +1878,15 @@
       var past = daysAll.filter(function (x) { return x.diff < 0; })
                         .sort(function (a, b) { return b.diff - a.diff; });
       var upcomingContent = upcoming.filter(function (x) { return dayHasContent(x.day); });
-      var pastContent = past.filter(function (x) { return (x.day.matches || []).filter(isTVMatch).length > 0; });
+      // 原实现只认 (matches||[]).filter(isTVMatch).length>0,而 dayHasContent 认 4 个条件。
+      // 实测后果:昨日若是 schedule-only 或 dayNote-only,【昨日战报整块消失】且不报错。
+      // 现改为与 dayHasContent 同源,但按拍板「昨日战报只显央视(与 F-01 一致)」排除 videoMatches。
+      var pastContent = past.filter(function (x) {
+        if ((x.day.matches || []).filter(isTVMatch).length > 0) return true;
+        if ((x.day.schedule || []).filter(isTVSchedule).length > 0) return true;
+        if (typeof x.day.dayNote === 'string' && x.day.dayNote.trim()) return true;
+        return false;
+      });
       var ordered = upcomingContent.concat(pastContent);
       var GAP_DAYS = 3;
       var nearestMatchDiff = null;
