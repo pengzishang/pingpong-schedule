@@ -369,10 +369,13 @@ test('isTVSchedule: 同样只按频道判定(risk 文案不再删节目单 · R-
   assert.strictEqual(api.isTVSchedule({ channel: '咪咕视频', program: 'x' }), false);
 });
 
-test('isTVReplay: 重播与直播解耦 —— 直播上 app、白天重播上央视仍算可看', () => {
-  assert.strictEqual(api.isTVReplay({ replay: { channel: 'CCTV-5', time: '09:00' } }), true);
+test('isTVReplay: 重播功能已下线(N8) —— 不再把任何重播计入可看', () => {
+  // N8 拍板砍掉重播(含深夜归次日归档)。样式、渲染、判定均已停用。
+  // 原断言「直播上 app、白天重播上央视仍算可看」随功能下线作废。
+  assert.strictEqual(api.isTVReplay({ replay: { channel: 'CCTV-5', time: '09:00' } }), false);
   assert.strictEqual(api.isTVReplay({ replay: { channel: '咪咕视频', time: '09:00' } }), false);
   assert.strictEqual(api.isTVReplay({}), false);
+  assert.strictEqual(api.renderReplayZone('2026-09-28', [], null, 'past'), '');
 });
 
 test('replayTargetDate: 深夜 23:00 后归次日,凌晨归当日', () => {

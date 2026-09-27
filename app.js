@@ -312,6 +312,8 @@
     // 当日重播汇总区:只列中国队相关场次(陆/港/澳/台),分两行——第一行重播时间+昨夜直播时间,第二行国旗贴选手名
     // mode: 'upcoming' = 未过时间(待看,置顶「今日重播」); 'past' = 已过时间(已播,归档到当日底部「今日已重播」)
     function renderReplayZone(dateStr, items, now, mode) {
+      // N8 拍板:重播功能已砍(样式与渲染均已下线)。保留签名仅为兼容既有调用与导出。
+      return '';
       if (!items || !items.length) return '';
       var isPast = (mode === 'past');
       // 汇总区只展示中国队相关场次(中国大陆+中国香港+中国澳门,不含中国台北),避免外协对阵挤占老人视线
@@ -711,7 +713,8 @@
     // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
     // —— 直播当晚可能只在 app/咪咕,但白天重播照样上央视电视,外婆能在电视看重播,必须显示
     function isTVReplay(m) {
-      return !!(m.replay && m.replay.channel && isCCTVChannel(m.replay.channel));
+      // N8 重播已砍:不再把重播计入,保证 replayGroups 为空
+      return false;
     }
     // 某天是否「有节目」:有≥1场央视电视可看比赛,或有≥1个央视乒乓球直播窗口(待公布也算有节目)。
     // 两者皆无的日子(赛程空档、无电视窗口)视为无节目,从日期序列里折叠跳过,直接跳到下一场有节目的日期。
@@ -2197,7 +2200,7 @@
             }
           }
           // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」;已过时间改「已重播」
-          if (m.replay) {
+          if (false && m.replay) {   // N8 重播已砍:卡内重播行不再渲染
             var rTd = replayTargetDate(day, m);
             var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
             var rPassed = isReplayPassed(day, m, now);
