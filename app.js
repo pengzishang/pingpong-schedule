@@ -2257,9 +2257,11 @@
           });
           html += '</div>';
         }
-        // dayNote 独立于 schedule 渲染:原为 else-if 互斥链,若当天有 schedule 则本分支永不执行,
+        // dayNote 与 schedule 并列渲染(仍在 else 块内,即有央视比赛时不渲染):
+        // 原为 else-if 互斥链,若当天有 schedule 则本分支永不执行,
         // 实测后果:同天同时有 schedule 与 dayNote 时,【dayNote 整段被静默丢弃】(HTML 不含其内容)。
-        if (typeof day.dayNote === 'string' && day.dayNote.trim()) {
+        // ⚠️ 必须留在上面的 else 块内 —— 若提成独立 if,会在有 matches 的日子也渲染出空窗徽章。
+        if (typeof day.dayNote === 'string' && day.dayNote.trim() && !liveSchedule.length) {
           // 空窗期/无直播天:当日有说明。优先读新契约 day.dayNote(字符串),
           // 无则兼容旧 schedule 伪 record(time:'—'&&channel:'—' 的 content)。
           // 用 parseDayNote 专为「叙事报道体」层次化(摘要 lead + 要点 points + 下一站区块),根治整坨大段。
@@ -2285,8 +2287,14 @@
             html += '<div class="pending__fallback"><span class="pending__note">' + esc(noteSrc) + '</span></div>';
           }
           html += '</div>';
-        } else if (data.nextEvent && data.nextEvent.date) {
-          // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
+        }
+        // 完全空白天(无比赛无赛程无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险。
+        // ⚠️ 必须是独立 if 并带完整前置条件:原为 else-if 链末级,拆链后若不加条件,
+        //    会让「有 schedule 但无 dayNote」的日子错误地渲染出「📋 待公布」(已实测发生)。
+        if (!liveSchedule.length &&
+            !(typeof day.dayNote === 'string' && day.dayNote.trim()) &&
+            !(day.matches || []).length &&
+            data.nextEvent && data.nextEvent.date) {
           html += '<div class="day__pending">' +
                     '<span class="pending__badge">📋 待公布</span>' +
                     '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode, now) || '国乒比赛') + '</span>' +
