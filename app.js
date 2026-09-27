@@ -682,6 +682,11 @@
     function isTVMatch(m) {
       return isCCTVChannel(m.channel) && !riskSaysNoTV(m.risk);
     }
+    // schedule(央视节目单/直播窗口)同样算外婆能在电视上看到的乒乓球内容,
+    // 空窗横幅计算最近一场时必须把它纳入,否则会出现"今天有 CCTV-5 节目却显示还有 X 天"的矛盾。
+    function isTVSchedule(it) {
+      return isCCTVChannel(it.channel) && !riskSaysNoTV(it.risk);
+    }
     // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
     // —— 直播当晚可能只在 app/咪咕,但白天重播照样上央视电视,外婆能在电视看重播,必须显示
     function isTVReplay(m) {
@@ -1852,7 +1857,9 @@
       var GAP_DAYS = 3;
       var nearestMatchDiff = null;
       for (var gi = 0; gi < upcoming.length; gi++) {
-        if ((upcoming[gi].day.matches || []).filter(isTVMatch).length > 0) {
+        var day = upcoming[gi].day;
+        if ((day.matches || []).filter(isTVMatch).length > 0 ||
+            (day.schedule || []).filter(isTVSchedule).length > 0) {
           nearestMatchDiff = upcoming[gi].diff; break;
         }
       }
@@ -2354,6 +2361,7 @@
         isCCTVChannel: isCCTVChannel,
         riskSaysNoTV: riskSaysNoTV,
         isTVMatch: isTVMatch,
+        isTVSchedule: isTVSchedule,
         isTVReplay: isTVReplay,
         dayHasContent: dayHasContent,
         isReplayPassed: isReplayPassed,

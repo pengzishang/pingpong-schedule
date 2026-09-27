@@ -361,6 +361,12 @@ test('belongsToCN: 含中国/中国澳门,不含中国香港与中国台北', ()
   assert.strictEqual(api.belongsToCN('日本'), false);
 });
 
+test('isTVSchedule: schedule 项同样按频道+风险判定电视可看', () => {
+  assert.strictEqual(api.isTVSchedule({ channel: 'CCTV-5', program: '亚运会乒乓球' }), true);
+  assert.strictEqual(api.isTVSchedule({ channel: 'CCTV-5', risk: '需用手机看APP', program: 'x' }), false);
+  assert.strictEqual(api.isTVSchedule({ channel: '咪咕视频', program: 'x' }), false);
+});
+
 test('isTVReplay: 重播与直播解耦 —— 直播上 app、白天重播上央视仍算可看', () => {
   assert.strictEqual(api.isTVReplay({ replay: { channel: 'CCTV-5', time: '09:00' } }), true);
   assert.strictEqual(api.isTVReplay({ replay: { channel: '咪咕视频', time: '09:00' } }), false);
@@ -753,4 +759,64 @@ test('parseStageDetail: 空输入安全', () => {
   assert.deepStrictEqual(api.parseStageDetail(''), { main: '', detail: '' });
   assert.deepStrictEqual(api.parseStageDetail(null), { main: '', detail: '' });
   assert.deepStrictEqual(api.parseStageDetail(undefined), { main: '', detail: '' });
+});
+
+// ===========================================================================
+// 十三、prepareCtx 空窗横幅 —— 2026-09-27 截图矛盾修复
+// ===========================================================================
+
+function isoDate(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+test('prepareCtx: 今天只有央视 schedule 时,不应进入空窗倒计时模式', () => {
+  const data = {
+    title: '测试', updatedAt: '', note: '',
+    days: [
+      {
+        date: isoDate(0), weekday: '日', matches: [], pending: false,
+        schedule: [{ time: '11:00', channel: 'CCTV-5', program: '第20届名古屋亚运会乒乓球' }]
+      },
+      {
+        date: isoDate(4), weekday: '四', matches: [], schedule: [], pending: false
+      }
+    ],
+    nextEvent: { date: isoDate(4), daysAway: 4 }
+  };
+  data.days[1].matches = [
+    {
+      time: '11:00', channel: 'CCTV-5', tournament: 'WTT', stage: '决赛',
+      nationHome: '中国', playerHome: '甲', playerHomeInfo: '',
+      nationAway: '日本', playerAway: '乙', playerAwayInfo: ''
+    }
+  ];
+  const ctx = api.prepareCtx(data);
+  assert.strictEqual(ctx.gapMode, false, '今天有 CCTV-5 schedule,不应显示倒计时横幅');
+  assert.strictEqual(ctx.countdownDays, 0, '最近一场就是今天');
+});
+
+test('prepareCtx: 今天无 schedule 无 match,4 天后才有比赛时才显示倒计时', () => {
+  const data = {
+    title: '测试', updatedAt: '', note: '',
+    days: [
+      { date: isoDate(0), weekday: '日', matches: [], schedule: [], pending: false },
+      {
+        date: isoDate(4), weekday: '四', matches: [
+          {
+            time: '11:00', channel: 'CCTV-5', tournament: 'WTT', stage: '决赛',
+            nationHome: '中国', playerHome: '甲', playerHomeInfo: '',
+            nationAway: '日本', playerAway: '乙', playerAwayInfo: ''
+          }
+        ], schedule: [], pending: false
+      }
+    ],
+    nextEvent: { date: isoDate(4), daysAway: 4 }
+  };
+  const ctx = api.prepareCtx(data);
+  assert.strictEqual(ctx.gapMode, true);
+  assert.strictEqual(ctx.countdownDays, 4);
 });
