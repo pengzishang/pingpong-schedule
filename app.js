@@ -1616,10 +1616,15 @@
       return parts.join(' · ');
     }
 
-    // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
+    // 国籍筛选:Q1 已拍板「删掉筛选,只做国乒」。
+    // M1 止血:函数体改为 no-op —— 不再隐藏任何比赛卡/日期段(原实现会把纯日韩日整段 display:none,
+    // 即 R-6「整段空白」)。FILTER 变量与 5 处调用点保留不动,待 M3 前端重写时彻底清除。
     var FILTER = 'cn';
     function applyFilter(scope) {
       FILTER = scope;
+      return; // Q1/M1:筛选已停用,保留签名仅为兼容既有调用点
+    }
+    function __applyFilterLegacy(scope) {
       document.querySelectorAll('.match').forEach(function (el) {
         var show = scope === 'all' ||
           (scope === 'cn' && el.dataset.cn) ||
