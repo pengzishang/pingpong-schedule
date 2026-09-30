@@ -1,3 +1,108 @@
 {
-  "days": []
+  "days": [
+    {
+      "date": "2026-10-01",
+      "matches": [
+        {
+          "time": "11:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "范姝涵",
+          "nationAway": "德国",
+          "playerAway": "万远",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "11:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "韩菲儿",
+          "nationAway": "中国",
+          "playerAway": "杨屹韵",
+          "note": "咪咕视频/央视频直播 · 国乒内战"
+        },
+        {
+          "time": "12:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "朱思冰",
+          "nationAway": "乌克兰",
+          "playerAway": "维罗妮卡·玛提乌尼娜",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "13:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "李和宸",
+          "nationAway": "俄罗斯",
+          "playerAway": "尼基塔·阿尔乔缅科",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "15:05",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "nationAway": "意大利",
+          "playerAway": "佐吉娅·皮科林",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "18:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "刘子菱",
+          "nationAway": "荷兰",
+          "playerAway": "李洁",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "19:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "周冠宏",
+          "nationAway": "新西兰",
+          "playerAway": "舒迪恩",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "20:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "徐瑛彬",
+          "nationAway": "中国香港",
+          "playerAway": "林兆恒",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        },
+        {
+          "time": "21:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "纵歌曼",
+          "nationAway": "韩国",
+          "playerAway": "刘叡潾",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+        }
+      ]
+    }
+  ]
 }
