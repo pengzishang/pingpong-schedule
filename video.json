@@ -103,6 +103,44 @@
           "note": "咪咕视频/央视频直播 · 资格赛第一轮"
         }
       ]
+    },
+    {
+      "date": "2026-10-02",
+      "matches": [
+        {
+          "time": "11:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "nationAway": "尼日利亚",
+          "playerAway": "阿鲁纳",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮（时刻据今日头条体育世界9/30公布）"
+        },
+        {
+          "time": "11:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "牛冠凯",
+          "nationAway": "印度",
+          "playerAway": "贾恩",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮（时刻据今日头条体育世界9/30公布）"
+        },
+        {
+          "time": "12:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第一轮",
+          "nationHome": "中国",
+          "playerHome": "袁励岑",
+          "nationAway": "贝宁",
+          "playerAway": "萨利夫",
+          "note": "咪咕视频/央视频直播 · 资格赛第一轮（时刻据今日头条体育世界9/30公布）"
+        }
+      ]
     }
   ]
 }
