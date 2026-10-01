@@ -12,7 +12,7 @@
           "playerHome": "范姝涵",
           "nationAway": "德国",
           "playerAway": "万远",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:范姝涵 3-0 万远"
         },
         {
           "time": "11:35",
@@ -23,7 +23,7 @@
           "playerHome": "韩菲儿",
           "nationAway": "中国",
           "playerAway": "杨屹韵",
-          "note": "咪咕视频/央视频直播 · 国乒内战"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:韩菲儿 3-1 杨屹韵(内战)"
         },
         {
           "time": "12:45",
@@ -34,7 +34,7 @@
           "playerHome": "朱思冰",
           "nationAway": "乌克兰",
           "playerAway": "维罗妮卡·玛提乌尼娜",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:朱思冰 3-0 玛提乌尼娜"
         },
         {
           "time": "13:20",
@@ -45,7 +45,7 @@
           "playerHome": "李和宸",
           "nationAway": "俄罗斯",
           "playerAway": "尼基塔·阿尔乔缅科",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 男单资格赛第一轮 · 赛果:李和宸 1-3 阿尔乔缅科(止步首轮)"
         },
         {
           "time": "15:05",
@@ -56,7 +56,7 @@
           "playerHome": "王晓彤",
           "nationAway": "意大利",
           "playerAway": "佐吉娅·皮科林",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:王晓彤 3-0 皮科林"
         },
         {
           "time": "18:00",
@@ -67,7 +67,7 @@
           "playerHome": "刘子菱",
           "nationAway": "荷兰",
           "playerAway": "李洁",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:刘子菱 3-0 李洁"
         },
         {
           "time": "19:10",
@@ -78,7 +78,7 @@
           "playerHome": "周冠宏",
           "nationAway": "新西兰",
           "playerAway": "舒迪恩",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 男单资格赛第一轮 · 赛果:周冠宏 3-0 舒迪恩"
         },
         {
           "time": "20:55",
@@ -89,7 +89,7 @@
           "playerHome": "徐瑛彬",
           "nationAway": "中国香港",
           "playerAway": "林兆恒",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 男单资格赛第一轮 · 赛果:徐瑛彬 3-0 林兆恒"
         },
         {
           "time": "21:30",
@@ -100,7 +100,7 @@
           "playerHome": "纵歌曼",
           "nationAway": "韩国",
           "playerAway": "刘叡潾",
-          "note": "咪咕视频/央视频直播 · 资格赛第一轮"
+          "note": "咪咕视频/央视频直播 · 女单资格赛第一轮 · 赛果:纵歌曼 3-2 刘叡潾"
         }
       ]
     },
@@ -139,6 +139,94 @@
           "nationAway": "贝宁",
           "playerAway": "萨利夫",
           "note": "咪咕视频/央视频直播 · 资格赛第一轮（时刻据今日头条体育世界9/30公布）"
+        },
+        {
+          "time": "18:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "韩菲儿",
+          "nationAway": "法国",
+          "playerAway": "皮卡德",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "18:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "范姝涵",
+          "nationAway": "中国香港",
+          "playerAway": "吴咏琳",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "18:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "朱思冰",
+          "nationAway": "印度",
+          "playerAway": "戈尔帕德",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "19:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "nationAway": "法国",
+          "playerAway": "卡米尔·卢茨",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "19:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "纵歌曼",
+          "nationAway": "印度",
+          "playerAway": "博米克",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（时刻以WTT赛程表19:10为准,个别稿写21:30存疑）"
+        },
+        {
+          "time": "20:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "周冠宏",
+          "nationAway": "罗马尼亚",
+          "playerAway": "尤利安·奇里塔",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "20:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "男单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "徐瑛彬",
+          "nationAway": "埃及",
+          "playerAway": "约瑟夫·阿卜杜勒·阿齐兹",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
+        },
+        {
+          "time": "20:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT中国大满贯",
+          "stage": "女单资格赛第二轮",
+          "nationHome": "中国",
+          "playerHome": "刘子菱",
+          "nationAway": "罗马尼亚",
+          "playerAway": "伊莲娜·扎哈里亚",
+          "note": "咪咕视频/央视频直播 · 资格赛第二轮（对手经网易赛程表+腾讯确认）"
         }
       ]
     }
