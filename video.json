@@ -391,7 +391,7 @@
           "playerHome": "中国男团",
           "playerHomeInfo": "林诗栋/温瑞博/周启豪/向鹏/黄友政",
           "playerAway": "待定",
-          "note": "咪咕视频/央视频/抖音直播 · 国乒男团团体首战(1/4决赛,13:00北京时间) · 对手待签表(取决于10/20资格组/小组赛结果)"
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男团团体首战(1/4决赛,13:00北京时间) · 对手待小组赛突围队伍落位"
         },
         {
           "time": "13:00",
@@ -401,8 +401,124 @@
           "nationHome": "中国",
           "playerHome": "中国女团",
           "playerHomeInfo": "蒯曼/王艺迪/陈熠/石洵瑶/徐奕",
+          "nationAway": "泰国",
+          "playerAway": "泰国",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女团团体首战(1/4决赛,13:00) · VS泰国(帕拉南/素塔西尼姐妹)"
+        },
+        {
+          "time": "18:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "石洵瑶",
+          "nationAway": "菲律宾",
+          "playerAway": "古德斯",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单首秀(1/32) · 石洵瑶VS古德斯(菲律宾)"
+        },
+        {
+          "time": "18:30",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "蒯曼",
+          "nationAway": "泰国",
+          "playerAway": "素塔西尼",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单首秀(1/32) · 蒯曼VS素塔西尼(泰国)"
+        },
+        {
+          "time": "19:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "覃予萱",
+          "nationAway": "泰国",
+          "playerAway": "旺拉空",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单首秀(1/32) · 覃予萱VS旺拉空(泰国)"
+        },
+        {
+          "time": "19:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "陈熠",
+          "nationAway": "伊朗",
+          "playerAway": "塞塔耶什",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单首秀(1/32) · 陈熠VS塞塔耶什(伊朗)"
+        },
+        {
+          "time": "19:30",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "王艺迪",
+          "nationAway": "中国香港",
+          "playerAway": "李凯敏",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单首秀(1/32) · 王艺迪VS李凯敏(中国香港)"
+        },
+        {
+          "time": "21:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/64决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政",
+          "nationAway": "伊朗",
+          "playerAway": "哈比比",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首秀(1/64) · 黄友政VS哈比比(伊朗)"
+        },
+        {
+          "time": "22:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "混双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政/陈熠",
+          "nationAway": "塔吉克斯坦",
+          "playerAway": "亚曼/哈萨尼",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒混双新组合首秀(1/16) · 黄友政/陈熠VS亚曼/哈萨尼(塔吉克斯坦)"
+        },
+        {
+          "time": "22:30",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "混双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "袁励岑/王艺迪",
+          "nationAway": "菲律宾",
+          "playerAway": "亚姆森/桑蒂扬",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒混双新组合首秀(1/16) · 袁励岑/王艺迪VS亚姆森/桑蒂扬(菲律宾)"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "matches": [
+        {
+          "time": "18:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女团决赛",
+          "nationHome": "中国",
+          "playerHome": "中国女团",
+          "playerHomeInfo": "蒯曼/王艺迪/陈熠/石洵瑶/徐奕",
           "playerAway": "待定",
-          "note": "咪咕视频/央视频/抖音直播 · 国乒女团团体首战(1/4决赛,13:00北京时间) · 对手待签表(取决于10/20资格组/小组赛结果)"
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女团决赛(若晋级,对手待半决赛落位) · 团体金牌战"
+        },
+        {
+          "time": "21:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男团决赛",
+          "nationHome": "中国",
+          "playerHome": "中国男团",
+          "playerHomeInfo": "林诗栋/温瑞博/周启豪/向鹏/黄友政",
+          "playerAway": "待定",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男团决赛(若晋级,对手待半决赛落位) · 团体金牌战"
         }
       ]
     }
