@@ -347,6 +347,35 @@
           "result": "袁励岑 3-2 戈麦斯(7-11/11-5/11-6/8-11/11-5)"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "matches": [
+        {
+          "time": "19:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/64决赛",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "playerHomeInfo": "19岁削球手·亚锦赛男单首秀",
+          "nationAway": "沙特阿拉伯",
+          "playerAway": "阿里·阿尔哈德拉维",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首秀(仅李天阳/向鹏需打1/64,余男单直通64强)"
+        },
+        {
+          "time": "20:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/64决赛",
+          "nationHome": "中国",
+          "playerHome": "向鹏",
+          "playerHomeInfo": "世界冠军·亚锦赛男单首秀",
+          "nationAway": "阿联酋",
+          "playerAway": "优素福·阿尔哈瓦伊",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首秀"
+        }
+      ]
     }
   ]
 }
