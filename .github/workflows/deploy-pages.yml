@@ -29,10 +29,37 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # 测试门禁(零依赖):采集端每 8h 自动推送 -> 自动部署,无校验时坏数据会直达外婆手机。
+      # 0 fail 才允许继续部署;失败则线上停留上一版。
+      - name: Test gate (zero-dep)
+        run: node --test tests/logic.test.js tests/render.test.js tests/data-contract.test.js
+
+      # 构建 staging 目录:原 path: '.' 会把 191 个非站点文件(采集说明/memory/早报/tests/docs)
+      # 一并上传至 Pages 公开可读。改为只拷白名单文件。
+      - name: Build staging directory (allowlist)
+        run: |
+          set -euo pipefail
+          rm -rf _site && mkdir -p _site
+          cp index.html style.css app.js data.json video.json .nojekyll _site/
+          # 【M3 扩展位】拆 ESM 后追加:cp boot.js _site/ ; cp -r lib _site/lib/
+          echo "--- staging contents ---"
+          find _site -type f | sort
+
+      # 快速失败:缺任一白名单文件即中断,避免上线半套产物导致白屏
+      - name: Verify staging contents
+        run: |
+          set -euo pipefail
+          for f in index.html style.css app.js data.json video.json .nojekyll; do
+            test -f "_site/$f" || { echo "::error::staging 缺少 $f"; exit 1; }
+          done
+
+      # ⚠️ 禁止升级到 v4/v5/main:新版本新增 include-hidden-files(默认 false),
+      #    tar 会追加 --exclude=.[^/]* 静默排除 .nojekyll -> Jekyll 接管 -> 站点故障。
+      #   若必须升级,须同时显式传 include-hidden-files: true。
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site/'
 
       - name: Deploy to GitHub Pages
         id: deployment

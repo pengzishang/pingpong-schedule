@@ -19,10 +19,9 @@
   </header>
 
   <div class="wrap">
-    <!-- 国乒参赛人员存活现状:替代原顶部「全部/国乒/日韩」筛选条;无赛事赛程时整体隐藏 -->
-    <div id="survival" class="survival" hidden></div>
     <!-- 静态骨架屏:仅在「无本地缓存且网络未回」时可见(app.js 下载前即首屏绘制)。
-         对齐真实 .day/.match 尺寸防 CLS 跳动;缓存命中或网络返回后被真实内容整体替换。 -->
+         对齐真实 .day/.match 尺寸防 CLS 跳动;缓存命中或网络返回后被真实内容整体替换。
+         Q4/B-05 拍板:今日赛程排在存活面板之前 —— 首屏优先给「今天几点、哪个台」。 -->
     <div id="days">
       <div class="skeleton" aria-busy="true" aria-live="polite">
         <div class="skeleton__banner sk-bar"></div>
@@ -58,6 +57,9 @@
         <div class="skeleton__slow">加载较慢，请稍候… 若长时间无响应，可刷新页面重试。</div>
       </div>
     </div>
+    <!-- 国乒参赛人员存活现状:Q4/B-05 拍板移出首屏,改放「今日赛程」之后。
+         首屏优先给外婆看「今天几点、哪个台」;无赛事赛程时整体隐藏。 -->
+    <div id="survival" class="survival" hidden></div>
     <footer>
       <div class="links">
         <a href="https://sports.cctv.com/" target="_blank" rel="noopener">央视体育官网</a>

@@ -281,7 +281,9 @@
 
     function ordinalizeInfo(info) {
       if (!info) return '';
-      return esc(info).replace(/世界第(\d+)/g, function (_, n) { return ordinal(parseInt(n, 10)) + ''; });
+      // Q12 拍板:对老人「世界第1」比「1st」更好懂 —— 不再转成英文序数,保留中文原样。
+      // (ordinal/fmtRank 保留:fmtRank 实测为死代码 0 调用点,待 M3 一并清理)
+      return esc(info);
     }
 
     // 重播归属日:默认随直播场所在日;直播 start∈[23:00,24:00) 视为前一日深夜,重播归次日;replay.date 可覆盖
@@ -310,6 +312,8 @@
     // 当日重播汇总区:只列中国队相关场次(陆/港/澳/台),分两行——第一行重播时间+昨夜直播时间,第二行国旗贴选手名
     // mode: 'upcoming' = 未过时间(待看,置顶「今日重播」); 'past' = 已过时间(已播,归档到当日底部「今日已重播」)
     function renderReplayZone(dateStr, items, now, mode) {
+      // N8 拍板:重播功能已砍(样式与渲染均已下线)。保留签名仅为兼容既有调用与导出。
+      return '';
       if (!items || !items.length) return '';
       var isPast = (mode === 'past');
       // 汇总区只展示中国队相关场次(中国大陆+中国香港+中国澳门,不含中国台北),避免外协对阵挤占老人视线
@@ -680,12 +684,15 @@
       return /手机|APP|App|app|客户端|咪咕|央视频|不直播|电视上不播|电视不播|看APP|开手机|仅app|仅APP|只在.*播|只在.*看/i.test(txt);
     }
     function isTVMatch(m) {
-      return isCCTVChannel(m.channel) && !riskSaysNoTV(m.risk);
+      // R-1 止血(M1):不再按 risk 文案删场——采集端一句措辞就让整场比赛从外婆表里消失,前后端都不报错。
+      // 判定只认频道;riskSaysNoTV 保留不删,将来只用于告警,不参与判定。
+      return isCCTVChannel(m.channel);
     }
     // schedule(央视节目单/直播窗口)同样算外婆能在电视上看到的乒乓球内容,
     // 空窗横幅计算最近一场时必须把它纳入,否则会出现"今天有 CCTV-5 节目却显示还有 X 天"的矛盾。
     function isTVSchedule(it) {
-      return isCCTVChannel(it.channel) && !riskSaysNoTV(it.risk);
+      // 同 isTVMatch:R-1 止血,不按 risk 文案删节目单,只认频道。
+      return isCCTVChannel(it.channel);
     }
     // 央视电视上、且是乒乓球的直播窗口(剔除录像/录播与非乒乓栏目)。
     // 空窗横幅、当日标签计数、赛程列表三处共用同一判据,避免口径打架。
@@ -693,14 +700,21 @@
       var txt = ((s.tournament || '') + ' ' + (s.content || '')).toLowerCase();
       if (txt.indexOf('录像') !== -1 || txt.indexOf('录播') !== -1) return false;
       if (!isCCTVChannel(s.channel)) return false;   // 只留央视电视窗口,app/咪咕不进表
-      var tt = ['乒乓', 'wtt', '世乒', '冠军赛', '大满贯', '世界杯', '锦标',
-                '单打', '双打', '团体', '混双', '男单', '女单', '男双', '女双', '决赛'];
+      // ⚠️ 只保留「乒乓专属词」。原词表含 决赛/单打/双打/团体/混双/世界杯/锦标/冠军赛/大满贯
+      // 等跨项目通用词,实测 8 个样本误判 5 个:足球世界杯预选赛、羽毛球公开赛、网球中网、
+      // 排球世锦赛、全国田径锦标赛 全部被判成乒乓 —— 会让外婆按足球时间打开电视。
+      // 宁可漏(少显示一个窗口),不可误报。M2 后「是不是乒乓」应交由结构化字段判断。
+      var tt = ['乒乓', 'wtt', '世乒', '国乒', '桌球', 'table tennis'];
+      // tournament 优先:赛事名里出现专属词即可判定,不受 content 描述干扰
+      var tour = (s.tournament || '').toLowerCase();
+      if (tt.some(function (k) { return tour.indexOf(k) !== -1; })) return true;
       return tt.some(function (k) { return txt.indexOf(k) !== -1; });
     }
     // 重播是否在央视电视播:只看「重播自身频道」(replay.channel),不看直播频道/直播风险卡
     // —— 直播当晚可能只在 app/咪咕,但白天重播照样上央视电视,外婆能在电视看重播,必须显示
     function isTVReplay(m) {
-      return !!(m.replay && m.replay.channel && isCCTVChannel(m.replay.channel));
+      // N8 重播已砍:不再把重播计入,保证 replayGroups 为空
+      return false;
     }
     // 某天是否「有节目」:有≥1场央视电视可看比赛,或有≥1个央视乒乓球直播窗口(待公布也算有节目)。
     // 两者皆无的日子(赛程空档、无电视窗口)视为无节目,从日期序列里折叠跳过,直接跳到下一场有节目的日期。
@@ -1613,10 +1627,15 @@
       return parts.join(' · ');
     }
 
-    // 国籍筛选:默认国乒。标签页点选后隐藏不匹配的比赛卡,并隐藏因此变空的日期段
+    // 国籍筛选:Q1 已拍板「删掉筛选,只做国乒」。
+    // M1 止血:函数体改为 no-op —— 不再隐藏任何比赛卡/日期段(原实现会把纯日韩日整段 display:none,
+    // 即 R-6「整段空白」)。FILTER 变量与 5 处调用点保留不动,待 M3 前端重写时彻底清除。
     var FILTER = 'cn';
     function applyFilter(scope) {
       FILTER = scope;
+      return; // Q1/M1:筛选已停用,保留签名仅为兼容既有调用点
+    }
+    function __applyFilterLegacy(scope) {
       document.querySelectorAll('.match').forEach(function (el) {
         var show = scope === 'all' ||
           (scope === 'cn' && el.dataset.cn) ||
@@ -1862,7 +1881,15 @@
       var past = daysAll.filter(function (x) { return x.diff < 0; })
                         .sort(function (a, b) { return b.diff - a.diff; });
       var upcomingContent = upcoming.filter(function (x) { return dayHasContent(x.day); });
-      var pastContent = past.filter(function (x) { return (x.day.matches || []).filter(isTVMatch).length > 0; });
+      // 原实现只认 (matches||[]).filter(isTVMatch).length>0,而 dayHasContent 认 4 个条件。
+      // 实测后果:昨日若是 schedule-only 或 dayNote-only,【昨日战报整块消失】且不报错。
+      // 现改为与 dayHasContent 同源,但按拍板「昨日战报只显央视(与 F-01 一致)」排除 videoMatches。
+      var pastContent = past.filter(function (x) {
+        if ((x.day.matches || []).filter(isTVMatch).length > 0) return true;
+        if ((x.day.schedule || []).filter(isTVSchedule).length > 0) return true;
+        if (typeof x.day.dayNote === 'string' && x.day.dayNote.trim()) return true;
+        return false;
+      });
       var ordered = upcomingContent.concat(pastContent);
       var GAP_DAYS = 3;
       var nearestMatchDiff = null;
@@ -2173,7 +2200,7 @@
             }
           }
           // 重播:卡内一行(带场次上下文);归属日 ≠ 当场所在日时标注「次日重播」;已过时间改「已重播」
-          if (m.replay) {
+          if (false && m.replay) {   // N8 重播已砍:卡内重播行不再渲染
             var rTd = replayTargetDate(day, m);
             var rNote = (rTd !== day.date) ? ' <span class="replay__note">（次日重播）</span>' : '';
             var rPassed = isReplayPassed(day, m, now);
@@ -2232,7 +2259,12 @@
                     '</div>';
           });
           html += '</div>';
-        } else if ((day.schedule || []).length || (typeof day.dayNote === 'string' && day.dayNote.trim())) {
+        }
+        // dayNote 与 schedule 并列渲染(仍在 else 块内,即有央视比赛时不渲染):
+        // 原为 else-if 互斥链,若当天有 schedule 则本分支永不执行,
+        // 实测后果:同天同时有 schedule 与 dayNote 时,【dayNote 整段被静默丢弃】(HTML 不含其内容)。
+        // ⚠️ 必须留在上面的 else 块内 —— 若提成独立 if,会在有 matches 的日子也渲染出空窗徽章。
+        if (typeof day.dayNote === 'string' && day.dayNote.trim() && !liveSchedule.length) {
           // 空窗期/无直播天:当日有说明。优先读新契约 day.dayNote(字符串),
           // 无则兼容旧 schedule 伪 record(time:'—'&&channel:'—' 的 content)。
           // 用 parseDayNote 专为「叙事报道体」层次化(摘要 lead + 要点 points + 下一站区块),根治整坨大段。
@@ -2258,8 +2290,14 @@
             html += '<div class="pending__fallback"><span class="pending__note">' + esc(noteSrc) + '</span></div>';
           }
           html += '</div>';
-        } else if (data.nextEvent && data.nextEvent.date) {
-          // 完全空白天(无比赛无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险
+        }
+        // 完全空白天(无比赛无赛程无说明)兜底指向下一场——理论上已被 dayHasContent 折叠,这里仅保险。
+        // ⚠️ 必须是独立 if 并带完整前置条件:原为 else-if 链末级,拆链后若不加条件,
+        //    会让「有 schedule 但无 dayNote」的日子错误地渲染出「📋 待公布」(已实测发生)。
+        if (!liveSchedule.length &&
+            !(typeof day.dayNote === 'string' && day.dayNote.trim()) &&
+            !(day.matches || []).length &&
+            data.nextEvent && data.nextEvent.date) {
           html += '<div class="day__pending">' +
                     '<span class="pending__badge">📋 待公布</span>' +
                     '<span class="pending__next">下一场：<strong>' + esc(data.nextEvent.date) + '</strong> ' + esc(nextEventCompactNoDate(data.nextEvent, gapMode, now) || '国乒比赛') + '</span>' +
@@ -2277,7 +2315,9 @@
     // 首屏关键区:横幅 + 未来(upcoming)天。fetch 完成立即渲染,渲染完即移除骨架(用户第一眼就有内容)。
     function buildAbove(ctx, data) {
       var html = '';
-      if (ctx.gapMode && ctx.countdownDays !== null) {
+      // 铁律(2026-10-22 子上反馈):countdownDays=0 表示最近一场就是今天,「还有 0 天」无意义,
+      // 此情况不渲染横幅(今天有比赛时首屏直接给赛程,横幅纯属噪音);仅 >0 天才显示。
+      if (ctx.gapMode && ctx.countdownDays > 0) {
         html += '<div class="gap-banner" role="status">' +
                   '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
                   '<span class="gap-banner__text">离最近一场国乒比赛，还有 <strong>' + ctx.countdownDays + '</strong> 天</span>' +

@@ -189,6 +189,21 @@ test('buildAbove/buildBelow: 产出不含未转义的裸 script(防注入)', () 
   assert.ok(all.indexOf('<script') < 0, '渲染产物不应含 script 标签');
 });
 
+// 2026-10-22 子上反馈:最近一场就是今天(countdownDays=0)时,「还有 0 天」无意义,
+// 首屏应直接给赛程,不得渲染 gap-banner;仅 >0 天才显示倒计时。
+test('buildAbove: countdownDays=0(今天就有比赛)时不渲染 gap-banner', () => {
+  const ctx = { gapMode: true, countdownDays: 0, upcomingContent: [] };
+  const html = api.buildAbove(ctx, {});
+  assert.ok(html.indexOf('gap-banner') < 0, '0 天不得显示倒计时横幅');
+});
+
+test('buildAbove: countdownDays>0 且 gapMode 时渲染 gap-banner 与天数', () => {
+  const ctx = { gapMode: true, countdownDays: 2, upcomingContent: [] };
+  const html = api.buildAbove(ctx, {});
+  assert.match(html, /class="gap-banner"/);
+  assert.ok(html.indexOf('还有 <strong>2</strong> 天') >= 0, '应渲染正确天数');
+});
+
 // 2026-08-31 线上复盘:真实下一站数据不得再出现 695 字赛程大坨 / 126 字排行榜巨行
 test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆成 emeta__rank', () => {
   const data = loadJSON('data.json');
@@ -365,9 +380,15 @@ test('isPPTVWindow: 只留央视电视上的乒乓直播窗口,剔除录像与�
   assert.strictEqual(api.isPPTVWindow({ channel: '咪咕视频', tournament: 'WTT', content: '女单决赛' }), false, 'app 平台不算');
   assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '央视体育新闻', content: '今日体育要闻' }), false, '新闻类不算');
   assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5' }), false, '缺 content/tournament 时安全返回 false');
-  // [已知局限] 关键词表含「锦标」,「全国田径锦标赛」这类也会被命中(与既有判据一致,本轮未改口径);
-  // 非乒乓栏目的剔除实际依赖采集端不要把非乒乓节目写进 schedule。
-  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '全国田径锦标赛', content: '男子百米' }), true, '已知宽口径:「锦标」关键词');
+  // 原「已知宽口径」已修复:词表原含 决赛/单打/团体/世界杯/锦标 等跨项目通用词,
+  // 实测 8 样本误判 5 个(足球世界杯预选赛/羽毛球/网球中网/排球世锦赛/全国田径锦标赛)。
+  // 现只留乒乓专属词,以下跨项目样本必须判 false —— 否则外婆会按足球时间打开电视。
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '全国田径锦标赛', content: '男子百米' }), false, '田径不算乒乓');
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '世界杯预选赛', content: '中国 vs 韩国' }), false, '足球不算乒乓');
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '中国羽毛球公开赛', content: '男双决赛' }), false, '羽毛球不算乒乓');
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '排球世锦赛', content: '女子团体决赛' }), false, '排球不算乒乓');
+  // 乒乓本身必须仍判 true(赛事名或 content 含专属词)
+  assert.strictEqual(api.isPPTVWindow({ channel: 'CCTV-5', tournament: '', content: '乒乓球男单半决赛' }), true, 'content 含乒乓仍算');
 });
 
 test('视频块: 走同一条拆分规则(.vmatch__stage-detail),标题 pill 也不带括号', () => {
