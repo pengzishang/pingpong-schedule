@@ -843,20 +843,16 @@ test('R-1: risk 文案含「央视频/咪咕/手机」时,央视场次仍必须�
   assert.strictEqual(api.isTVMatch({ channel: '央视频', risk: '' }), false);
 });
 
-// R-3「已知限制」(2026-09-28 登记,不修,仅提醒)
-// parseNextRoster 靠 lookahead 关键字截断名单段,会把播出渠道等文字一并吞成「选手」。
-// 真实数据实测:nextEvent.note 解析出 22 条,真实 20 人,多出两条垃圾:
-//   「姜依依。CCTV-5直播(4源确认)。央视频」、「咪咕视频同步直播」
-// 后果:底部「下一站」卡以选手同款大字号显示乱码;存活面板人数虚高。
-// 根治:M2 用结构化 nextEvent.roster 取代解析(见 FRONTEND-CHANGES.md 步骤 6)。
-// 本用例登记当前行为;M2 修复后应改写为「不得产生垃圾条目」,届时若仍通过即为假绿。
-test('[已知限制] R-3: parseNextRoster 会从散文名册解析出非选手条目', () => {
+// R-3 演进(2026-10-22):采集端 note 改为「出战」段收尾后,parseNextRoster 不再把播出渠道
+// 文字吞成选手。原哨兵用例(登记缺陷)按其注释既定路线改写为正向断言——
+// 一旦 note 回到旧格式(名单后紧跟直播渠道文字),本条即红,提示 R-3 复发需修解析器。
+test('R-3: parseNextRoster 不得从名册解析出播出渠道等非选手条目', () => {
   const data = loadJSON('data.json');
   if (!data || !data.nextEvent || !data.nextEvent.note) return;
   const r = api.parseNextRoster(data.nextEvent.note);
   const names = (r.squad || []).map(x => x.name);
-  // 登记事实:存在含「直播/央视频/咪咕」等播出渠道字样的条目,它们不是人名
-  const junk = names.filter(n => /直播|央视频|咪咕|源确认/.test(n));
-  assert.ok(junk.length > 0,
-    '预期存在非选手条目(R-3 现象);若为 0 说明解析器已修复或数据已结构化,请改写本用例');
+  assert.ok(names.length > 0, '名册不应为空');
+  const junk = names.filter(n => /直播|央视频|咪咕|源确认|排播/.test(n));
+  assert.strictEqual(junk.length, 0,
+    '名册含播出渠道等非选手条目(R-3 复发): ' + junk.join(' / '));
 });
