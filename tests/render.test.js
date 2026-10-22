@@ -411,3 +411,24 @@ test('视频块: 走同一条拆分规则(.vmatch__stage-detail),标题 pill 也
   assert.ok(all.indexOf('<div class="vmatch__stage-detail">七局四胜 · 胜者进今晚18:30决赛</div>') >= 0,
     '视频块应产出独立说明条目');
 });
+
+// ===========================================================================
+// 八、style.css 语法守卫(2026-10-22 踩坑后新增)
+// 教训:本次修 .gap-banner 时误把 JS 风格 // 注释写进 CSS。CSS 只认 /* */,
+// // 会让后续声明解析错乱,而 node --test 只测 app.js 逻辑、完全不覆盖 CSS,
+// 错误直接上线。本守卫剥掉合法块注释后,再扫行内 // —— 出现即红。
+// ===========================================================================
+
+test('style.css: 不含 CSS 非法的 // 注释(只认 /* */)', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const css = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const lines = stripped.split('\n');
+  const bad = [];
+  lines.forEach((line, i) => {
+    // url(//...) 之类协议写法少见,本仓库无外链 url(); 命中即视为误写注释
+    if (line.includes('//')) bad.push('第 ' + (i + 1) + ' 行: ' + line.trim());
+  });
+  assert.strictEqual(bad.length, 0, 'CSS 不支持 // 注释,请改为 /* */:\n' + bad.join('\n'));
+});

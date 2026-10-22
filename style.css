@@ -676,8 +676,8 @@
     /* ---------- 顶部空窗期横幅(3 日内无比赛时显示) ---------- */
     .gap-banner {
       display: flex; align-items: center; gap: .65rem;
-      // 铁律(2026-10-22 子上反馈):上方 margin 必须非 0 —— 外层 .wrap 垂直 padding 为 0,
-      // 原 margin:0 0 1rem 会让横幅紧贴页头分隔线;上下各留 1rem 与日期卡间距一致。
+      /* 铁律(2026-10-22 子上反馈):上方 margin 必须非 0 —— 外层 .wrap 垂直 padding 为 0,
+         原 margin:0 0 1rem 会让横幅紧贴页头分隔线;上下各留 1rem 与日期卡间距一致。 */
       margin: 1rem 0;
       padding: .95rem 1.1rem;
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
