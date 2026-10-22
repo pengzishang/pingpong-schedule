@@ -189,6 +189,21 @@ test('buildAbove/buildBelow: 产出不含未转义的裸 script(防注入)', () 
   assert.ok(all.indexOf('<script') < 0, '渲染产物不应含 script 标签');
 });
 
+// 2026-10-22 子上反馈:最近一场就是今天(countdownDays=0)时,「还有 0 天」无意义,
+// 首屏应直接给赛程,不得渲染 gap-banner;仅 >0 天才显示倒计时。
+test('buildAbove: countdownDays=0(今天就有比赛)时不渲染 gap-banner', () => {
+  const ctx = { gapMode: true, countdownDays: 0, upcomingContent: [] };
+  const html = api.buildAbove(ctx, {});
+  assert.ok(html.indexOf('gap-banner') < 0, '0 天不得显示倒计时横幅');
+});
+
+test('buildAbove: countdownDays>0 且 gapMode 时渲染 gap-banner 与天数', () => {
+  const ctx = { gapMode: true, countdownDays: 2, upcomingContent: [] };
+  const html = api.buildAbove(ctx, {});
+  assert.match(html, /class="gap-banner"/);
+  assert.ok(html.indexOf('还有 <strong>2</strong> 天') >= 0, '应渲染正确天数');
+});
+
 // 2026-08-31 线上复盘:真实下一站数据不得再出现 695 字赛程大坨 / 126 字排行榜巨行
 test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆成 emeta__rank', () => {
   const data = loadJSON('data.json');

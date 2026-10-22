@@ -2315,7 +2315,9 @@
     // 首屏关键区:横幅 + 未来(upcoming)天。fetch 完成立即渲染,渲染完即移除骨架(用户第一眼就有内容)。
     function buildAbove(ctx, data) {
       var html = '';
-      if (ctx.gapMode && ctx.countdownDays !== null) {
+      // 铁律(2026-10-22 子上反馈):countdownDays=0 表示最近一场就是今天,「还有 0 天」无意义,
+      // 此情况不渲染横幅(今天有比赛时首屏直接给赛程,横幅纯属噪音);仅 >0 天才显示。
+      if (ctx.gapMode && ctx.countdownDays > 0) {
         html += '<div class="gap-banner" role="status">' +
                   '<span class="gap-banner__icon" aria-hidden="true">📭</span>' +
                   '<span class="gap-banner__text">离最近一场国乒比赛，还有 <strong>' + ctx.countdownDays + '</strong> 天</span>' +
