@@ -654,26 +654,81 @@
           "note": "咪咕视频/央视频/抖音直播 · 国乒混双1/4(13:00) · 黄友政/陈熠VS印度组合贾恩/达斯"
         },
         {
-          "time": "19:15",
+          "time": "13:45",
           "platform": "咪咕视频",
           "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "男双1/8决赛",
+          "stage": "男单1/32决赛",
           "nationHome": "中国",
-          "playerHome": "林诗栋/黄友政",
-          "nationAway": "中国香港",
-          "playerAway": "林兆恒/姚钧涛",
-          "note": "咪咕视频/央视频/抖音直播 · 国乒男双1/8(19:15) · 林诗栋/黄友政VS林兆恒/姚钧涛(中国香港)"
+          "playerHome": "向鹏",
+          "nationAway": "乌兹别克斯坦",
+          "playerAway": "库尔希德·阿赫梅多夫",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首轮(1/32,13:45) · 向鹏VS库尔希德·阿赫梅多夫(乌兹别克斯坦)"
         },
         {
-          "time": "19:15",
+          "time": "13:45",
           "platform": "咪咕视频",
           "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "男双1/8决赛",
+          "stage": "男单1/32决赛",
           "nationHome": "中国",
-          "playerHome": "温瑞博/袁励岑",
-          "nationAway": "韩国",
-          "playerAway": "金敏赫/朴奎炫",
-          "note": "咪咕视频/央视频/抖音直播 · 国乒男双1/8(19:15) · 温瑞博/袁励岑VS金敏赫/朴奎炫(韩国)"
+          "playerHome": "李天阳",
+          "nationAway": "菲律宾",
+          "playerAway": "约翰·拉塞尔·米萨尔",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首轮(1/32,13:45) · 李天阳VS约翰·拉塞尔·米萨尔(菲律宾)"
+        },
+        {
+          "time": "14:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "温瑞博",
+          "nationAway": "马来西亚",
+          "playerAway": "黄祺燊",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首轮(1/32,14:15) · 温瑞博VS黄祺燊(马来西亚)"
+        },
+        {
+          "time": "14:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政",
+          "nationAway": "伊拉克",
+          "playerAway": "安瓦尔·哈米德",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首轮(1/32,14:15) · 黄友政VS安瓦尔·哈米德(伊拉克)"
+        },
+        {
+          "time": "14:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "周启豪",
+          "nationAway": "马来西亚",
+          "playerAway": "叶睿泽",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男单首轮(1/32,14:45) · 周启豪VS叶睿泽(马来西亚)"
+        },
+        {
+          "time": "15:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "混双半决赛",
+          "nationHome": "中国",
+          "playerHome": "袁励岑/王艺迪",
+          "nationAway": "待定",
+          "playerAway": "待定",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒混双半决赛(15:45,若1/4晋级) · 对手待定"
+        },
+        {
+          "time": "15:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "混双半决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政/陈熠",
+          "nationAway": "待定",
+          "playerAway": "待定",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒混双半决赛(15:45,若1/4晋级) · 对手待定"
         },
         {
           "time": "19:15",
@@ -696,6 +751,92 @@
           "nationAway": "中国台北",
           "playerAway": "简彤娟/彭郁涵",
           "note": "咪咕视频/央视频/抖音直播 · 国乒女双1/8(19:15) · 陈熠/姜依依VS简彤娟/彭郁涵(中国台北)"
+        },
+        {
+          "time": "19:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男双1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "林诗栋/黄友政",
+          "nationAway": "中国香港",
+          "playerAway": "林兆恒/姚钧涛",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男双1/8(19:15) · 林诗栋/黄友政VS林兆恒/姚钧涛(中国香港)"
+        },
+        {
+          "time": "19:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男双1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "温瑞博/袁励岑",
+          "nationAway": "韩国",
+          "playerAway": "金敏赫/朴奎炫",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒男双1/8(19:15) · 温瑞博/袁励岑VS金敏赫/朴奎炫(韩国)"
+        },
+        {
+          "time": "20:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "石洵瑶",
+          "nationAway": "韩国",
+          "playerAway": "李多恩",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单1/16(20:15) · 石洵瑶VS李多恩(韩国)"
+        },
+        {
+          "time": "20:15",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "蒯曼",
+          "nationAway": "马来西亚",
+          "playerAway": "郑爱新",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单1/16(20:15) · 蒯曼VS郑爱新(马来西亚)"
+        },
+        {
+          "time": "20:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "覃予萱",
+          "nationAway": "待定",
+          "playerAway": "黎明映",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单1/16(20:45) · 覃予萱VS黎明映(对手国籍待核实)"
+        },
+        {
+          "time": "20:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "陈熠",
+          "nationAway": "中国台北",
+          "playerAway": "简彤娟",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单1/16(20:45) · 陈熠VS简彤娟(中国台北)"
+        },
+        {
+          "time": "20:45",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "王艺迪",
+          "nationAway": "伊朗",
+          "playerAway": "阿什塔里",
+          "note": "咪咕视频/央视频/抖音直播 · 国乒女单1/16(20:45) · 王艺迪VS阿什塔里(伊朗)"
+        },
+        {
+          "time": "22:30",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "混双决赛",
+          "playerHome": "待定",
+          "playerAway": "待定",
+          "note": "咪咕视频/央视频/抖音直播 · 混双决赛(22:30,首金诞生,国乒组合若晋级争冠) · 对阵待定"
         }
       ]
     }
