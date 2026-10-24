@@ -927,67 +927,13 @@
           "time": "13:00",
           "platform": "咪咕视频",
           "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "女单1/8决赛",
-          "nationHome": "中国",
-          "playerHome": "蒯曼",
-          "nationAway": "印度",
-          "playerAway": "达斯",
-          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒,待赛) · 蒯曼vs达斯(印度)。ATTU未固定精确时点,约13:00开赛,具体台次待官方实时对阵表"
-        },
-        {
-          "time": "13:00",
-          "platform": "咪咕视频",
-          "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "女单1/8决赛",
-          "nationHome": "中国",
-          "playerHome": "陈熠",
-          "nationAway": "中国",
-          "playerAway": "覃予萱",
-          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒内战,待赛) · 陈熠vs覃予萱。具体台次待官方实时对阵表"
-        },
-        {
-          "time": "13:00",
-          "platform": "咪咕视频",
-          "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "女单1/8决赛",
-          "nationHome": "中国",
-          "playerHome": "王艺迪",
-          "nationAway": "韩国",
-          "playerAway": "李时温",
-          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒,待赛) · 王艺迪vs李时温(韩国)。具体台次待官方实时对阵表"
-        },
-        {
-          "time": "13:00",
-          "platform": "咪咕视频",
-          "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "男单1/8决赛",
-          "nationHome": "中国",
-          "playerHome": "黄友政",
-          "nationAway": "日本",
-          "playerAway": "张本智和",
-          "note": "咪咕视频/央视频/抖音直播 · 男单1/8(中日焦点,待赛) · 黄友政vs张本智和(日本)。具体台次待官方实时对阵表"
-        },
-        {
-          "time": "13:00",
-          "platform": "咪咕视频",
-          "tournament": "2026亚洲乒乓球锦标赛",
-          "stage": "男双1/4决赛",
-          "nationHome": "中国",
-          "playerHome": "林诗栋/黄友政",
-          "nationAway": "日本",
-          "playerAway": "张本智和/篠塚大登",
-          "note": "咪咕视频/央视频/抖音直播 · 男双1/4(国乒,待赛) · 林诗栋/黄友政vs张本智和/篠塚大登(日本)。具体台次待官方实时对阵表"
-        },
-        {
-          "time": "13:00",
-          "platform": "咪咕视频",
-          "tournament": "2026亚洲乒乓球锦标赛",
           "stage": "女双1/4决赛",
           "nationHome": "中国",
           "playerHome": "蒯曼/王艺迪",
+          "playerHomeInfo": "国乒",
           "nationAway": "泰国",
           "playerAway": "素塔西尼/帕拉南",
-          "note": "咪咕视频/央视频/抖音直播 · 女双1/4(国乒,待赛) · 蒯曼/王艺迪vs素塔西尼/帕拉南(泰国)。具体台次待官方实时对阵表"
+          "note": "咪咕视频/央视频/抖音直播 · 女双1/4(国乒,待赛) · 蒯曼/王艺迪vs素塔西尼/帕拉南(泰国)。时点ATTU浮动,以官方实时台次为准"
         },
         {
           "time": "13:00",
@@ -996,9 +942,123 @@
           "stage": "女双1/4决赛",
           "nationHome": "中国",
           "playerHome": "陈熠/姜依依",
+          "playerHomeInfo": "国乒",
           "nationAway": "马来西亚",
           "playerAway": "可人/郑爱欣",
-          "note": "咪咕视频/央视频/抖音直播 · 女双1/4(国乒,待赛) · 陈熠/姜依依vs可人/郑爱欣(马来西亚)。具体台次待官方实时对阵表"
+          "note": "咪咕视频/央视频/抖音直播 · 女双1/4(国乒,待赛) · 陈熠/姜依依vs可人/郑爱欣(马来西亚)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "13:40",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "林诗栋/黄友政",
+          "playerHomeInfo": "国乒",
+          "nationAway": "日本",
+          "playerAway": "张本智和/篠塚大登",
+          "note": "咪咕视频/央视频/抖音直播 · 男双1/4(国乒,待赛) · 林诗栋/黄友政vs张本智和/篠塚大登(日本)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "13:40",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "温瑞博/袁励岑",
+          "playerHomeInfo": "国乒",
+          "nationAway": "印度",
+          "playerAway": "塔卡/贾恩",
+          "note": "咪咕视频/央视频/抖音直播 · 男双1/4(国乒,待赛) · 温瑞博/袁励岑vs塔卡/贾恩(印度)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "14:20",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "蒯曼",
+          "nationAway": "印度",
+          "playerAway": "达斯",
+          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒,待赛) · 蒯曼vs达斯(印度)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "14:20",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "陈熠",
+          "nationAway": "中国",
+          "playerAway": "覃予萱",
+          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒内战,待赛) · 陈熠vs覃予萱。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "14:20",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "王艺迪",
+          "nationAway": "韩国",
+          "playerAway": "李时温",
+          "note": "咪咕视频/央视频/抖音直播 · 女单1/8(国乒,待赛) · 王艺迪vs李时温(韩国)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政",
+          "nationAway": "日本",
+          "playerAway": "张本智和",
+          "note": "咪咕视频/央视频/抖音直播 · 男单1/8(中日焦点,待赛) · 黄友政vs张本智和(日本)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "nationAway": "韩国",
+          "playerAway": "朴奎炫",
+          "note": "咪咕视频/央视频/抖音直播 · 男单1/8(国乒,待赛) · 李天阳vs朴奎炫(韩国)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "向鹏",
+          "nationAway": "印度",
+          "playerAway": "曼纳弗·塔卡",
+          "note": "咪咕视频/央视频/抖音直播 · 男单1/8(国乒,待赛) · 向鹏vs曼纳弗·塔卡(印度)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "中国",
+          "playerHome": "温瑞博",
+          "nationAway": "哈萨克斯坦",
+          "playerAway": "格拉斯门科",
+          "note": "咪咕视频/央视频/抖音直播 · 男单1/8(国乒,待赛) · 温瑞博vs格拉斯门科(哈萨克斯坦)。时点ATTU浮动,以官方实时台次为准"
+        },
+        {
+          "time": "19:00",
+          "platform": "咪咕视频",
+          "tournament": "2026亚洲乒乓球锦标赛",
+          "stage": "男单排名赛",
+          "nationHome": "中国",
+          "playerHome": "周启豪",
+          "playerHomeInfo": "已止步1/16,争奥运资格排位",
+          "nationAway": "泰国",
+          "playerAway": "PRASONGPOL Nawchet",
+          "note": "咪咕视频/央视频/抖音直播 · 男单排名赛(周启豪已止步1/16,争排位) · 周启豪vsPRASONGPOL Nawchet(泰国,待赛)。时点ATTU浮动,以官方实时台次为准"
         }
       ]
     }
