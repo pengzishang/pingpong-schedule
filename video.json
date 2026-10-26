@@ -110,33 +110,6 @@
           "note": "咪咕视频/央视频直播·手机/平板/电脑可看·时间据WTT签表发布(以平台为准)"
         }
       ]
-    },
-    {
-      "date": "2026-10-29",
-      "matches": [
-        {
-          "time": "19:00",
-          "platform": "咪咕视频",
-          "tournament": "WTT蒙彼利埃冠军赛",
-          "stage": "男单1/16决赛",
-          "nationHome": "中国",
-          "playerHome": "温瑞博",
-          "nationAway": "中国",
-          "playerAway": "梁靖崑",
-          "note": "咪咕视频/央视频直播·手机/平板/电脑可看·国乒内战·时间据WTT签表发布(以平台为准)"
-        },
-        {
-          "time": "19:35",
-          "platform": "咪咕视频",
-          "tournament": "WTT蒙彼利埃冠军赛",
-          "stage": "男单1/16决赛",
-          "nationHome": "中国",
-          "playerHome": "向鹏",
-          "nationAway": "德国",
-          "playerAway": "奥恰洛夫",
-          "note": "咪咕视频/央视频直播·手机/平板/电脑可看·时间据WTT签表发布(以平台为准)"
-        }
-      ]
     }
   ]
 }
