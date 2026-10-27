@@ -1,45 +1,6 @@
 {
   "days": [
     {
-      "date": "2026-10-27",
-      "matches": [
-        {
-          "time": "20:10",
-          "platform": "咪咕视频",
-          "tournament": "WTT蒙彼利埃冠军赛",
-          "stage": "女单1/16决赛",
-          "nationHome": "中国",
-          "playerHome": "孙颖莎",
-          "playerHomeInfo": "世界第2",
-          "nationAway": "法国",
-          "playerAway": "卢茨",
-          "note": "咪咕视频/央视频直播·手机/平板/电脑可看·时间据WTT签表发布(以平台为准)"
-        },
-        {
-          "time": "20:45",
-          "platform": "咪咕视频",
-          "tournament": "WTT蒙彼利埃冠军赛",
-          "stage": "男单1/16决赛",
-          "nationHome": "中国",
-          "playerHome": "林诗栋",
-          "nationAway": "韩国",
-          "playerAway": "林钟勋",
-          "note": "咪咕视频/央视频直播·手机/平板/电脑可看·时间据WTT签表发布(以平台为准)"
-        },
-        {
-          "time": "21:20",
-          "platform": "咪咕视频",
-          "tournament": "WTT蒙彼利埃冠军赛",
-          "stage": "女单1/16决赛",
-          "nationHome": "日本",
-          "playerHome": "早田希娜",
-          "nationAway": "中国香港",
-          "playerAway": "杜凯琹",
-          "note": "咪咕视频/央视频直播·手机/平板/电脑可看·时间据WTT签表发布(以平台为准)"
-        }
-      ]
-    },
-    {
       "date": "2026-10-28",
       "matches": [
         {
