@@ -552,7 +552,14 @@ test('buildBelow[真实数据]: 「下一站国乒赛事」模块显隐 = nextEv
   const ne = data && data.nextEvent;
   const ctx = api.prepareCtx(data);
   const below = api.buildBelow(ctx, data);
-  const within = !!(ne && ne.date && api.isNextEventWithinWindow(ne, new Date()));
+  if (!ne || !ne.date) {
+    // 真实数据当前无 nextEvent(赛事进行中,未来3天含比赛,按采集说明4.5不应存在)
+    // →「下一站国乒赛事」模块本就不该出现,与前端实际渲染一致。
+    assert.ok(!/下一站国乒赛事/.test(below), '无 nextEvent 时「下一站」模块应整体消失');
+    assert.ok(!/day--next/.test(below), '无 nextEvent 时下一站 section 不应出现');
+    return;
+  }
+  const within = api.isNextEventWithinWindow(ne, new Date());
   if (within) {
     assert.ok(!/下一站国乒赛事/.test(below), 'nextEvent 在窗口内,「下一站」模块应整体消失');
     assert.ok(!/day--next/.test(below), 'nextEvent 在窗口内,下一站 section 不应出现');
