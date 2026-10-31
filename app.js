@@ -2228,21 +2228,18 @@
           var hasLineup = liveSchedule.some(function (s) {
             return /vs|对阵/.test(s.content || '');
           });
-          if (hasLineup) {
-            // 赛程已公布:徽章直接说这是哪一天的赛程,不再挂「待公布」
-            html += '<div class="day__pending">' +
-                      '<span class="pending__badge">📺 ' + rel + '赛程</span>' +
-                    '</div>';
-          } else {
-            // 确实还没拆出对阵:精简一句下一场时间,不堆解释
+          // 只要央视乒乓直播时段已排定(赛程窗口公布),徽章就写「今天/明天赛程」,
+          // 不再挂「待公布」——子上 2026-09-27 反馈:有节目单却显示「待公布」像没数据。
+          // 仅当具体对阵还没拆出(vs/对阵)时,补一句「下一场」时间提示。
+          html += '<div class="day__pending">' +
+                    '<span class="pending__badge">📺 ' + rel + '赛程</span>';
+          if (!hasLineup) {
             var firstS = liveSchedule.slice().sort(function (a, b) { return (a.time || '').localeCompare(b.time || ''); })[0];
             var nextTime = (firstS.time || '').split('-')[0] || '';
             var nextEv = firstS.tournament || firstS.channel || '乒乓球直播';
-            html += '<div class="day__pending">' +
-                      '<span class="pending__badge">📋 待公布</span>' +
-                      '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>' +
-                    '</div>';
+            html += '<span class="pending__next">下一场：<strong>' + esc(nextTime) + '</strong> ' + esc(nextEv) + '</span>';
           }
+          html += '</div>';
           html += '<div class="sched">';
           liveSchedule.forEach(function (s) {
             var sLive = isLiveSchedule(day.date, s.time, now);
