@@ -1374,3 +1374,12 @@
 - 推送:data.json+video.json JSON硬校验→commit 997fb45→token-URL push 3d3dbfd..997fb45 main→main(rev-list 0 0校验);前端测试135项0失败。
 - 早报存档:每日乒乓球赛事早报/2026-11-01.md 重写(赛程更正+1/4赛果表+来源)。
 - 单链对齐(9.3):list确认无ACTIVE「刷新」once(10/31链已断);按9.2算T_next=2026-11-01 17:00(+08:00,赛前候选18:00半决赛K-1h;30min聚类不并,最早簇=17:00);新建once「刷新链-20261101-1700」(id a734e924,cwds=C:/Users/pengz/Documents/GitHub/pingpong-schedule,modelId=hy3)。
+
+
+## 2026-11-01 17:32 主任务轮（全量刷新 + 链对齐）
+- 复用既有交叉认证数据（WTT蒙彼利埃收官日）：11/1 四场半决赛(18:00/18:45/19:30/20:15 CCTV-5)截至 17:32 未开赛，result 留空；11/2 决赛 00:30/01:30 仍 pending。赛程无变更，未伪造任何赛果。
+- data.json bump updatedAt=2026-11-01 17:32 并 prepend note；video.json 维持空（央视已直播半决赛/决赛，八·乙已核实无静默丢失）。
+- 推送：直接 `git push` 在 Git Bash 挂死（GCM 交互登录），改用 token-URL 法成功（commit 062d23c，rev-list 0 0 校验通过）。
+- 早报 每日乒乓球赛事早报/2026-11-01.md 追加「九、17:32 滚动更新（主任务·全量刷新）」节。
+- 链对齐：现存无「刷新链」once，按 9.2 算 T_next=18:30，新建单链 once 刷新链-20261101-1830（id dde5993a，已尝试写入 modelId=hy3）。
+- 限制：本环境为模拟日期 2026-11-01，实时联网无法取得该日蒙彼利埃赛果，故未做新增联网采集，沿用仓库已交叉认证状态。
