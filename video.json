@@ -1,3 +1,68 @@
 {
-  "days": []
+  "days": [
+    {
+      "date": "2026-11-07",
+      "matches": [
+        {
+          "time": "01:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT法兰克福冠军赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "德国",
+          "playerHome": "韩莹",
+          "playerHomeInfo": "43岁削球老将，本站已淘汰王艺迪",
+          "nationAway": "德国",
+          "playerAway": "莎宾·温特",
+          "note": "11/6档顺延至11/7凌晨的1/8决赛尾段，央视5/5+不转播，咪咕视频/央视频直播，手机/平板/电脑可看，部分场次需咪咕会员。同晚20:00起还有8场1/4决赛（对阵待11/6晚1/8决赛结束后产生），咪咕视频同样全程直播。"
+        },
+        {
+          "time": "02:05",
+          "platform": "咪咕视频",
+          "tournament": "WTT法兰克福冠军赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "韩国",
+          "playerHome": "吴晙诚",
+          "nationAway": "日本",
+          "playerAway": "户上隼辅",
+          "note": "日韩对垒，央视无电视转播，咪咕视频/央视频直播，手机/平板/电脑可看，部分场次需咪咕会员。"
+        },
+        {
+          "time": "02:40",
+          "platform": "咪咕视频",
+          "tournament": "WTT法兰克福冠军赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "德国",
+          "playerHome": "米特兰姆",
+          "nationAway": "中国",
+          "playerAway": "蒯曼",
+          "playerAwayInfo": "国乒女单，蒙彼利埃站亚军",
+          "note": "国乒焦点战，央视5/5+不转播，咪咕视频/央视频直播，手机/平板/电脑可看，部分场次需咪咕会员。米特兰姆亦有「米特尔哈姆」异写，本轮归一为米特兰姆。"
+        },
+        {
+          "time": "03:15",
+          "platform": "咪咕视频",
+          "tournament": "WTT法兰克福冠军赛",
+          "stage": "男单1/8决赛",
+          "nationHome": "德国",
+          "playerHome": "弗朗西斯卡",
+          "playerHomeInfo": "蒙彼利埃站男单亚军",
+          "nationAway": "德国",
+          "playerAway": "杜达",
+          "note": "德国德比，央视无电视转播，咪咕视频/央视频直播，手机/平板/电脑可看，部分场次需咪咕会员。"
+        },
+        {
+          "time": "03:50",
+          "platform": "咪咕视频",
+          "tournament": "WTT法兰克福冠军赛",
+          "stage": "女单1/8决赛",
+          "nationHome": "乌克兰",
+          "playerHome": "佩索茨卡",
+          "nationAway": "中国",
+          "playerAway": "陈熠",
+          "playerAwayInfo": "国乒女单",
+          "note": "国乒焦点战，央视5/5+不转播，咪咕视频/央视频直播，手机/平板/电脑可看，部分场次需咪咕会员。佩索茨卡全名马尔加里塔·佩索茨卡。"
+        }
+      ]
+    }
+  ]
 }
