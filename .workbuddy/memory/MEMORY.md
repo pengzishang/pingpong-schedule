@@ -11,10 +11,13 @@
 6. **远端校验优先用 PowerShell**：`Invoke-RestMethod` + 代理 127.0.0.1:7897 直接读 raw.githubusercontent.com（Git Bash 里 curl 直连会挂死 3 分钟）；要下载到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。临时文件被占用删不掉时先 TaskStop 再用 Python `os.remove`。
 
 ## 推送环境
-- 代理 `http://127.0.0.1:7897` 已在 Git 全局 `https.proxy` 配好；`curl`/`git` 走它可通 github。
-- **【2026-11-06 实测·首选】DSH Harness 的 PowerShell 会话里 `git push origin main` 直接成功**（exit 0），GCM credential helper 已配好、无需交互登录。每轮先 `git fetch origin && git rebase origin/main` 再 push；PowerShell 把 git 的 stderr 包成 `NativeCommandError` 只是显示问题，`PUSH_EXIT=0` 即成功，用 `git ls-remote origin main` 复核远端 SHA 最稳。
+- 代理 `http://127.0.0.1:7897` 配在 Git 全局 `http(s).proxy`；`curl`/`git` 走它可通 **大部分站点（如 baidu 返回 200）**，但**截至 2026-11-08 实测 GitHub 经该代理持续超时（CONNECT 隧道能建、TLS 握手收不到）→ `git push origin main` 一律 `ec=128` TLS EOF**；直连 GitHub 同样失败，SSH:22 端口虽通但本机无 `~/.ssh` 密钥故无法改走 SSH。属本机↔GitHub 链路性中断，**每轮开头必须先用 `git ls-remote origin main` 或一次短 `git push` 验证连通性**，连通才推、不通则启动后台重试循环（见下）而非卡死。
+- **【2026-11-06 实测·当时有效】DSH Harness 的 PowerShell 会话里 `git push origin main` 曾直接成功**（exit 0），GCM credential helper 已配好、无需交互登录；PowerShell 把 git stderr 包成 `NativeCommandError` 只是显示问题，`PUSH_EXIT=0` 即成功。该结论在 2026-11-08 GitHub 链路中断时**失效**，勿默认沿用。
+- **【断网自愈机制·必备】push 受阻时启动后台重试循环**（不要用 `&&` 串、PowerShell 不支持；用 `Start-Process -FilePath git -Wait -PassThru` 拿真退出码，proxy→direct 轮换，每 60s 一轮，cap 上千），GitHub 一恢复即自动推送；本机 01:15 轻量轮曾因此卡 4h+ 未推，已沉淀教训。
+- **`python` 不在 PATH**（报 Microsoft Store 别名未安装）；做 `json.load` 硬校验须改用 bundled python：`C:\Users\pengz\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe`。
 - **【已废弃·勿照抄】token-URL 法**（`git -c credential.helper= push https://user:$(printf ... | awk ...)@github.com/...`）：仅在旧 Git Bash 会话有效；**PowerShell 无 `printf`/`awk`，该命令直接失败**（报 "Invalid username or token"）。旧记忆「Git Bash 直接 push 会挂死、必须 token-URL」「别用 PowerShell 承接 push」在 DSH PowerShell 会话均已失效，别再当铁律。
 - 远端内容校验：`Invoke-RestMethod` + 代理 127.0.0.1:7897 读 raw.githubusercontent.com；临时文件下到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。
+- 本机↔GitHub 推送间歇性 TLS 握手 EOF 阻断（error:0A000126 unexpected eof）；任何 git push 前 fetch/rebase 失败时应改用代理 http://127.0.0.1:7897 或持续后台重试直至成功，勿误判推送成功（远端未落则网页 updatedAt 不刷新）。
 
 ## 单链滚动刷新（once 链）
 - 全局仅 1 个 name 含「刷新」的 **once**（recurring 主任务名也含「刷新」，不算）。命名 `刷新链-[YYYYMMDD]-[HHMM]`，`cwds`=`C:/Users/pengz/Documents/GitHub/pingpong-schedule`，**不传 rrule**，带 `modelId=hy3`。
