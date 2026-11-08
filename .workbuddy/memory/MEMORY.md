@@ -18,6 +18,7 @@
 - **【已废弃·勿照抄】token-URL 法**（`git -c credential.helper= push https://user:$(printf ... | awk ...)@github.com/...`）：仅在旧 Git Bash 会话有效；**PowerShell 无 `printf`/`awk`，该命令直接失败**（报 "Invalid username or token"）。旧记忆「Git Bash 直接 push 会挂死、必须 token-URL」「别用 PowerShell 承接 push」在 DSH PowerShell 会话均已失效，别再当铁律。
 - 远端内容校验：`Invoke-RestMethod` + 代理 127.0.0.1:7897 读 raw.githubusercontent.com；临时文件下到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。
 - 本机↔GitHub 推送间歇性 TLS 握手 EOF 阻断（error:0A000126 unexpected eof）；任何 git push 前 fetch/rebase 失败时应改用代理 http://127.0.0.1:7897 或持续后台重试直至成功，勿误判推送成功（远端未落则网页 updatedAt 不刷新）。
+- GitHub `git push origin main` 偶发 `cannot lock ref 'refs/heads/main'` 远端竞态，remote rejected 但 commit 实际已落地＝**假失败**；本机后台重试循环 400 次报告 ok=False 亦曾因此误判，须以 `git fetch origin` 后比对 `git rev-parse HEAD` 与 `git rev-parse origin/main` 相等即推送成功（22:45 轮实证）。勿因 push 返回非成功即重推或误判未推送。
 
 ## 单链滚动刷新（once 链）
 - 全局仅 1 个 name 含「刷新」的 **once**（recurring 主任务名也含「刷新」，不算）。命名 `刷新链-[YYYYMMDD]-[HHMM]`，`cwds`=`C:/Users/pengz/Documents/GitHub/pingpong-schedule`，**不传 rrule**，带 `modelId=hy3`。
