@@ -11,14 +11,17 @@
 6. **远端校验优先用 PowerShell**：`Invoke-RestMethod` + 代理 127.0.0.1:7897 直接读 raw.githubusercontent.com（Git Bash 里 curl 直连会挂死 3 分钟）；要下载到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。临时文件被占用删不掉时先 TaskStop 再用 Python `os.remove`。
 
 ## 推送环境
-- 代理 `http://127.0.0.1:7897` 配在 Git 全局 `http(s).proxy`；`curl`/`git` 走它可通 **大部分站点（如 baidu 返回 200）**，但**截至 2026-11-08 实测 GitHub 经该代理持续超时（CONNECT 隧道能建、TLS 握手收不到）→ `git push origin main` 一律 `ec=128` TLS EOF**；直连 GitHub 同样失败，SSH:22 端口虽通但本机无 `~/.ssh` 密钥故无法改走 SSH。属本机↔GitHub 链路性中断，**每轮开头必须先用 `git ls-remote origin main` 或一次短 `git push` 验证连通性**，连通才推、不通则启动后台重试循环（见下）而非卡死。
-- **【2026-11-06 实测·当时有效】DSH Harness 的 PowerShell 会话里 `git push origin main` 曾直接成功**（exit 0），GCM credential helper 已配好、无需交互登录；PowerShell 把 git stderr 包成 `NativeCommandError` 只是显示问题，`PUSH_EXIT=0` 即成功。该结论在 2026-11-08 GitHub 链路中断时**失效**，勿默认沿用。
+- 代理 `http://127.0.0.1:7897` 配在 Git 全局 `http(s).proxy`；`curl`/`git` 走它可通 **大部分站点（如 baidu 返回 200）**，但 **GitHub 经该代理与直连均持续 TLS EOF(error:0A000126) 失败**（`git push origin main` 一律 `ec=128`）；SSH:22 端口虽通但本机无 `~/.ssh` 密钥故无法改走 SSH。属本机↔GitHub 链路性中断，**每轮开头验证连通性**，连通才推、不通则启动后台重试循环（见下）而非卡死。
+- **【2026-11-10 实测】本会话仅 `powershell.exe`(5.1) 在 PATH、`pwsh`(PS7) 不存在** → 后台启动重试循环必须用 `C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe` 全路径 `-File _push_retry.ps1`，裸 `pwsh` 会「系统找不到指定的文件」失败。
+- **【外网受限·赛果不编造铁律·2026-11-09~11-10 三连轮实证】**：当 WTT.com/ITTF.cn/results.ittf.link 全部 TLS 阻断、且 Web 多引擎/维基仅返百科泛页时，**绝不臆造决赛比分**——已结束场次维持 `risk-only`、不填 `result`，在 data.json `note` 与早报显式标注「网络受限·赛果待核实回填」。同时**先 `git commit` 固化本轮工作、再靠 `_push_retry.ps1` 后台重试**（proxy↔direct 轮换、60s/轮）把累积提交（曾堆积 9~10 个）在 GitHub 恢复后自动推送并校验 `HEAD==origin/main`，避免工作丢失。
+- **【data.json note 追加修正·2026-11-10 踩坑】**：往 `note` 末尾追加轮次记录时匹配串必须只是 note 值尾部的 `"`（如 `重新对齐。",`），若误把 `"\n\n【…` 也写进 old_string 会把一个字符串切成两段独立 JSON 字符串字面量（中间无 key）导致 `ConvertFrom-Json` 报「应为 : 或 }」。**校验用 PowerShell `ConvertFrom-Json`**（本机 python 不在 PATH，勿用 `python -c`）。
 - **【断网自愈机制·必备】push 受阻时启动后台重试循环**（不要用 `&&` 串、PowerShell 不支持；用 `Start-Process -FilePath git -Wait -PassThru` 拿真退出码，proxy→direct 轮换，每 60s 一轮，cap 上千），GitHub 一恢复即自动推送；本机 01:15 轻量轮曾因此卡 4h+ 未推，已沉淀教训。
 - **`python` 不在 PATH**（报 Microsoft Store 别名未安装）；做 `json.load` 硬校验须改用 bundled python：`C:\Users\pengz\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe`。
 - **【已废弃·勿照抄】token-URL 法**（`git -c credential.helper= push https://user:$(printf ... | awk ...)@github.com/...`）：仅在旧 Git Bash 会话有效；**PowerShell 无 `printf`/`awk`，该命令直接失败**（报 "Invalid username or token"）。旧记忆「Git Bash 直接 push 会挂死、必须 token-URL」「别用 PowerShell 承接 push」在 DSH PowerShell 会话均已失效，别再当铁律。
 - 远端内容校验：`Invoke-RestMethod` + 代理 127.0.0.1:7897 读 raw.githubusercontent.com；临时文件下到**仓库内**再删（`/tmp` Windows 版 Python 看不到）。
 - 本机↔GitHub 推送间歇性 TLS 握手 EOF 阻断（error:0A000126 unexpected eof）；任何 git push 前 fetch/rebase 失败时应改用代理 http://127.0.0.1:7897 或持续后台重试直至成功，勿误判推送成功（远端未落则网页 updatedAt 不刷新）。
 - GitHub `git push origin main` 偶发 `cannot lock ref 'refs/heads/main'` 远端竞态，remote rejected 但 commit 实际已落地＝**假失败**；本机后台重试循环 400 次报告 ok=False 亦曾因此误判，须以 `git fetch origin` 后比对 `git rev-parse HEAD` 与 `git rev-parse origin/main` 相等即推送成功（22:45 轮实证）。勿因 push 返回非成功即重推或误判未推送。
+- 历史：2026-11-06 曾有 DSH PowerShell 会话 `git push` 直接成功，2026-11-08 GitHub 链路中断后失效，勿默认沿用。
 
 ## 单链滚动刷新（once 链）
 - 全局仅 1 个 name 含「刷新」的 **once**（recurring 主任务名也含「刷新」，不算）。命名 `刷新链-[YYYYMMDD]-[HHMM]`，`cwds`=`C:/Users/pengz/Documents/GitHub/pingpong-schedule`，**不传 rrule**，带 `modelId=hy3`。
