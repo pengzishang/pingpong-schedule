@@ -22,6 +22,7 @@
 - 本机↔GitHub 推送间歇性 TLS 握手 EOF 阻断（error:0A000126 unexpected eof）；任何 git push 前 fetch/rebase 失败时应改用代理 http://127.0.0.1:7897 或持续后台重试直至成功，勿误判推送成功（远端未落则网页 updatedAt 不刷新）。
 - GitHub `git push origin main` 偶发 `cannot lock ref 'refs/heads/main'` 远端竞态，remote rejected 但 commit 实际已落地＝**假失败**；本机后台重试循环 400 次报告 ok=False 亦曾因此误判，须以 `git fetch origin` 后比对 `git rev-parse HEAD` 与 `git rev-parse origin/main` 相等即推送成功（22:45 轮实证）。勿因 push 返回非成功即重推或误判未推送。
 - 历史：2026-11-06 曾有 DSH PowerShell 会话 `git push` 直接成功，2026-11-08 GitHub 链路中断后失效，勿默认沿用。
+- **【data.json 误改挽救·2026-11-10 16:26 实证】** 若 _update_data.py 因误写真换行/串位把 data.json 写成非法 JSON，立即 `git checkout HEAD -- data.json` 还原到最近已提交的有效版（HEAD 必为上一轮合法态），再重跑幂等追加；切忌手改巨型 note。note 追加须用转义 `\\n` 且锚定唯一标记 `",\n    "days": [` 而非 `rfind('"')`（后者会落在 note 内已转义 `{\"days\":[]}` 上把串位）。
 
 ## 单链滚动刷新（once 链）
 - 全局仅 1 个 name 含「刷新」的 **once**（recurring 主任务名也含「刷新」，不算）。命名 `刷新链-[YYYYMMDD]-[HHMM]`，`cwds`=`C:/Users/pengz/Documents/GitHub/pingpong-schedule`，**不传 rrule**，带 `modelId=hy3`。
