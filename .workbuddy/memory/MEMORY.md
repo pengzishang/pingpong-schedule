@@ -23,6 +23,7 @@
 - GitHub `git push origin main` 偶发 `cannot lock ref 'refs/heads/main'` 远端竞态，remote rejected 但 commit 实际已落地＝**假失败**；本机后台重试循环 400 次报告 ok=False 亦曾因此误判，须以 `git fetch origin` 后比对 `git rev-parse HEAD` 与 `git rev-parse origin/main` 相等即推送成功（22:45 轮实证）。勿因 push 返回非成功即重推或误判未推送。
 - 历史：2026-11-06 曾有 DSH PowerShell 会话 `git push` 直接成功，2026-11-08 GitHub 链路中断后失效，勿默认沿用。
 - **【data.json 误改挽救·2026-11-10 16:26 实证】** 若 _update_data.py 因误写真换行/串位把 data.json 写成非法 JSON，立即 `git checkout HEAD -- data.json` 还原到最近已提交的有效版（HEAD 必为上一轮合法态），再重跑幂等追加；切忌手改巨型 note。note 追加须用转义 `\\n` 且锚定唯一标记 `",\n    "days": [` 而非 `rfind('"')`（后者会落在 note 内已转义 `{\"days\":[]}` 上把串位）。
+- 【2026-11-11 16:11 网络状态更正】本机↔GitHub 链路自 ~11/09 02:30 的 TLS EOF(0A000126) 阻断**已于 11/11 16:11 起解除**：git fetch/rebase/push 直连均可成功（origin/main 未领先、rebase 无冲突、push 落地后 HEAD==origin/main）。此前 `_push_retry.ps1` 日志反复报「rebase conflict -> aborted」实为**工作树脏**导致 `cannot rebase: unstaged changes`（循环只 fetch+rebase 从不 commit），非真冲突亦非 TLS。纠正旧记忆「GitHub TLS 持续失败」：下轮先 `git status`，脏树则先 `git add/commit` 清理再 rebase/push；采集侧外网(WTT/ITTF/央视EPG/电视猫/多引擎)仍受限未恢复。
 
 ## 单链滚动刷新（once 链）
 - 全局仅 1 个 name 含「刷新」的 **once**（recurring 主任务名也含「刷新」，不算）。命名 `刷新链-[YYYYMMDD]-[HHMM]`，`cwds`=`C:/Users/pengz/Documents/GitHub/pingpong-schedule`，**不传 rrule**，带 `modelId=hy3`。
