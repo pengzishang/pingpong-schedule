@@ -65,6 +65,7 @@
 - 黑名单：sports.sina.com.cn/pingpang、sports.163.com/pingpang、s.weibo.com、so.toutiao.com、sports.sina.cn 首页聚合稿、k.sina.cn、搜狐 1071907758、**cnyouth.com**（错时间戳/旧稿）、网易号「乒乓乐园」。
 - **「标题党」陷阱**：标题写「XX 力克 YY」但正文是「如果…就…」式前瞻＝**不是赛果**，必读正文再判。AI 体例聚合稿（「结论:」式、无一手源）同理。
 - `WebFetch tv.cctv.com/live/cctv5plus/` 自 9/1 失效。
+- 本机未安装 python（调用报「Python was not found」），采集说明 7.2 的 JSON 硬校验 `python -c "import json..."` 不可用；改用 PowerShell `ConvertFrom-Json` 或 `node -e JSON.parse` 校验 data.json/video.json 合法性。
 
 ## 真伪判定
 - **【铁律】结论与依据分开判定**：依据错只否定依据，结论另行求证。
