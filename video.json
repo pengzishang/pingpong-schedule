@@ -1,3 +1,185 @@
 {
-  "days": []
+  "days": [
+    {
+      "date": "2026-11-18",
+      "matches": [
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "覃予萱/纵歌曼",
+          "nationAway": "日本",
+          "playerAway": "桥本帆乃香/长崎美柚",
+          "note": "国旗/对阵据全言作品11/18稿;Eleven官方签表确认UK07:00=北京15:00。2源(全言作品/网易+Eleven/WTT签表)。咪咕独家(本站央视零转播),咪咕无一手逐场排期页,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "15:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政/陈垣宇",
+          "nationAway": "法国",
+          "playerAway": "塞弗里德/皮卡德",
+          "note": "对阵/时刻据全言作品11/18稿(1源),Eleven双打OOP未抓全未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "16:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "袁励岑",
+          "nationAway": "丹麦",
+          "playerAway": "格罗特",
+          "note": "QR3决胜轮3-2力克博嘉德晋级。对阵/时刻2源交叉(Eleven官方签表UK08:10=北京16:10+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "16:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "王晓彤/徐奕",
+          "nationAway": "法国",
+          "playerAway": "卢茨/扎里夫",
+          "note": "对阵/时刻据全言作品11/18稿(1源),Eleven双打OOP未抓全未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "17:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "陈俊菘/唐乙仁",
+          "nationAway": "克罗地亚",
+          "playerAway": "加奇尼/伊沃",
+          "note": "此为男双(独立于男单QR3,陈俊菘男单已出局但仍与唐乙仁打男双)。对阵/时刻据全言作品11/18稿(1源),Eleven双打OOP未抓全未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "17:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "冯怡璇",
+          "nationAway": "摩纳哥",
+          "playerAway": "杨晓馨",
+          "note": "正赛首轮对阵/时刻2源交叉(Eleven官方签表UK09:55=北京17:55+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "17:55",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "纵歌曼",
+          "nationAway": "日本",
+          "playerAway": "青木咲智",
+          "note": "正赛首轮对阵/时刻2源交叉(Eleven官方签表UK09:55=北京17:55+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "21:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "混双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "袁励岑/王晓彤",
+          "nationAway": "土耳其",
+          "playerAway": "伊根勒/哈拉克",
+          "note": "对阵/时刻据全言作品11/18稿(1源),Eleven混双OOP未列国乒场次未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "21:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "混双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政/覃予萱",
+          "nationAway": "韩国",
+          "playerAway": "朴康贤/朱芊曦",
+          "note": "对阵/时刻据全言作品11/18稿(1源),Eleven混双OOP未列国乒场次未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "21:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女双1/16决赛",
+          "nationHome": "中国",
+          "playerHome": "范姝涵/冯怡璇",
+          "nationAway": "意大利",
+          "playerAway": "博嘉德/蒙法蒂尼",
+          "note": "对阵/时刻据全言作品11/18稿(1源),Eleven双打OOP未抓全未独立确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "魏璟茗",
+          "nationAway": "印度",
+          "playerAway": "巴特拉",
+          "note": "正赛首轮对阵/时刻2源交叉(Eleven官方签表UK14:10=北京22:10+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "唐乙仁",
+          "nationAway": "德国",
+          "playerAway": "贝特斯迈尔",
+          "note": "QR3决胜轮3-1库雷奇晋级。对阵/时刻2源交叉(Eleven官方签表UK14:10=北京22:10+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "nationAway": "意大利",
+          "playerAway": "皮科林",
+          "note": "正赛首轮对阵/时刻2源交叉(Eleven官方签表UK14:45=北京22:45+全言作品)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "23:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "范姝涵",
+          "nationAway": "中国",
+          "playerAway": "杨惠泽",
+          "note": "国乒内战。对阵据全言作品11/18稿与Eleven官方签表2源;时刻两源有约40分钟差异(全言作品23:20/Eleven UK16:00=北京00:00),此处按全言作品照写并留痕待赛中确认。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "00:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "黄友政",
+          "nationAway": "葡萄牙",
+          "playerAway": "弗雷塔斯",
+          "note": "北京时间11/19凌晨00:30,阿曼11/18 20:30。对阵/时刻2源交叉(Eleven官方签表UK16:30=北京00:30+全言作品,弗雷塔斯=Freitas)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "00:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/32决赛",
+          "nationHome": "中国",
+          "playerHome": "孙杨",
+          "nationAway": "印度",
+          "playerAway": "巴塔查吉",
+          "note": "北京时间11/19凌晨00:30,阿曼11/18 20:30。QR3决胜轮3-0多尔晋级。对阵/时刻2源交叉(Eleven官方签表UK16:30=北京00:30+全言作品,巴塔查吉=Bhattacharya,译名待核)。咪咕独家,手机装咪咕视频App或WTT官方YouTube可看。"
+        }
+      ]
+    }
+  ]
 }
