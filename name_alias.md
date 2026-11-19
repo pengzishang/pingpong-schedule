@@ -56,6 +56,7 @@
 | 皮卡德 | — | Vincent Picard，法国男单（2026-11-18 补表；与 QR1 女选手 Claire Picard 是两人，勿与皮科林 Piccolin 混） |
 | 皮科林 | 乔治娅·皮科利恩 | Giorgia Piccolin，意大利女单（2026-11-18 补表） |
 | 杨晓馨 | 杨晓欣 | Xiaoxin Yang，摩纳哥女单（2026-11-18 补表，百度百科作「杨晓馨」、360/pingpongtimes 作「杨晓欣」并存） |
+| 格列布涅夫 | 格列布涅夫、Grebnev | Maksim Grebnev，俄罗斯男单（2026-11-19 补表，陈垣宇马斯喀特站对手；Swift TT 作 GREBNEV） |
 
 ## 规则
 
