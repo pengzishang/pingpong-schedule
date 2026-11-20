@@ -1,235 +1,235 @@
 {
-    "days":  [
-                 {
-                     "date":  "2026-11-19",
-                     "matches":  [
-                                     {
-                                         "time":  "15:00",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女双1/4决赛",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "范姝涵/冯怡璇",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "芝田沙季/青木咲智",
-                                         "playerAwayInfo":  null,
-                                         "note":  "已结束:范姝涵/冯怡璇1-3芝田沙季/青木咲智(日方11-9/7-11/11-9/11-8,中方视角9-11/11-7/9-11/8-11),国乒负止步八强。对阵WTT官方签表一手,时刻约3源系(Eleven OOP+全言03:53稿+新浪佐证)。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "15:35",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女双1/4决赛",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "王晓彤/徐奕",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "大藤沙月/横井咲樱",
-                                         "playerAwayInfo":  null,
-                                         "note":  "已结束:王晓彤/徐奕1-3大藤沙月/横井咲樱(亚锦赛女双冠军,日方11-6/6-11/12-10/11-8,中方视角6-11/11-6/10-12/8-11),国乒负止步八强。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "16:45",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "覃予萱",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "芝田沙季",
-                                         "playerAwayInfo":  "7号种子",
-                                         "note":  "已结束:覃予萱3-2芝田沙季(11-6/9-11/12-10/7-11/11-8),国乒胜晋级16强。⚠️网易号\u0027湘楚风云聊体育\u0027《覃予萱1-3芝田沙季》为11/13伊斯坦布尔站旧稿,勿据旧标题误采。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "17:20",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "范姝涵",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "长崎美柚",
-                                         "playerAwayInfo":  "4号种子",
-                                         "note":  "已结束:范姝涵1-3长崎美柚(日方11-13/6-11/14-12/11-5,中方视角13-11/11-6/12-14/5-11),国乒负出局。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "17:20",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "陈垣宇",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "俄罗斯",
-                                         "playerAway":  "格列布涅夫",
-                                         "playerAwayInfo":  null,
-                                         "note":  "已结束:陈垣宇3-1格列布涅夫(9-11/11-2/11-2/12-10),国乒胜晋级16强(格列布涅夫=Grebnev俄,新发现异写已补name_alias.md)。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "18:30",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "混双1/4决赛",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "袁励岑/王晓彤",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "澳大利亚",
-                                         "playerAway":  "林文政/刘杨子",
-                                         "playerAwayInfo":  null,
-                                         "note":  "已结束:袁励岑/王晓彤2-3林文政/刘杨子(澳方11-3/6-11/11-7/2-11/10-12,中方视角3-11/11-6/7-11/11-2/12-10),国乒负止步八强。对阵WTT官方签表一手(Eleven作Nicholas Lum/Yangzi Liu),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "21:35",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "魏璟茗",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "罗马尼亚",
-                                         "playerAway":  "斯佐科斯",
-                                         "playerAwayInfo":  "5号种子",
-                                         "note":  "已结束:魏璟茗2-3斯佐科斯(罗方7-11/14-16/11-9/11-6/11-4,中方视角11-7/16-14/9-11/6-11/4-11),2-0领先被世界第22老将逆转,国乒负出局。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "21:35",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "王晓彤",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "罗马尼亚",
-                                         "playerAway":  "萨马拉",
-                                         "playerAwayInfo":  "14号种子",
-                                         "note":  "已结束:王晓彤3-1萨马拉(16-14/5-11/20-18/12-10,第三局20-18拉锯),国乒胜晋级16强。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "22:10",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "袁励岑",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "葡萄牙",
-                                         "playerAway":  "格拉尔多",
-                                         "playerAwayInfo":  "16号种子",
-                                         "note":  "已结束:袁励岑3-1格拉尔多(11-8/11-13/11-9/12-10),国乒胜晋级16强。对阵WTT官方签表一手(João Geraldo),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "22:10",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "孙杨",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "斯洛文尼亚",
-                                         "playerAway":  "达科·约奇克",
-                                         "playerAwayInfo":  "头号种子/世界14",
-                                         "note":  "已结束:孙杨3-1达科·约奇克(13-11/11-9/9-11/11-5),18岁世界第228削球手2-0领先后被追至2-1、第四局11-5锁定,爆冷淘汰头号种子,本站最大冷门、职业生涯最重要胜利。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "22:10",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "李天阳",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "罗马尼亚",
-                                         "playerAway":  "约内斯库",
-                                         "playerAwayInfo":  null,
-                                         "note":  "已结束:李天阳3-1约内斯库(13-11/11-7/7-11/11-5),国乒胜晋级16强。对阵WTT官方签表一手(Eduard Ionescu),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "22:45",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/16决赛(32强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "黄友政",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "克罗地亚",
-                                         "playerAway":  "普卡",
-                                         "playerAwayInfo":  "9号种子",
-                                         "note":  "已结束:黄友政2-3普卡(克方6-11/5-11/11-8/12-10/11-9,中方视角11-6/11-5/8-11/10-12/9-11),2-0领先被逆转,国乒负出局(普卡=普卡尔Tomislav Pucar,已按name_alias归一)。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     }
-                                 ]
-                 },
-                 {
-                     "date":  "2026-11-20",
-                     "matches":  [
-                                     {
-                                         "time":  "14:00",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/8决赛(16强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "王晓彤",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "韩国",
-                                         "playerAway":  "朱芊曦",
-                                         "playerAwayInfo":  null,
-                                         "note":  "11/20未开赛。Joo Cheonhui(女双签表译名存疑,或朱天辉/周天惠之误,留痕待核不影响存在性)。对阵+时刻2源:Eleven赛事页(WTT官方数据,Matches Fri20=28,页脚Official draw updated 19 Nov 18:39,UTC)+Sohu全言11/20 03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1,Eleven官方另1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "14:35",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/8决赛(16强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "孙杨",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "韩国",
-                                         "playerAway":  "朴康贤",
-                                         "playerAwayInfo":  null,
-                                         "note":  "11/20未开赛。孙杨携昨日爆冷淘汰头号种子达科之威迎战韩将朴康贤(Park Ganghyeon,世界44)。对阵+时刻2源:Eleven赛事页(WTT官方数据,Matches Fri20=28,页脚Official draw updated 19 Nov 18:39,UTC)+Sohu全言11/20 03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1,Eleven官方另1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "14:35",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/8决赛(16强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "李天阳",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "中国",
-                                         "playerAway":  "袁励岑",
-                                         "playerAwayInfo":  null,
-                                         "note":  "11/20未开赛·国乒内战。李天阳近期状态更强(亚锦赛决赛摘银),但削球打法内战或成突破口。对阵+时刻2源:Eleven赛事页(WTT官方数据,Matches Fri20=28,页脚Official draw updated 19 Nov 18:39,UTC)+Sohu全言11/20 03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1,Eleven官方另1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "15:10",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "女单1/8决赛(16强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "覃予萱",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "赤江夏星",
-                                         "playerAwayInfo":  null,
-                                         "note":  "11/20未开赛。赤江夏星(Kaho Akae)日本新星进步快,覃予萱携昨日3-2险胜芝田沙季晋级。对阵+时刻2源:Eleven赛事页(WTT官方数据,Matches Fri20=28,页脚Official draw updated 19 Nov 18:39,UTC)+Sohu全言11/20 03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1,Eleven官方另1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     },
-                                     {
-                                         "time":  "15:10",
-                                         "platform":  "咪咕视频",
-                                         "tournament":  "WTT马斯喀特球星赛",
-                                         "stage":  "男单1/8决赛(16强)",
-                                         "nationHome":  "中国",
-                                         "playerHome":  "陈垣宇",
-                                         "playerHomeInfo":  null,
-                                         "nationAway":  "日本",
-                                         "playerAway":  "篠塚大登",
-                                         "playerAwayInfo":  null,
-                                         "note":  "11/20未开赛。篠塚大登(Hiroto Shinozuka)日本选手,陈垣宇昨日3-1逆转格列布涅夫晋级。对阵+时刻2源:Eleven赛事页(WTT官方数据,Matches Fri20=28,页脚Official draw updated 19 Nov 18:39,UTC)+Sohu全言11/20 03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1,Eleven官方另1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
-                                     }
-                                 ]
-                 }
-             ]
+  "days": [
+    {
+      "date": "2026-11-19",
+      "matches": [
+        {
+          "time": "15:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "范姝涵/冯怡璇",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "芝田沙季/青木咲智",
+          "playerAwayInfo": null,
+          "note": "已结束:范姝涵/冯怡璇1-3芝田沙季/青木咲智(日方11-9/7-11/11-9/11-8,中方视角9-11/11-7/9-11/8-11),国乒负止步八强。对阵WTT官方签表一手,时刻约3源系(Eleven OOP+全言03:53稿+新浪佐证)。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "15:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "王晓彤/徐奕",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "大藤沙月/横井咲樱",
+          "playerAwayInfo": null,
+          "note": "已结束:王晓彤/徐奕1-3大藤沙月/横井咲樱(亚锦赛女双冠军,日方11-6/6-11/12-10/11-8,中方视角6-11/11-6/10-12/8-11),国乒负止步八强。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "16:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "覃予萱",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "芝田沙季",
+          "playerAwayInfo": "7号种子",
+          "note": "已结束:覃予萱3-2芝田沙季(11-6/9-11/12-10/7-11/11-8),国乒胜晋级16强。⚠️网易号'湘楚风云聊体育'《覃予萱1-3芝田沙季》为11/13伊斯坦布尔站旧稿,勿据旧标题误采。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "17:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "范姝涵",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "长崎美柚",
+          "playerAwayInfo": "4号种子",
+          "note": "已结束:范姝涵1-3长崎美柚(日方11-13/6-11/14-12/11-5,中方视角13-11/11-6/12-14/5-11),国乒负出局。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "17:20",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "陈垣宇",
+          "playerHomeInfo": null,
+          "nationAway": "俄罗斯",
+          "playerAway": "格列布涅夫",
+          "playerAwayInfo": null,
+          "note": "已结束:陈垣宇3-1格列布涅夫(9-11/11-2/11-2/12-10),国乒胜晋级16强(格列布涅夫=Grebnev俄,新发现异写已补name_alias.md)。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "18:30",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "混双1/4决赛",
+          "nationHome": "中国",
+          "playerHome": "袁励岑/王晓彤",
+          "playerHomeInfo": null,
+          "nationAway": "澳大利亚",
+          "playerAway": "林文政/刘杨子",
+          "playerAwayInfo": null,
+          "note": "已结束:袁励岑/王晓彤2-3林文政/刘杨子(澳方11-3/6-11/11-7/2-11/10-12,中方视角3-11/11-6/7-11/11-2/12-10),国乒负止步八强。对阵WTT官方签表一手(Eleven作Nicholas Lum/Yangzi Liu),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "21:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "魏璟茗",
+          "playerHomeInfo": null,
+          "nationAway": "罗马尼亚",
+          "playerAway": "斯佐科斯",
+          "playerAwayInfo": "5号种子",
+          "note": "已结束:魏璟茗2-3斯佐科斯(罗方7-11/14-16/11-9/11-6/11-4,中方视角11-7/16-14/9-11/6-11/4-11),2-0领先被世界第22老将逆转,国乒负出局。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "21:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "playerHomeInfo": null,
+          "nationAway": "罗马尼亚",
+          "playerAway": "萨马拉",
+          "playerAwayInfo": "14号种子",
+          "note": "已结束:王晓彤3-1萨马拉(16-14/5-11/20-18/12-10,第三局20-18拉锯),国乒胜晋级16强。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "袁励岑",
+          "playerHomeInfo": null,
+          "nationAway": "葡萄牙",
+          "playerAway": "格拉尔多",
+          "playerAwayInfo": "16号种子",
+          "note": "已结束:袁励岑3-1格拉尔多(11-8/11-13/11-9/12-10),国乒胜晋级16强。对阵WTT官方签表一手(João Geraldo),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "孙杨",
+          "playerHomeInfo": null,
+          "nationAway": "斯洛文尼亚",
+          "playerAway": "达科·约奇克",
+          "playerAwayInfo": "头号种子/世界14",
+          "note": "已结束:孙杨3-1达科·约奇克(13-11/11-9/9-11/11-5),18岁世界第228削球手2-0领先后被追至2-1、第四局11-5锁定,爆冷淘汰头号种子,本站最大冷门、职业生涯最重要胜利。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "playerHomeInfo": null,
+          "nationAway": "罗马尼亚",
+          "playerAway": "约内斯库",
+          "playerAwayInfo": null,
+          "note": "已结束:李天阳3-1约内斯库(13-11/11-7/7-11/11-5),国乒胜晋级16强。对阵WTT官方签表一手(Eduard Ionescu),时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "22:45",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/16决赛(32强)",
+          "nationHome": "中国",
+          "playerHome": "黄友政",
+          "playerHomeInfo": null,
+          "nationAway": "克罗地亚",
+          "playerAway": "普卡",
+          "playerAwayInfo": "9号种子",
+          "note": "已结束:黄友政2-3普卡(克方6-11/5-11/11-8/12-10/11-9,中方视角11-6/11-5/8-11/10-12/9-11),2-0领先被逆转,国乒负出局(普卡=普卡尔Tomislav Pucar,已按name_alias归一)。对阵WTT官方签表一手,时刻约3源系。咪咕一手排期页0源,platform=咪咕视频属继承性判定(本站WTT600央视零转播·咪咕主导,阿斯塔纳先例)。手机装咪咕视频App或WTT官方YouTube可看。"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-20",
+      "matches": [
+        {
+          "time": "14:00",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/8决赛(16强)",
+          "nationHome": "中国",
+          "playerHome": "王晓彤",
+          "playerHomeInfo": null,
+          "nationAway": "韩国",
+          "playerAway": "朱芊曦",
+          "playerAwayInfo": null,
+          "note": "已结束:王晓彤2-3朱芊曦(韩国Joo Cheonhui,中方视角11-7/7-11/11-5/8-11/9-11),国乒负出局无缘8强。赛果源=WTT官方一手数据(Swift TT events/3256,coverage published at 20 Nov 08:06UTC=北京16:06,逐局镜像校验大比分一致)+新浪11/20 09:29稿确认女单16强仅王晓彤/覃予萱两人格局佐证。对阵+时刻2源:Eleven赛事页(WTT官方,Matches Fri20=28)+Sohu全言03:20稿(北京时间),UTC+8逐场吻合;全言Sohu/网易/新浪转载同源计1。Joo Cheonhui译名存疑(或朱天辉/周天惠之误)留痕不影响存在性。咪咕一手排期页0源,platform属继承性判定(本站WTT600央视零转播·咪咕主导)。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "14:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/8决赛(16强)",
+          "nationHome": "中国",
+          "playerHome": "孙杨",
+          "playerHomeInfo": null,
+          "nationAway": "韩国",
+          "playerAway": "朴康贤",
+          "playerAwayInfo": "世界44",
+          "note": "已结束:孙杨2-3朴康贤(韩国Park Ganghyeon,世界44,中方视角6-11/12-10/7-11/14-12/5-11),国乒负出局无缘8强,昨日爆冷淘汰头号种子达科·约奇克的黑马之旅止步16强。赛果源=WTT官方一手数据(Swift TT coverage 20 Nov 08:06UTC,逐局镜像校验大比分一致)。对阵+时刻2源:Eleven赛事页(WTT官方)+Sohu全言03:20稿(北京时间),UTC+8逐场吻合;全言同源计1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "14:35",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/8决赛(16强)",
+          "nationHome": "中国",
+          "playerHome": "李天阳",
+          "playerHomeInfo": null,
+          "nationAway": "中国",
+          "playerAway": "袁励岑",
+          "playerAwayInfo": null,
+          "note": "已结束:李天阳2-3袁励岑(国乒内战,李天阳视角11-8/8-11/5-11/11-5/10-12),袁励岑胜晋级8强、李天阳出局。赛果源=WTT官方一手数据(Swift TT coverage 20 Nov 08:06UTC,aria-label作YUAN Licen 3-2 LI Tianyang,逐局镜像校验一致)。对阵+时刻2源:Eleven赛事页(WTT官方)+Sohu全言03:20稿(北京时间),UTC+8逐场吻合;全言同源计1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "15:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "女单1/8决赛(16强)",
+          "nationHome": "中国",
+          "playerHome": "覃予萱",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "赤江夏星",
+          "playerAwayInfo": null,
+          "note": "已结束:覃予萱0-3赤江夏星(日本Kaho Akae,中方视角6-11/2-11/3-11),国乒负出局无缘8强,昨日3-2险胜芝田沙季的黑马止步16强。赛果源=WTT官方一手数据(Swift TT coverage 20 Nov 08:06UTC,逐局镜像校验大比分一致)。对阵+时刻2源:Eleven赛事页(WTT官方)+Sohu全言03:20稿(北京时间),UTC+8逐场吻合;全言同源计1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
+        },
+        {
+          "time": "15:10",
+          "platform": "咪咕视频",
+          "tournament": "WTT马斯喀特球星赛",
+          "stage": "男单1/8决赛(16强)",
+          "nationHome": "中国",
+          "playerHome": "陈垣宇",
+          "playerHomeInfo": null,
+          "nationAway": "日本",
+          "playerAway": "篠塚大登",
+          "playerAwayInfo": null,
+          "note": "已结束:陈垣宇3-0篠塚大登(日本Hiroto Shinozuka,中方视角11-9/11-7/11-0,第三局11-0),国乒胜晋级8强、本站唯一闯入男单8强的国乒选手;今夜19:00起1/4决赛对阵待WTT公布(Swift TT coverage时点QF尚未published),属条件场不预写。赛果源=WTT官方一手数据(Swift TT coverage 20 Nov 08:06UTC,aria-label作SHINOZUKA 0-3 CHEN,逐局镜像校验一致,第三局11-0经原始HTML复核无误)。对阵+时刻2源:Eleven赛事页(WTT官方)+Sohu全言03:20稿(北京时间),UTC+8逐场吻合;全言同源计1。咪咕一手排期页0源,platform属继承性判定。手机装咪咕视频App或WTT官方YouTube可看。"
+        }
+      ]
+    }
+  ]
 }
