@@ -205,16 +205,31 @@ test('buildAbove: countdownDays>0 且 gapMode 时渲染 gap-banner 与天数', (
 });
 
 // 2026-08-31 线上复盘:真实下一站数据不得再出现 695 字赛程大坨 / 126 字排行榜巨行
-test('renderNextCard[真实数据]: schedule/tv 拆成 next__lines,排行榜拆成 emeta__rank', () => {
+// 2026-11-23 修正:原用例无条件断言旧 blob 专属结构(next__lines/emeta__rank >=10),
+//   但那只对 8/31 那份含 695 字赛程+126 字排行榜的 note 成立;此后 nextEvent 改成
+//   结构化 emeta 卡片(title/facts/points),renderNextCard 走新分支,旧结构自然为 0 →
+//   该断言永远 fail,而 deploy-pages.yml 的 Test gate 一旦 fail 就拒绝部署,线上因此
+//   冻结在 11/12。改为:仅当 note 仍含旧 blob 特征时才强制旧拆分(守卫不失效);
+//   否则验证新结构化卡片正常渲染,且两种 blob 都不得以单一大坨出现。
+test('renderNextCard[真实数据]: 下一站卡片无大坨(旧 blob 拆行 / 新结构化)', () => {
   const data = loadJSON('data.json');
   if (!data || !data.nextEvent) return;
   const h = api.renderNextCard(data.nextEvent);
+  const note = data.nextEvent.note || '';
 
-  assert.ok(h.indexOf('next__lines') >= 0, '赛程/直播描述段应拆成多行列表');
-  assert.ok((h.match(/<ul class="next__lines">/g) || []).length >= 1,
-    '应至少出现一个 next__lines');
-  assert.ok(h.indexOf('emeta__rank') >= 0, '排行榜要点应拆成子列表');
-  assert.ok((h.match(/emeta__rank-item/g) || []).length >= 10, '排行榜应 >=10 名各一行');
+  // 旧 8/31 blob 特征仍在 → 必须仍拆成 next__lines / emeta__rank
+  const hasOldBlob = note.indexOf(SCHEDULE_BLOB) >= 0 || note.indexOf(RANK_POINT) >= 0;
+  if (hasOldBlob) {
+    assert.ok(h.indexOf('next__lines') >= 0, '赛程/直播描述段应拆成多行列表');
+    assert.ok((h.match(/<ul class="next__lines">/g) || []).length >= 1,
+      '应至少出现一个 next__lines');
+    assert.ok(h.indexOf('emeta__rank') >= 0, '排行榜要点应拆成子列表');
+    assert.ok((h.match(/emeta__rank-item/g) || []).length >= 10, '排行榜应 >=10 名各一行');
+  } else {
+    // 新结构化卡片:必须有标题 + facts/points 之一,证明走了现代渲染分支
+    assert.ok(h.indexOf('emeta__title') >= 0 || h.indexOf('emeta__facts') >= 0,
+      '新结构化卡片应渲染 emeta__title/facts');
+  }
 
   assert.strictEqual(h.indexOf(SCHEDULE_BLOB), -1,
     '整段 695 字赛程不得再以单一连续段落出现(已被 ； 拆开)');
